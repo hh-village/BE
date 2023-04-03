@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @AllArgsConstructor
 public enum ErrorCode {
     /* 400 BAD_REQUEST : 잘못된 요청 */
-    DUPLICATE_RESERVATION_DATE(BAD_REQUEST, "예약하실 수 없는 날짜입니다."),
+    DUPLICATE_RESERVATION_DATE(BAD_REQUEST, "예약할 수 없는 날짜입니다."),
     DUPLICATE_USER(BAD_REQUEST, "중복된 사용자가 존재합니다"),
     DUPLICATE_NICKNAME(BAD_REQUEST, "중복된 닉네임이 존재합니다"),
     NOT_PROPER_PASSWORD(BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
