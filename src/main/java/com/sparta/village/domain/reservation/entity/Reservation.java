@@ -33,10 +33,14 @@ public class Reservation extends Timestamped {
     @Column(nullable = false)
     private Long productId;
 
+    @Column(nullable = false)
+    private String status;
+
     public Reservation(Long productId, Long userId, ReservationRequestDto requestDto) {
         this.productId = productId;
         this.userId = userId;
         this.startDate = requestDto.getStartDate();
         this.endDate = requestDto.getEndDate();
+        this.status = "waiting";
     }
 }
