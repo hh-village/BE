@@ -19,4 +19,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean checkOverlapDateByProductId(@Param("id") Long productId,
                                         @Param("startDate") LocalDate startDate,
                                         @Param("endDate") LocalDate endDate);
+    boolean existsByUserId(Long userId);
 }
