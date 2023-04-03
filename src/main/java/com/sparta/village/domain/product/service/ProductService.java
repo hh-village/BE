@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
-        productRepository.saveAndFlush(new Product(user, productRequestDto));
+    public ResponseEntity<ResponseMessage> registProduct(ProductRequestDto productRequestDto) {
+        productRepository.saveAndFlush(new Product(productRequestDto));
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
 

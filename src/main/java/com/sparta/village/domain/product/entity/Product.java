@@ -23,16 +23,16 @@ public class Product {
     private String location;
     @Column(nullable = false)
     private String imageUrl;
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private User user;
 
-    public Product(User user, ProductRequestDto productRequestDto) {
+    public Product(ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
         this.imageUrl = productRequestDto.getImageUrl();
-        this.user = user;
+//        this.user = user;
     }
 }
