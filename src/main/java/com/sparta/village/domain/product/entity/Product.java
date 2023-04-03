@@ -3,11 +3,13 @@ package com.sparta.village.domain.product.entity;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.user.entity.User;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
