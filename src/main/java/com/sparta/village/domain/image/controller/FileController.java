@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class FileController {
@@ -19,8 +21,8 @@ public class FileController {
     private final FileStorageService fileStorageService;
 
     @PostMapping(value = "/products/upload", consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseMessage> uploadFile(@ModelAttribute UploadRequestDto image) {
+    public ResponseEntity<ResponseMessage> uploadFile(@RequestParam List<MultipartFile> images) {
         System.out.println("=========클릭되니?=========");
-        return fileStorageService.storeFile(image.getImage());
+        return fileStorageService.storeFiles(images);
     }
 }
