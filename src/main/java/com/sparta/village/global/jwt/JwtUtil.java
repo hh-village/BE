@@ -53,13 +53,13 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(String nickname) {
+    public String createToken(String nickname,Long kakaoId) {
         Date date = new Date();
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(nickname)
-                        .claim(AUTHORIZATION_KEY, nickname)
+                        .claim(AUTHORIZATION_KEY, kakaoId)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
