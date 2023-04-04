@@ -26,7 +26,7 @@ public class ImageStorageService {
     private String bucketName;
 
     public ResponseEntity<ResponseMessage> storeFiles(List<MultipartFile> files) {
-        List<String> fileUrls = new ArrayList<>();
+        List<String> fileUrlList = new ArrayList<>();
         for(MultipartFile file : files) {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             try {
@@ -38,9 +38,9 @@ public class ImageStorageService {
             }
             //S3 버킷 내에 저장된 파일의 URL 생성
             String fileUrl = amazonS3.getUrl(bucketName, fileName).toString();
-            fileUrls.add(fileUrl);
+            fileUrlList.add(fileUrl);
         }
-        return ResponseMessage.SuccessResponse("성공적으로 업로드 되었습니다.", fileUrls);
+        return ResponseMessage.SuccessResponse("성공적으로 업로드 되었습니다.", fileUrlList);
     }
 
     public String getFileUrl(String fileName) {
