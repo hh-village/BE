@@ -28,7 +28,7 @@ public class Product {
     @Column(nullable = false)
     private String imageUrl;
     @Column(nullable = false)
-    private User user;
+    private Long userId;
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
@@ -37,6 +37,6 @@ public class Product {
         this.latitude = productRequestDto.getLatitude();
         this.longitude = productRequestDto.getLongitude();
         this.imageUrl = productRequestDto.getImageUrl();
-        this.user = user;
+        this.userId = user.getId();
     }
 }
