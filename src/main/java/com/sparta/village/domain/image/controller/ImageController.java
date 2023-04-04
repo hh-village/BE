@@ -1,12 +1,9 @@
 package com.sparta.village.domain.image.controller;
 
-import com.sparta.village.domain.image.dto.UploadRequestDto;
-import com.sparta.village.domain.image.entity.Image;
-import com.sparta.village.domain.image.service.FileStorageService;
+import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.global.exception.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,13 +13,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class FileController {
+public class ImageController {
 
-    private final FileStorageService fileStorageService;
+    private final ImageStorageService imageStorageService;
 
     @PostMapping(value = "/products/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseMessage> uploadFile(@RequestParam List<MultipartFile> images) {
         System.out.println("=========클릭되니?=========");
-        return fileStorageService.storeFiles(images);
+        return imageStorageService.storeFiles(images);
     }
 }

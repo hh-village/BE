@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class FileStorageService {
+public class ImageStorageService {
 
     @Autowired
     private AmazonS3 amazonS3;
