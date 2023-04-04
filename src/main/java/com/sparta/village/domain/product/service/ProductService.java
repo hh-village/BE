@@ -30,7 +30,6 @@ public class ProductService {
         // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
         ResponseEntity<ResponseMessage> response = imageStorageService.storeFiles(productRequestDto.getImages());
         List<String> fileUrls = (List<String>) response.getBody().getData();
-        System.out.println(fileUrls.toString());
 
         // 새로운 Product 객체를 생성하고 저장합니다.
         Product newProduct = new Product(user, productRequestDto);
