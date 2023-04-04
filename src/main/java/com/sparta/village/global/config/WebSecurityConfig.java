@@ -48,7 +48,7 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/rooms/**").permitAll()
-                .antMatchers("/swagger-ui/index.html", "/products").permitAll()
+                .antMatchers("/swagger-ui/index.html", "/products/upload", "/products").permitAll()
                 .antMatchers("/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/products/**").permitAll()
                 .antMatchers("/swagger-ui/index.html").permitAll()
