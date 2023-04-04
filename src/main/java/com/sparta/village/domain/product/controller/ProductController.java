@@ -19,7 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping("/products")
-    public ResponseEntity<ResponseMessage> registProduct(@RequestBody ProductRequestDto productRequestDto) {
-        return productService.registProduct(productRequestDto);
+    public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody ProductRequestDto productRequestDto) {
+        return productService.registProduct(userDetails.getUser(), productRequestDto);
     }
 }

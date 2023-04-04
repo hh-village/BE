@@ -22,19 +22,21 @@ public class Product {
     @Column(nullable = false)
     private int price;
     @Column(nullable = false)
-    private String location;
+    private double latitude;
+    @Column(nullable = false)
+    private double longitude;
     @Column(nullable = false)
     private String imageUrl;
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
+    @Column(nullable = false)
+    private User user;
 
-    public Product(ProductRequestDto productRequestDto) {
+    public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
-        this.location = productRequestDto.getLocation();
+        this.latitude = productRequestDto.getLatitude();
+        this.longitude = productRequestDto.getLongitude();
         this.imageUrl = productRequestDto.getImageUrl();
-//        this.user = user;
+        this.user = user;
     }
 }
