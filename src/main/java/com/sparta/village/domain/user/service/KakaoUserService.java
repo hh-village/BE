@@ -114,9 +114,12 @@ public class KakaoUserService {
     }
     // 3. 필요시에 회원가입
     private String registerKakaoUserIfNeeded(UserInfoDto kakaoUserInfo) {
-        String nickname = UUID.randomUUID().toString();
+        String nickname = "";
         if(!userRepository.existsByKakaoId(kakaoUserInfo.getKakaoId())){
+            nickname = UUID.randomUUID().toString();
             userRepository.save(new User(kakaoUserInfo.getKakaoId(), nickname,"", UserRoleEnum.USER));
+        } else {
+            nickname = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId()).getNickname();
         }
         return nickname;
     }
