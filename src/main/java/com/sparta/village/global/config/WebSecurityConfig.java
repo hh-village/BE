@@ -51,6 +51,7 @@ public class WebSecurityConfig {
                 .antMatchers("/swagger-ui/index.html", "/products/upload", "/products").permitAll()
                 .antMatchers("/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/products/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/maps/**").permitAll()
                 .antMatchers("/swagger-ui/index.html").permitAll()
                 .anyRequest().authenticated()
                 //JWT 인증/인가를 사용하기 위한 설정
