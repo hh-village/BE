@@ -1,13 +1,11 @@
 package com.sparta.village.domain.reservation.service;
 
 import com.sparta.village.domain.reservation.dto.ReservationRequestDto;
-import com.sparta.village.domain.reservation.dto.StatusRequestDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
-import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

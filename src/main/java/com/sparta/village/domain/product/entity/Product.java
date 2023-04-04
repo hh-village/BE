@@ -17,16 +17,22 @@ public class Product {
 
     @Column(nullable = false)
     private String title;
+
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false)
     private int price;
+
     @Column(nullable = false)
     private double latitude;
+
     @Column(nullable = false)
     private double longitude;
+
     @Column(nullable = false)
     private String imageUrl;
+
     @Column(nullable = false)
     private Long userId;
 
