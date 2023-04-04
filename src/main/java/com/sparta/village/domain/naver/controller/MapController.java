@@ -2,6 +2,7 @@ package com.sparta.village.domain.naver.controller;
 
 import com.sparta.village.domain.naver.service.NaverMapService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +17,7 @@ public class MapController {
         return naverMapService.searchByKeyword(keyword);
     }
 
+    @PreAuthorize("hasRole('Role_USER')")
     @GetMapping("/geocode")
     public String geocode(@RequestParam String address) {
         System.out.println("======클릭은 되니?=======");
