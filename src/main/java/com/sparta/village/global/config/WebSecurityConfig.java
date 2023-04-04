@@ -46,7 +46,7 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("/users/**","/products").permitAll()
+                .antMatchers("/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/products/**").permitAll()
                 .antMatchers("/swagger-ui/index.html").permitAll()
                 .anyRequest().authenticated()

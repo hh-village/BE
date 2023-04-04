@@ -25,10 +25,12 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ImageStorageService imageStorageService;
     private final ImageRepository imageRepository;
+    @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
         // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
         ResponseEntity<ResponseMessage> response = imageStorageService.storeFiles(productRequestDto.getImages());
         List<String> fileUrls = (List<String>) response.getBody().getData();
+        System.out.println(fileUrls.toString());
 
         // 새로운 Product 객체를 생성하고 저장합니다.
         Product newProduct = new Product(user, productRequestDto);
@@ -36,6 +38,7 @@ public class ProductService {
 
         // 이미지 URL을 ProductImage 객체로 변환하고 저장합니다.
         for (String fileUrl : fileUrls) {
+
             Image image = new Image(newProduct, fileUrl);
             imageRepository.saveAndFlush(image);
         }
