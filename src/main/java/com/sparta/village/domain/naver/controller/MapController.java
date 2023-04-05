@@ -20,7 +20,6 @@ public class MapController {
     @PreAuthorize("hasRole('Role_USER')")
     @GetMapping("/geocode")
     public String geoCode(@RequestParam String address) {
-        System.out.println("======클릭은 되니?=======");
         return naverMapService.geoCode(address);
     }
 
