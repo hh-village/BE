@@ -12,7 +12,13 @@ public class MapController {
     private final NaverMapService naverMapService;
 
     @GetMapping("/geocode")
-    public String geocode(@RequestParam String address) {
-        return naverMapService.geocode(address);
+    public String geoCode(@RequestParam String address) {
+        return naverMapService.geoCode(address);
+    }
+
+    @PreAuthorize("hasRole('Role_USER')")
+    @GetMapping("/gc")
+    public String reverseGeocode(@RequestParam String coords) {
+        return naverMapService.reverseGeocode(coords);
     }
 }
