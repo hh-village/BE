@@ -5,6 +5,7 @@ import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.json.Json;
@@ -32,7 +33,8 @@ public class NaverMapService {
         this.restTemplate = new RestTemplate();
     }
 
-    public String geoCode(String address) {
+    @Transactional
+    public String geocode(String address) {
         //Http 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -48,6 +50,7 @@ public class NaverMapService {
         return response.getBody();
     }
 
+    @Transactional
     public String reverseGeocode(String coords) {
         //Http 헤더 설정
         HttpHeaders headers = new HttpHeaders();
@@ -70,24 +73,13 @@ public class NaverMapService {
         JsonObject firstResult = resultsArray.getJsonObject(0);
 
         // 필요한 정보 추출
-        JsonObject region = firstResult.getJsonObject("region");
-        JsonObject area1 = region.getJsonObject("area1");
-        String alias = area1.getString("alias");
-        JsonObject area2 = region.getJsonObject("area2");
-        String middleName = area2.getString("name");
-        JsonObject land = firstResult.getJsonObject("land");
-        String name = land.getString("name");
-        String number1 = land.getString("number1");
-        JsonObject addition0 = land.getJsonObject("addition0");
-        String additionValue = addition0.getString("value");
+        String alias = firstResult.getJsonObject("region").getJsonObject("area1").getString("alias");
+        String middleName = firstResult.getJsonObject("region").getJsonObject("area2").getString("name");
+        String endName = firstResult.getJsonObject("land").getString("name");
+        String jiBun = firstResult.getJsonObject("land").getString("number1");
+        String additionValue = firstResult.getJsonObject("land").getJsonObject("addition0").getString("value");
 
         // 추출한 정보를 반환 형식에 맞게 조합
-        String extractedInfo = alias + " " + middleName +" " + name + " " + number1 + " " + additionValue;
-
-        // 추출한 정보 반환
-        return extractedInfo;
-
-        //응답을 반환
-//        return response.getBody();
+        return alias + " " + middleName +" " + endName + " " + jiBun + " " + additionValue;
     }
 }

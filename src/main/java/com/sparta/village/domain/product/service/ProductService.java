@@ -42,13 +42,8 @@ public class ProductService {
         Product newProduct = new Product(user, productRequestDto);
         productRepository.saveAndFlush(newProduct);
 
-        // 이미지 URL을 ProductImage 객체로 변환하고 저장합니다.
-
-        for (String fileUrl : fileUrlList) {
-            Image image = new Image(newProduct, fileUrl);
-            imageRepository.saveAndFlush(image);
-        }
-        productRepository.saveAndFlush(newProduct);
+        // 이미지 URL을 이용하여 이미지 엔티티를 생성하고 저장합니다.
+        imageStorageService.saveImageList(newProduct, fileUrlList);
 
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
