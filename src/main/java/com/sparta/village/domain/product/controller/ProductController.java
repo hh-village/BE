@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,4 +30,10 @@ public class ProductController {
         if (userDetails != null) user = userDetails.getUser();
         return productService.detailProduct(user, id);
     }
+
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+      return productService.deleteProductById(id,userDetails.getUser());
+    }
 }
+

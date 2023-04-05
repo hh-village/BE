@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @AllArgsConstructor
@@ -25,7 +24,16 @@ public enum ErrorCode {
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
     USER_NOT_FOUND(NOT_FOUND, "등록된 사용자가 없습니다"),
     RESERVATION_NOT_FOUND(NOT_FOUND, "선택한 댓글에 해당되는 예약이 없습니다."),
-    PRODUCT_NOT_FOUND(NOT_FOUND, "선택한 제품을 찾을 수 없습니다.");
+    COMMENT_NOT_FOUND(NOT_FOUND, "선택한 댓글을 찾을 수 없습니다."),
+    PRODUCT_NOT_FOUND(NOT_FOUND, "선택한 제품을 찾을 수 없습니다."),
+    IMAGE_NOT_FOUND(NOT_FOUND,"이미지를 찾을 수 없습니다."),
+
+    /* 403 FORBIDDEN, 권한이 없음*/
+    DELETE_NOT_FOUND(FORBIDDEN,"삭제 권한이 없습니다");
+
+
+
+
 
 
     private final HttpStatus httpStatus;

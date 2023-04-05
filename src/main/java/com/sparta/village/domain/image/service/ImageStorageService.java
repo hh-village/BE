@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ public class ImageStorageService {
     private String bucketName;
     private final ImageRepository imageRepository;
 
+    @Transactional
     public ResponseEntity<ResponseMessage> storeFiles(List<MultipartFile> files) {
         List<String> fileUrlList = new ArrayList<>();
         for(MultipartFile file : files) {
