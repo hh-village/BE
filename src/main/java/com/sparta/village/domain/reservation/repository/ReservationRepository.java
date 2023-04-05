@@ -1,11 +1,13 @@
 package com.sparta.village.domain.reservation.repository;
 
+import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
+import java.util.List;
 
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -23,4 +25,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Modifying
     @Query(value = "update Reservation r set r.status = :status where r.id = :id")
     void updateStatus(@Param("id") Long reservationId, @Param("status") String status);
+
+    @Query(value = "select " +
+            "new com.sparta.village.domain.reservation.dto.ReservationResponseDto(r.id, r.startDate, r.endDate, r.status, CONCAT(r.userId, '')) " +
+            "from Reservation r")
+    List<ReservationResponseDto> findAllReservationDto();
+
 }
