@@ -32,7 +32,6 @@ public class ProductService {
     private final ImageStorageService imageStorageService;
     private final ImageRepository imageRepository;
     private final ReservationService reservationService;
-
     private final KakaoUserService kakaoUserService;
     @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
@@ -66,13 +65,13 @@ public class ProductService {
         boolean isOwner = checkProductOwner(id, user.getId());
         List<ReservationResponseDto> reservationList = reservationService.getReservationList();
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
-        String ownerNickname = kakaoUserService.getNicknameByUserId(Long.toString(product.getUserId()));
+        User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUserId()));
+        String ownerNickname = owner.getNickname();
+        String ownerProfile = owner.getProfile();
 
-        List<ProductDetailResponseDto> detailList = new ArrayList<>();
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, isOwner, imageList, ownerNickname,reservationList);
-        detailList.add(productDetailResponseDto);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, isOwner, imageList, ownerNickname, ownerProfile,reservationList);
 
-        return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", detailList);
+        return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
 
     @Transactional(readOnly = true)

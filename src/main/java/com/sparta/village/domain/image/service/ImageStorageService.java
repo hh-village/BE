@@ -56,11 +56,12 @@ public class ImageStorageService {
     }
 
     public List<String> getImageUrlsByProductId(Long id) {
-        List<Image> imageList = imageRepository.findByProductId(id);
-        List<String> imageUrlList = new ArrayList<>();
-        for(Image image : imageList) {
-            imageUrlList.add(image.getImageUrl());
-        }
-        return imageUrlList;
+        return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
+//        List<Image> imageList = imageRepository.findByProductId(id);
+//        List<String> imageUrlList = new ArrayList<>();
+//        for(Image image : imageList) {
+//            imageUrlList.add(image.getImageUrl());
+//        }
+//        return imageUrlList;
     }
 }

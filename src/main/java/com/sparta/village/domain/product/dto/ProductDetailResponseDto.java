@@ -13,28 +13,29 @@ import java.util.List;
 @Getter
 public class ProductDetailResponseDto {
 
-    private Long id;
-    private String title;
-    private String description;
-    private int price;
-    private List<String> image;
-    private String profile;
-    private String ownerNickname;
-    private double latitude;
-    private double longitude;
-    private boolean isOwner;
-    private List<ReservationResponseDto> reservationList;
+    private final Long id;
+    private final String title;
+    private final String description;
+    private final int price;
+    private final List<String> image;
+    private final String profile;
+    private final String ownerNickname;
+    private final double latitude;
+    private final double longitude;
+    private final boolean checkOwner;
+    private final List<ReservationResponseDto> reservationList;
 
-    public ProductDetailResponseDto(Product product, boolean isOwner, List<String> imageUrls, String ownerNickname, List<ReservationResponseDto> reservationList) {
+    public ProductDetailResponseDto(Product product, boolean isOwner, List<String> imageUrls, String ownerNickname, String ownerProfile, List<ReservationResponseDto> reservationList) {
         this.id = product.getId();
         this.title = product.getTitle();
         this.description = product.getDescription();
         this.price = product.getPrice();
         this.image = imageUrls;
+        this.profile = ownerProfile;
         this.latitude = product.getLatitude();
         this.longitude = product.getLongitude();
         this.ownerNickname = ownerNickname;
-        this.isOwner = isOwner;
+        this.checkOwner = isOwner;
         this.reservationList = reservationList;
     }
 }
