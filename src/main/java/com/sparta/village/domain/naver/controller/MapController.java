@@ -19,8 +19,15 @@ public class MapController {
 
     @PreAuthorize("hasRole('Role_USER')")
     @GetMapping("/geocode")
-    public String geocode(@RequestParam String address) {
+    public String geoCode(@RequestParam String address) {
         System.out.println("======클릭은 되니?=======");
-        return naverMapService.geocode(address);
+        return naverMapService.geoCode(address);
+    }
+
+    @PreAuthorize("hasRole('Role_USER')")
+    @GetMapping("/gc")
+    public String reverseGeocode(@RequestParam String coords) {
+        System.out.println("======클릭은 되니?=======");
+        return naverMapService.reverseGeocode(coords);
     }
 }
