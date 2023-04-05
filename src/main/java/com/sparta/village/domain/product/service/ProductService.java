@@ -52,18 +52,15 @@ public class ProductService {
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
 
-    @Transactional
-    public void checkProductId(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
-    }
 
-    @Transactional
-    public void checkProductOwner(Long productId, Long userId) {
+    //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
+    private boolean checkProductOwner(Long productId, Long userId) {
+        boolean result = true;
         if (!productRepository.existsByIdAndUserId(productId, userId)) {
+            result = false;
             throw new CustomException(ErrorCode.NOT_SELLER);
         }
+        return result;
     }
 
     @Transactional
