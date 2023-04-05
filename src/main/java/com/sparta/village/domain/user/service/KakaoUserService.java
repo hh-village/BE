@@ -103,15 +103,17 @@ public class KakaoUserService {
     // 3. 필요시에 회원가입
     private String registerOrUpdateKakaoUser(UserInfoDto kakaoUserInfo) {
         String nickname = "";
-        if(!userRepository.existsByKakaoId(kakaoUserInfo.getKakaoId())){
-            nickname = UUID.randomUUID().toString();
-            userRepository.save(new User(kakaoUserInfo.getKakaoId(), nickname,"", UserRoleEnum.USER));
+        if (!userRepository.existsByKakaoId(kakaoUserInfo.getKakaoId())) {
+            // 8-10자리의 랜덤 닉네임을 생성하여 사용자 정보에 추가하고, 데이터베이스에 저장합니다.
+            nickname = UUID.randomUUID().toString().substring(0, 8);
+            userRepository.save(new User(kakaoUserInfo.getKakaoId(), nickname, "", UserRoleEnum.USER));
         } else {
+            // 카카오 ID에 해당하는 사용자 정보를 데이터베이스에서 검색하여 닉네임을 가져옵니다.
             nickname = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId()).getNickname();
         }
+        // 등록 또는 업데이트된 사용자의 닉네임을 반환합니다.
         return nickname;
     }
-
     public User getUserByUserId(String userId) {
         User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
         if (user == null) {
