@@ -26,9 +26,7 @@ public class ProductController {
 
     @GetMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
-        User user = null;
-        if (userDetails != null) user = userDetails.getUser();
-        return productService.detailProduct(user, id);
+        return productService.detailProduct(userDetails, id);
     }
 
     @DeleteMapping("/products/{id}")
