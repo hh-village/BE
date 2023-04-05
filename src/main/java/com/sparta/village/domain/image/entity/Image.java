@@ -19,10 +19,10 @@ public class Image {
     @Column(nullable = false, length = 500)
     private String imageUrl;
     @Column(nullable = false)
-    private Long productid;
+    private Long productId;
 
     public Image(Product product, String imageUrl) {
-        this.productid = product.getId();
+        this.productId = product.getId();
         this.imageUrl = imageUrl;
     }
 

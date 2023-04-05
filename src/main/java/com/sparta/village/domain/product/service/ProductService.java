@@ -7,9 +7,10 @@ import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
-import com.sparta.village.domain.reservation.entity.Reservation;
+import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
+import com.sparta.village.domain.user.service.KakaoUserService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -31,6 +32,8 @@ public class ProductService {
     private final ImageStorageService imageStorageService;
     private final ImageRepository imageRepository;
     private final ReservationService reservationService;
+
+    private final KakaoUserService kakaoUserService;
     @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
         // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
@@ -55,23 +58,21 @@ public class ProductService {
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
     private boolean checkProductOwner(Long productId, Long userId) {
-        boolean result = true;
-        if (!productRepository.existsByIdAndUserId(productId, userId)) {
-            result = false;
-            throw new CustomException(ErrorCode.NOT_SELLER);
-        }
-        return result;
+        return productRepository.existsByIdAndUserId(productId, userId);
     }
-
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(User user, Long id) {
         Product product = findProductById(id);
-        checkProductOwner(user.getId(), id);
-        List<Reservation> reservationList = reservationService.findAllByProduct(product);
+        boolean isOwner = checkProductOwner(id, user.getId());
+        List<ReservationResponseDto> reservationList = reservationService.getReservationList();
+        List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
+        String ownerNickname = kakaoUserService.getNicknameByUserId(Long.toString(product.getUserId()));
 
-        List<ProductDetailResponseDto> datailList = new ArrayList<>();
+        List<ProductDetailResponseDto> detailList = new ArrayList<>();
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, isOwner, imageList, ownerNickname,reservationList);
+        detailList.add(productDetailResponseDto);
 
-
+        return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", detailList);
     }
 
     @Transactional(readOnly = true)

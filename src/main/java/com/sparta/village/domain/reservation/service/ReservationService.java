@@ -69,7 +69,7 @@ public class ReservationService {
         }
     }
 
-    private List<ReservationResponseDto> getReservationList() {
+    public List<ReservationResponseDto> getReservationList() {
         List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
         reservationList.forEach(r -> r.setNickname(userService.getNicknameByUserId(r.getNickname())));
         return reservationList;
