@@ -2,7 +2,6 @@ package com.sparta.village.domain.product.controller;
 
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.service.ProductService;
-import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +25,7 @@ public class ProductController {
 
     @GetMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
-        User user = null;
-        if (userDetails != null) user = userDetails.getUser();
-        return productService.detailProduct(user, id);
+        return productService.detailProduct(userDetails, id);
     }
 
     @DeleteMapping("/products/{id}")
