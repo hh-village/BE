@@ -29,14 +29,14 @@ public class ProductService {
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
         // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
         ResponseEntity<ResponseMessage> response = imageStorageService.storeFiles(productRequestDto.getImages());
-        List<String> fileUrls = (List<String>) response.getBody().getData();
+        List<String> fileUrlList = (List<String>) response.getBody().getData();
 
         // 새로운 Product 객체를 생성하고 저장합니다.
         Product newProduct = new Product(user, productRequestDto);
         productRepository.saveAndFlush(newProduct);
 
         // 이미지 URL을 ProductImage 객체로 변환하고 저장합니다.
-        for (String fileUrl : fileUrls) {
+        for (String fileUrl : fileUrlList) {
 
             Image image = new Image(newProduct, fileUrl);
             imageRepository.saveAndFlush(image);
