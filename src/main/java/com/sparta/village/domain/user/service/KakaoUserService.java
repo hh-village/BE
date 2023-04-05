@@ -123,4 +123,12 @@ public class KakaoUserService {
         }
         return nickname;
     }
+
+    public String getNicknameByUserId(String userId) {
+        User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+        if (user == null) {
+            return null;
+        }
+        return String.valueOf(user.getNickname());
+    }
 }

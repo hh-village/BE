@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -25,6 +26,7 @@ public class ImageStorageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    @Transactional
     public ResponseEntity<ResponseMessage> storeFiles(List<MultipartFile> files) {
         List<String> fileUrlList = new ArrayList<>();
         for(MultipartFile file : files) {
@@ -47,7 +49,8 @@ public class ImageStorageService {
         return amazonS3.getUrl(bucketName, fileName).toString();
     }
 
-    public void deleteFile(String fileName) {
+    public void deleteFile(String fileUrl) {
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
     }
 }
