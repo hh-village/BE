@@ -4,6 +4,8 @@ import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.reservation.dto.ReservationRequestDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
+
+
 import com.sparta.village.domain.reservation.dto.StatusRequestDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
@@ -22,15 +24,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+
     private final ProductRepository productRepository;
     private final KakaoUserService userService;
+
 
     @Transactional
     public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, Long userId) {
         //제품 있는지 체크(제품 등록 코드 완성되면 추가하기!!)
+
         if (!productRepository.existsById(productId)) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }
+
         //예약 가능한 날짜인지 체크
         if (reservationRepository.checkOverlapDateByProductId(productId, requestDto.getStartDate(), requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION_DATE);
@@ -52,6 +58,7 @@ public class ReservationService {
     public ResponseEntity<ResponseMessage> changeStatus(Long id, StatusRequestDto requestDto, Long userId) {
         checkReservationId(id);
 //        productService.checkProductOwner(reservationRepository.findProductIdById(id), userId);
+
         reservationRepository.updateStatus(id, requestDto.getStatus());
         return ResponseMessage.SuccessResponse("상태 변경되었습니다.", "");
     }
@@ -63,20 +70,17 @@ public class ReservationService {
         }
     }
 
+
     private void checkReservationUserId(Long userId) {
         if (!reservationRepository.existsByUserId(userId)) {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
     }
 
+
     private List<ReservationResponseDto> getReservationList() {
         List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
         reservationList.forEach(r -> r.setNickname(userService.getNicknameByUserId(r.getNickname())));
         return reservationList;
     }
-
-
-
-
-
 }

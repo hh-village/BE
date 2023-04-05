@@ -7,6 +7,7 @@ import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,5 +21,9 @@ public class ProductController {
     @PostMapping(value = "/products", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
+    }
+    @DeleteMapping("/products/{id}")
+    public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+      return productService.deleteProductById(id,userDetails.getUser());
     }
 }

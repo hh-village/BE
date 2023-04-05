@@ -32,7 +32,7 @@ public class NaverMapService {
         this.restTemplate = new RestTemplate();
     }
 
-    public String geocode(String address) {
+    public String geoCode(String address) {
         //Http 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

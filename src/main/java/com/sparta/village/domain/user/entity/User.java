@@ -32,4 +32,6 @@ public class User {
         this.profile = profile;
         this.role = role;
     }
+
+
 }
