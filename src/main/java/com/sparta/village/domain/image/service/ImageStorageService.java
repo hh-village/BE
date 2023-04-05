@@ -31,7 +31,7 @@ public class ImageStorageService {
     private final ImageRepository imageRepository;
 
     @Transactional
-    public ResponseEntity<ResponseMessage> storeFiles(List<MultipartFile> files) {
+    public List<String> storeFiles(List<MultipartFile> files) {
         List<String> fileUrlList = new ArrayList<>();
         for(MultipartFile file : files) {
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -46,7 +46,7 @@ public class ImageStorageService {
             String fileUrl = amazonS3.getUrl(bucketName, fileName).toString();
             fileUrlList.add(fileUrl);
         }
-        return ResponseMessage.SuccessResponse("성공적으로 업로드 되었습니다.", fileUrlList);
+        return fileUrlList;
     }
 
     public void saveImageList(Product product, List<String> imageUrlList) {
@@ -59,6 +59,15 @@ public class ImageStorageService {
     public void deleteFile(String fileUrl) {
         String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+    }
+
+    public void deleteImagesByProductId(Long productId) {
+        List<Image> imageList = imageRepository.findByProductId(productId);
+        for (Image image : imageList) {
+            Long imageId = image.getId();
+            deleteFile(image.getImageUrl());
+            imageRepository.deleteById(imageId);
+        }
     }
 
     public List<String> getImageUrlsByProductId(Long id) {
