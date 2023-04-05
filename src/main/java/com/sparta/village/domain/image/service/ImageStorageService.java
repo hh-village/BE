@@ -47,7 +47,8 @@ public class ImageStorageService {
         return amazonS3.getUrl(bucketName, fileName).toString();
     }
 
-    public void deleteFile(String fileName) {
+    public void deleteFile(String fileUrl) {
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
     }
 }
