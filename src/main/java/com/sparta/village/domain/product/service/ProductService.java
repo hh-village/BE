@@ -1,7 +1,5 @@
 package com.sparta.village.domain.product.service;
 
-import com.sparta.village.domain.image.entity.Image;
-import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
@@ -19,9 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -29,29 +25,18 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ImageStorageService imageStorageService;
-    private final ImageRepository imageRepository;
     private final ReservationService reservationService;
     private final KakaoUserService kakaoUserService;
 
     @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
         // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
-        ResponseEntity<ResponseMessage> response = imageStorageService.storeFiles(productRequestDto.getImages());
-
-        List<String> fileUrlList = (List<String>) response.getBody().getData();
-
+        List<String> fileUrlList = imageStorageService.storeFiles(productRequestDto.getImages());
         // 새로운 Product 객체를 생성하고 저장합니다.
         Product newProduct = new Product(user, productRequestDto);
         productRepository.saveAndFlush(newProduct);
-
-        // 이미지 URL을 ProductImage 객체로 변환하고 저장합니다.
-
-        for (String fileUrl : fileUrlList) {
-            Image image = new Image(newProduct, fileUrl);
-            imageRepository.saveAndFlush(image);
-        }
-        productRepository.saveAndFlush(newProduct);
-
+        // 이미지 URL을 이용하여 이미지 엔티티를 생성하고 저장합니다.
+        imageStorageService.saveImageList(newProduct, fileUrlList);
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
 
@@ -60,26 +45,14 @@ public class ProductService {
         // 데이터베이스에서 지정된 ID의 제품을 검색
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-
         // 사용자가 제품을 삭제할 권한이 있는지 확인
         if (!(Objects.equals(product.getUserId(), user.getId()))) {
             throw new CustomException(ErrorCode.DELETE_NOT_FOUND);
         }
         // 데이터베이스에서 제품과 연결된 이미지를 검색
-        List<Image> imageList = imageRepository.findByProductId(id);
-
-        // 각 이미지를 데이터베이스 및 스토리지에서 삭제
-        for (Image image : imageList) {
-            // 이미지를 스토리지에서 삭제
-            Long imageId = image.getId();
-            imageStorageService.deleteFile(image.getImageUrl());
-            // 이미지를 데이터베이스에서 삭제
-            imageRepository.deleteById(imageId);
-        }
-
+        imageStorageService.deleteImagesByProductId(id);
         // 데이터베이스에서 제품을 삭제
         productRepository.deleteById(id);
-
         // 성공적인 응답을 반환
         return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.","");
     }

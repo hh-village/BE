@@ -13,7 +13,7 @@ public class MapController {
 
     @GetMapping("/geocode")
     public String geoCode(@RequestParam String address) {
-        return naverMapService.geoCode(address);
+        return naverMapService.geocode(address);
     }
 
     @PreAuthorize("hasRole('Role_USER')")
