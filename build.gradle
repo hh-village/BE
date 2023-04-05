@@ -29,7 +29,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'junit:junit:4.13.1'
     compileOnly 'org.projectlombok:lombok'
-    //runtimeOnly 'com.h2database:h2'
+//    runtimeOnly 'com.h2database:h2'
     implementation 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -45,6 +45,9 @@ dependencies {
 
     testImplementation 'org.mockito:mockito-core:4.8.0'
     testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
+
+    implementation 'javax.json:javax.json-api:1.1.4'
+    implementation 'org.glassfish:javax.json:1.1.4'
 }
 
 tasks.named('test') {

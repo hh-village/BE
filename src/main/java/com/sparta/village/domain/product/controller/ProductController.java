@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,14 +18,12 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping("/products")
-    public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestBody ProductRequestDto productRequestDto) {
+    @PostMapping(value = "/products", consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
     }
-
     @DeleteMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        productService.deleteProductById(id,userDetails.getUser());
-        return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.","");
+      return productService.deleteProductById(id,userDetails.getUser());
     }
 }
