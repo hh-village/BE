@@ -4,7 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.sparta.village.domain.image.entity.Image;
+import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.global.exception.ResponseMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +19,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ImageStorageService {
-
-    @Autowired
-    private AmazonS3 amazonS3;
-
+    private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public ResponseEntity<ResponseMessage> storeFiles(List<MultipartFile> files) {
@@ -52,5 +55,15 @@ public class ImageStorageService {
     public void deleteFile(String fileUrl) {
         String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
+    }
+
+    public List<String> getImageUrlsByProductId(Long id) {
+        return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
+//        List<Image> imageList = imageRepository.findByProductId(id);
+//        List<String> imageUrlList = new ArrayList<>();
+//        for(Image image : imageList) {
+//            imageUrlList.add(image.getImageUrl());
+//        }
+//        return imageUrlList;
     }
 }

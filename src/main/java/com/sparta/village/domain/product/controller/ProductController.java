@@ -2,6 +2,7 @@ package com.sparta.village.domain.product.controller;
 
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.service.ProductService;
+import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,17 @@ public class ProductController {
     public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
     }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
+        User user = null;
+        if (userDetails != null) user = userDetails.getUser();
+        return productService.detailProduct(user, id);
+    }
+
     @DeleteMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
       return productService.deleteProductById(id,userDetails.getUser());
     }
 }
+

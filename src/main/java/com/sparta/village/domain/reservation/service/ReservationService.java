@@ -77,10 +77,9 @@ public class ReservationService {
         }
     }
 
-
-    private List<ReservationResponseDto> getReservationList() {
+    public List<ReservationResponseDto> getReservationList() {
         List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
-        reservationList.forEach(r -> r.setNickname(userService.getNicknameByUserId(r.getNickname())));
+        reservationList.forEach(r -> r.setNickname(userService.getUserByUserId(r.getNickname()).getNickname()));
         return reservationList;
     }
 }
