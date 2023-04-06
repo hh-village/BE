@@ -20,8 +20,7 @@ public class ProductDetailResponseDto {
     private final List<String> imageList;
     private final String profile;
     private final String ownerNickname;
-    private final double latitude;
-    private final double longitude;
+    private final String location;
     private final boolean checkOwner;
     private final List<ReservationResponseDto> reservationList;
 
@@ -32,8 +31,7 @@ public class ProductDetailResponseDto {
         this.price = product.getPrice();
         this.imageList = imageUrlList;
         this.profile = ownerProfile;
-        this.latitude = product.getLatitude();
-        this.longitude = product.getLongitude();
+        this.location = product.getLocation();
         this.ownerNickname = ownerNickname;
         this.checkOwner = checkOwner;
         this.reservationList = reservationList;
