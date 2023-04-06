@@ -22,9 +22,7 @@ public class Product {
     @Column(nullable = false)
     private int price;
     @Column(nullable = false)
-    private double latitude;
-    @Column(nullable = false)
-    private double longitude;
+    private String location;
     @Column(nullable = false)
     private Long userId;
 
@@ -32,8 +30,7 @@ public class Product {
         this.title = productRequestDto.getTitle();
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
-        this.latitude = productRequestDto.getLatitude();
-        this.longitude = productRequestDto.getLongitude();
+        this.location = productRequestDto.getLocation();
         this.userId = user.getId();
     }
 }
