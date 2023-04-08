@@ -1,6 +1,7 @@
 package com.sparta.village.domain.product.controller;
 
 import com.sparta.village.domain.product.dto.ProductRequestDto;
+import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
@@ -21,6 +24,11 @@ public class ProductController {
     @PostMapping(value = "/products", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
+    }
+
+    @GetMapping("/products")
+    public ResponseEntity<ResponseMessage> searchProductList(@RequestParam(value = "name", required = false) String title, @RequestParam(value = "location", required = false) String location) {
+        return productService.searchProductList(title, location);
     }
 
     @GetMapping("/products/{id}")
