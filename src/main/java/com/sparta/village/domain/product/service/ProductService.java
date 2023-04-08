@@ -85,4 +85,20 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
+
+    public ResponseEntity<ResponseMessage> searchProductList(String qr, String location) {
+        List<Product> products;
+
+        if (qr == null && location == null) {
+            products = productRepository.findAll();
+        } else if (qr == null) {
+            products = productRepository.findByLocationContaining(location);
+        } else if (location == null) {
+            products = productRepository.findByTitleContaining(qr);
+        } else {
+            products = productRepository.findByTitleContainingAndLocationContaining(qr, location);
+        }
+
+        return  ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", products);
+    }
 }
