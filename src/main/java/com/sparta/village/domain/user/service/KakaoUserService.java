@@ -7,6 +7,8 @@ import com.sparta.village.domain.user.dto.UserInfoDto;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.entity.UserRoleEnum;
 import com.sparta.village.domain.user.repository.UserRepository;
+import com.sparta.village.global.exception.CustomException;
+import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -116,6 +118,10 @@ public class KakaoUserService {
     }
     public User getUserByUserId(String userId) {
         return userRepository.findById(Long.parseLong(userId)).orElse(null);
+    }
+
+    public User getUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
 }
