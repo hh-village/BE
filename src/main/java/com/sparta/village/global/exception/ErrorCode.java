@@ -27,6 +27,7 @@ public enum ErrorCode {
     COMMENT_NOT_FOUND(NOT_FOUND, "선택한 댓글을 찾을 수 없습니다."),
     PRODUCT_NOT_FOUND(NOT_FOUND, "선택한 제품을 찾을 수 없습니다."),
     IMAGE_NOT_FOUND(NOT_FOUND,"이미지를 찾을 수 없습니다."),
+    CHATROOM_NOT_FOUND(NOT_FOUND, "선택한 채팅방을 찾을 수ㅜ 없습니다."),
 
     /* 403 FORBIDDEN, 권한이 없음*/
     DELETE_NOT_FOUND(FORBIDDEN,"삭제 권한이 없습니다");
