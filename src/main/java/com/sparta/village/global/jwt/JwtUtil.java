@@ -58,8 +58,8 @@ public class JwtUtil {
 
         return BEARER_PREFIX +
                 Jwts.builder()
-                        .setSubject(nickname)
-                        .claim(AUTHORIZATION_KEY, kakaoId)
+                        .setSubject(kakaoId.toString())
+                        .claim(AUTHORIZATION_KEY, nickname)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)

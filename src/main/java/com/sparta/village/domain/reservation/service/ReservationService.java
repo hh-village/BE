@@ -87,7 +87,7 @@ public class ReservationService {
     public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
         List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
         acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
-        acceptReservationList.forEach(r -> r.setCustomerNickname(userService.getUserByUserId(r.getCustomerNickname()).getNickname()));
+//        acceptReservationList.forEach(r -> r.setCustomerNickname(userService.getUserByUserId(r.getCustomerNickname()).getNickname()));
         return ResponseMessage.SuccessResponse("검색완료 되었습니다.", acceptReservationList);
     }
 }

@@ -33,7 +33,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<ReservationResponseDto> findAllReservationDto();
 
     @Query(value = "select " +
-            "new com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto(r.id, concat(r.productId, ''), concat(r. userId, ''))" +
+            "new com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto(r.id, concat(r.productId, ''), concat(r.userId, '')) " +
             "from Reservation r WHERE r.status = 'accepted'")
     List<AcceptReservationResponseDto> findAcceptedReservationDto();
 
