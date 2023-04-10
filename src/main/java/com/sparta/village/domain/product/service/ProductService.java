@@ -64,7 +64,7 @@ public class ProductService {
             checkOwner = checkProductOwner(id, userDetails.getUser().getId());
         }
         Product product = findProductById(id);
-        List<ReservationResponseDto> reservationList = reservationService.getReservationList();
+        List<ReservationResponseDto> reservationList = reservationService.getReservationListByProductId(id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
         User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUserId()));
         String ownerNickname = owner.getNickname();

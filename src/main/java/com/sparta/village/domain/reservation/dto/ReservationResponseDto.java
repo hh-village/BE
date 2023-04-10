@@ -16,6 +16,8 @@ public class ReservationResponseDto {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    private Long productId;
+
     private String status;
     private String nickname;
 }
