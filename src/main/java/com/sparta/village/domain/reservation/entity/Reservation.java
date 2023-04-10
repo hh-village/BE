@@ -33,7 +33,7 @@ public class Reservation extends Timestamped {
     @Column(nullable = false)
     private Long productId;
 
-    //waiting, accepted, rejected
+    //waiting, accepted, rejected, returned
     @Column(nullable = false)
     private String status;
 

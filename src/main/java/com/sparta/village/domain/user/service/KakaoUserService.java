@@ -115,11 +115,7 @@ public class KakaoUserService {
         return nickname;
     }
     public User getUserByUserId(String userId) {
-        User user = userRepository.findById(Long.parseLong(userId)).orElse(null);
-        if (user == null) {
-            return null;
-        }
-        return user;
+        return userRepository.findById(Long.parseLong(userId)).orElse(null);
     }
 
 }
