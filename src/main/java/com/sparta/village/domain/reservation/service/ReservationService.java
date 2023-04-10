@@ -2,6 +2,7 @@ package com.sparta.village.domain.reservation.service;
 
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.service.ProductService;
+import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationRequestDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 
@@ -81,5 +82,12 @@ public class ReservationService {
         List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
         reservationList.forEach(r -> r.setNickname(userService.getUserByUserId(r.getNickname()).getNickname()));
         return reservationList;
+    }
+
+    public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
+        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
+        acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
+        acceptReservationList.forEach(r -> r.setCustomerNickname(userService.getUserByUserId(r.getCustomerNickname()).getNickname()));
+        return ResponseMessage.SuccessResponse("검색완료 되었습니다.", acceptReservationList);
     }
 }

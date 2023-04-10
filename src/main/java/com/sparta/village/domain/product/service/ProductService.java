@@ -75,17 +75,6 @@ public class ProductService {
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
 
-    //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
-    private boolean checkProductOwner(Long productId, Long userId) {
-        return productRepository.existsByIdAndUserId(productId, userId);
-    }
-
-    @Transactional(readOnly = true)
-    public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
-
     public ResponseEntity<ResponseMessage> searchProductList(String qr, String location) {
         List<Product> productList;
 
@@ -112,5 +101,16 @@ public class ProductService {
                 product.setPrimeImageUrl(primeImageUrl);
             }
         }
+    }
+
+    //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
+    private boolean checkProductOwner(Long productId, Long userId) {
+        return productRepository.existsByIdAndUserId(productId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Product findProductById(Long id) {
+        return productRepository.findById(id).orElseThrow(
+                () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 }
