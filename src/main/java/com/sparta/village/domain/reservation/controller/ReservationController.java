@@ -36,4 +36,9 @@ public class ReservationController {
     public ResponseEntity<ResponseMessage> changeStatus(@PathVariable Long id, @RequestBody StatusRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reservationService.changeStatus(id, requestDto, userDetails.getUser().getId());
     }
+
+    @GetMapping("/products/reservations")
+    public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
+        return reservationService.getAcceptedReservationList();
+    }
 }

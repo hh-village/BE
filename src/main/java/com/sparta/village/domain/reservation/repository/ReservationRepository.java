@@ -1,5 +1,6 @@
 package com.sparta.village.domain.reservation.repository;
 
+import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,6 +31,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "new com.sparta.village.domain.reservation.dto.ReservationResponseDto(r.id, r.startDate, r.endDate, r.status, CONCAT(r.userId, '')) " +
             "from Reservation r")
     List<ReservationResponseDto> findAllReservationDto();
+
+    @Query(value = "select " +
+            "new com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto(r.id, concat(r.productId, ''), concat(r. userId, ''))" +
+            "from Reservation r WHERE r.status = 'accepted'")
+    List<AcceptReservationResponseDto> findAcceptedReservationDto();
 
 }
 
