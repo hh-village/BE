@@ -68,6 +68,7 @@ class ReservationServiceTest {
     public void testReserveDuplicateDate() {
         //예약 생성
         Reservation reservation = new Reservation();
+        reservation.setId(1L);
         reservation.setProductId(1L);
         reservation.setUserId(1L);
         reservation.setStartDate(LocalDate.of(2023,4,10));
@@ -89,6 +90,7 @@ class ReservationServiceTest {
     public void testDeleteReservation() {
         //예약 생성
         Reservation reservation = new Reservation();
+//        reservation.setId(1L);
         reservation.setProductId(1L);
         reservation.setUserId(1L);
         reservation.setStartDate(LocalDate.of(2023,4,10));
@@ -111,6 +113,7 @@ class ReservationServiceTest {
     public void testDeleteReservationByNotProperId() {
         //예약 생성
         Reservation reservation = new Reservation();
+        reservation.setId(1L);
         reservation.setProductId(1L);
         reservation.setUserId(1L);
         reservation.setStartDate(LocalDate.of(2023,4,10));
@@ -127,6 +130,7 @@ class ReservationServiceTest {
     public void testDeleteReservationByInvalidUserId() {
         //예약 생성
         Reservation reservation = new Reservation();
+        reservation.setId(1L);
         reservation.setProductId(1L);
         reservation.setUserId(1L);
         reservation.setStartDate(LocalDate.of(2023,4,10));
