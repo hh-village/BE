@@ -17,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Objects;
-import java.util.List;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +54,7 @@ public class ProductService {
         // 데이터베이스에서 제품을 삭제
         productRepository.deleteById(id);
         // 성공적인 응답을 반환
-        return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.","");
+        return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.", "");
     }
 
     @Transactional
@@ -70,7 +70,7 @@ public class ProductService {
         String ownerNickname = owner.getNickname();
         String ownerProfile = owner.getProfile();
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, imageList, ownerNickname, ownerProfile,reservationList);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, imageList, ownerNickname, ownerProfile, reservationList);
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
@@ -87,18 +87,30 @@ public class ProductService {
     }
 
     public ResponseEntity<ResponseMessage> searchProductList(String qr, String location) {
-        List<Product> products;
+        List<Product> productList;
 
         if (qr == null && location == null) {
-            products = productRepository.findAll();
+            productList = productRepository.findAll();
         } else if (qr == null) {
-            products = productRepository.findByLocationContaining(location);
+            productList = productRepository.findByLocationContaining(location);
         } else if (location == null) {
-            products = productRepository.findByTitleContaining(qr);
+            productList = productRepository.findByTitleContaining(qr);
         } else {
-            products = productRepository.findByTitleContainingAndLocationContaining(qr, location);
+            productList = productRepository.findByTitleContainingAndLocationContaining(qr, location);
         }
 
-        return  ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", products);
+        searchPrimeImageUrl(productList);
+
+        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", productList);
+    }
+
+    private void searchPrimeImageUrl(List<Product> productList) {
+        for (Product product : productList) {
+            List<String> imageUrlList = imageStorageService.getImageUrlsByProductId(product.getId());
+            if (!imageUrlList.isEmpty()) {
+                String primeImageUrl = imageUrlList.get(0);
+                product.setPrimeImageUrl(primeImageUrl);
+            }
+        }
     }
 }

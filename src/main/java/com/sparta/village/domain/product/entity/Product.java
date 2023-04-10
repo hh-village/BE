@@ -5,11 +5,13 @@ import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 public class Product {
     @Id
@@ -25,6 +27,8 @@ public class Product {
     private String location;
     @Column(nullable = false)
     private Long userId;
+    @Column
+    private String primeImageUrl;
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
