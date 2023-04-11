@@ -41,7 +41,7 @@ public class ReservationService {
         );
 
         //예약 가능한 날짜인지 체크
-        if (reservationRepository.checkOverlapDateByProductId(productId, requestDto.getStartDate(), requestDto.getEndDate())) {
+        if (reservationRepository.checkOverlapDateByProductId(product, requestDto.getStartDate(), requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION_DATE);
         }
         //예약 테이블에 저장
@@ -81,14 +81,15 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> getReservationList() {
-        List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
-        reservationList.forEach(r -> r.setNickname(userService.getUserByUserId(r.getNickname()).getNickname()));
-        return reservationList;
+        return reservationRepository.findAll().stream()
+                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname())).toList();
     }
 
     public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
-        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
-        acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
+        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findByStatus("accepted").stream()
+                .map(r -> new AcceptReservationResponseDto(r.getId(), r.getUser().getNickname(), r.getProduct().getUser().getNickname())).toList();
+//        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
+//        acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
 //        acceptReservationList.forEach(r -> r.setCustomerNickname(userService.getUserByUserId(r.getCustomerNickname()).getNickname()));
         return ResponseMessage.SuccessResponse("검색완료 되었습니다.", acceptReservationList);
     }
