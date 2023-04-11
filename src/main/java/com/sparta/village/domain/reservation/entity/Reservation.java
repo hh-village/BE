@@ -1,7 +1,9 @@
 package com.sparta.village.domain.reservation.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.reservation.dto.ReservationRequestDto;
+import com.sparta.village.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,19 +29,19 @@ public class Reservation extends Timestamped {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate endDate;
 
-    @Column(nullable = false)
-    private Long userId;
+    @ManyToOne
+    private User user;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne
+    private Product product;
 
     //waiting, accepted, rejected, returned
     @Column(nullable = false)
     private String status;
 
-    public Reservation(Long productId, Long userId, ReservationRequestDto requestDto) {
-        this.productId = productId;
-        this.userId = userId;
+    public Reservation(Product product, User user, ReservationRequestDto requestDto) {
+        this.product = product;
+        this.user = user;
         this.startDate = requestDto.getStartDate();
         this.endDate = requestDto.getEndDate();
         this.status = "waiting";

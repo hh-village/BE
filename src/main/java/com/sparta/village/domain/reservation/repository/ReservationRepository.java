@@ -28,12 +28,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     void updateStatus(@Param("id") Long reservationId, @Param("status") String status);
 
     @Query(value = "select " +
-            "new com.sparta.village.domain.reservation.dto.ReservationResponseDto(r.id, r.startDate, r.endDate, r.status, CONCAT(r.userId, '')) " +
+            "new com.sparta.village.domain.reservation.dto.ReservationResponseDto(r.id, r.startDate, r.endDate, r.status, CONCAT(r.user, '')) " +
             "from Reservation r")
     List<ReservationResponseDto> findAllReservationDto();
 
     @Query(value = "select " +
-            "new com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto(r.id, concat(r.productId, ''), concat(r.userId, '')) " +
+            "new com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto(r.id, concat(r.product, ''), concat(r.user, '')) " +
             "from Reservation r WHERE r.status = 'accepted'")
     List<AcceptReservationResponseDto> findAcceptedReservationDto();
 
