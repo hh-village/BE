@@ -23,7 +23,7 @@ public class ReservationController {
         if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.NOT_PROPER_DATE);
         }
-        return reservationService.reserve(id, requestDto, userDetails.getUser().getId());
+        return reservationService.reserve(id, requestDto, userDetails.getUser());
     }
 
     @DeleteMapping("/products/reservation/{id}")

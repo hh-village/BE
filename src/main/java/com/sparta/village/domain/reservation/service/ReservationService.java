@@ -1,5 +1,6 @@
 package com.sparta.village.domain.reservation.service;
 
+import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
@@ -10,6 +11,7 @@ import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.StatusRequestDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
+import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
@@ -31,19 +33,19 @@ public class ReservationService {
 
 
     @Transactional
-    public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, Long userId) {
+    public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, User user) {
         //제품 있는지 체크(제품 등록 코드 완성되면 추가하기!!)
 
-        if (!productRepository.existsById(productId)) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
+        Product product = productRepository.findById(productId).orElseThrow(
+                () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
+        );
 
         //예약 가능한 날짜인지 체크
-        if (reservationRepository.checkOverlapDateByProductId(productId, requestDto.getStartDate(), requestDto.getEndDate())) {
+        if (reservationRepository.checkOverlapDateByProductId(product, requestDto.getStartDate(), requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION_DATE);
         }
         //예약 테이블에 저장
-        reservationRepository.saveAndFlush(new Reservation(productId, userId, requestDto));
+        reservationRepository.saveAndFlush(new Reservation(product, user, requestDto));
         return ResponseMessage.SuccessResponse("예약 되었습니다.", "");
     }
 
@@ -79,14 +81,15 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> getReservationList() {
-        List<ReservationResponseDto> reservationList = reservationRepository.findAllReservationDto();
-        reservationList.forEach(r -> r.setNickname(userService.getUserByUserId(r.getNickname()).getNickname()));
-        return reservationList;
+        return reservationRepository.findAll().stream()
+                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname())).toList();
     }
 
     public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
-        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
-        acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
+        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findByStatus("accepted").stream()
+                .map(r -> new AcceptReservationResponseDto(r.getId(), r.getUser().getNickname(), r.getProduct().getUser().getNickname())).toList();
+//        List<AcceptReservationResponseDto> acceptReservationList = reservationRepository.findAcceptedReservationDto();
+//        acceptReservationList.forEach(r -> r.setOwnerNickname(userService.getUserByUserId(r.getOwnerNickname()).getNickname()));
 //        acceptReservationList.forEach(r -> r.setCustomerNickname(userService.getUserByUserId(r.getCustomerNickname()).getNickname()));
         return ResponseMessage.SuccessResponse("검색완료 되었습니다.", acceptReservationList);
     }

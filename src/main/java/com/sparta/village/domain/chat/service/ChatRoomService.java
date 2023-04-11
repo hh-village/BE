@@ -36,7 +36,7 @@ public class ChatRoomService {
     public ResponseEntity<ResponseMessage> enterRoom(Long productId, String nickname) {
         User user = userService.getUserByNickname(nickname);
         Product product = productService.findProductById(productId);
-        User owner = userService.getUserByUserId(String.valueOf(product.getUserId()));
+        User owner = userService.getUserByUserId(String.valueOf(product.getUser().getId()));
         ChatRoom room = chatRoomRepository.findChatRoomByProductAndUser(product, user).orElse(null);
         if (room == null) {
             room = new ChatRoom(product, user, owner);
