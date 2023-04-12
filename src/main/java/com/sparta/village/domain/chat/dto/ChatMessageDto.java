@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ChatMessageDto {
-    private ChatMessage.MessageType type; // 메시지 타입
+//    private ChatMessage.MessageType type; // 메시지 타입
     private String roomId; // 방번호
     private String sender; // nickname
     private String content; // 메시지
-
-
 }

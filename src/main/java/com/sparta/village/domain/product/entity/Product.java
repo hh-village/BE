@@ -27,8 +27,6 @@ public class Product {
     private String location;
     @ManyToOne
     private User user;
-    @Column
-    private String primeImageUrl;
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
