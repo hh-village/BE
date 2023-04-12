@@ -36,6 +36,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatus(String status);
 
+    List<Reservation> findByProductId(Long productId);
+
 }
 
 

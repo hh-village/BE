@@ -73,9 +73,9 @@ public class ReservationService {
     }
 
 
-    public List<ReservationResponseDto> getReservationList() {
-        return reservationRepository.findAll().stream()
-                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname())).toList();
+    public List<ReservationResponseDto> getReservationList(Long id){
+        return reservationRepository.findByProductId(id).stream()
+                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname(), r.getProduct().getId())).toList();
     }
 
     public ResponseEntity<ResponseMessage> getAcceptedReservationList() {
