@@ -7,17 +7,16 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Setter
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReservationResponseDto {
     private Long id;
     private LocalDate startDate;
     private LocalDate endDate;
-
-    private Long productId;
-
     private String status;
     private String nickname;
+    private Long productId;
 }
