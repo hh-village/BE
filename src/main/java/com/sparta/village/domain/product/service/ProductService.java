@@ -3,6 +3,7 @@ package com.sparta.village.domain.product.service;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
+import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class ProductService {
         productRepository.saveAndFlush(newProduct);
         // 이미지 URL을 이용하여 이미지 엔티티를 생성하고 저장합니다.
         imageStorageService.saveImageList(newProduct, fileUrlList);
+
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
 
@@ -88,19 +91,16 @@ public class ProductService {
             productList = productRepository.findByTitleContainingAndLocationContaining(qr, location);
         }
 
-        searchPrimeImageUrl(productList);
+        List<ProductResponseDto> responseList = productList.stream()
+                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product)))
+                .toList();
 
-        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", productList);
+        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
     }
 
-    private void searchPrimeImageUrl(List<Product> productList) {
-        for (Product product : productList) {
-            List<String> imageUrlList = imageStorageService.getImageUrlsByProductId(product.getId());
-            if (!imageUrlList.isEmpty()) {
-                String primeImageUrl = imageUrlList.get(0);
-                product.setPrimeImageUrl(primeImageUrl);
-            }
-        }
+    private String searchPrimeImageUrl(Product product) {
+        List<String> imageUrlList = imageStorageService.getImageUrlsByProductId(product.getId());
+        return imageUrlList.get(0);
     }
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
