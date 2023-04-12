@@ -10,8 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessageResponseDto {
-    private String target;
-
     private List<MessageListDto> messageList;
 
     private List<RoomListDto> roomList;

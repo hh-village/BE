@@ -41,7 +41,7 @@ public class ReservationService {
         );
 
         //예약 가능한 날짜인지 체크
-        if (reservationRepository.checkOverlapDateByProductId(product, requestDto.getStartDate(), requestDto.getEndDate())) {
+        if (reservationRepository.checkOverlapDateByProduct(product, requestDto.getStartDate(), requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION_DATE);
         }
         //예약 테이블에 저장
@@ -50,35 +50,28 @@ public class ReservationService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> deleteReservation(Long id, Long userId) {
-        checkReservationId(id);
-        checkReservationUserId(userId);
+    public ResponseEntity<ResponseMessage> deleteReservation(Long id, User user) {
+        Reservation reservation = findReservationById(id);
+        if (!reservation.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        }
         reservationRepository.deleteById(id);
         return ResponseMessage.SuccessResponse("예약 취소되었습니다.", "");
     }
 
     @Transactional
     public ResponseEntity<ResponseMessage> changeStatus(Long id, StatusRequestDto requestDto, Long userId) {
-        checkReservationId(id);
+        Reservation reservation = findReservationById(id);
 //        productService.checkProductOwner(reservationRepository.findProductIdById(id), userId);
-
-        reservationRepository.updateStatus(id, requestDto.getStatus());
+        reservationRepository.updateStatus(reservation.getId(), requestDto.getStatus());
         return ResponseMessage.SuccessResponse("상태 변경되었습니다.", "");
     }
 
 
-    private void checkReservationId(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
+    private Reservation findReservationById(Long id) {
+        return reservationRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
-
-    private void checkReservationUserId(Long userId) {
-        if (!reservationRepository.existsByUserId(userId)) {
-            throw new CustomException(ErrorCode.NOT_AUTHOR);
-        }
-    }
 
     public List<ReservationResponseDto> getReservationList() {
         return reservationRepository.findAll().stream()
