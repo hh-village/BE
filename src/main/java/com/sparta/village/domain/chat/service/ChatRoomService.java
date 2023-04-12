@@ -47,30 +47,31 @@ public class ChatRoomService {
 
     public ResponseEntity<ResponseMessage> findMessageHistory(String roomId, User user) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-        String target = getConversationPartner(room, user).getNickname();
+//        String target = getConversationPartner(room, user).getNickname();
         List<MessageListDto> messageList = chatMessageRepository.findAllByRoom(room).stream()
                 .map(m -> new MessageListDto(m.getSender().getId(), m.getContent(), m.getRoom().getRoomId())).toList();
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllChatRoomByUser(user);
         List<RoomListDto> roomList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
+            boolean target = chatRoom.getRoomId().equals(roomId);
             User other = getConversationPartner(chatRoom, user);
-            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile()));
+            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), target));
         }
-        return ResponseMessage.SuccessResponse("대화 불러오기 성공", new ChatMessageResponseDto(target, messageList, roomList));
+        return ResponseMessage.SuccessResponse("대화 불러오기 성공", new ChatMessageResponseDto(messageList, roomList));
     }
 
     public void saveMessage(ChatMessageDto message) {
         User user = userService.getUserByNickname(message.getSender());
-        ChatMessage.MessageType type = message.getType();
-        if (type.equals(ChatMessage.MessageType.ENTER)) {
-            message.setContent(message.getSender() + "님이 채팅방에 참여하였습니다.");
-        } else if (type.equals(ChatMessage.MessageType.QUIT)) {
-            message.setContent(message.getSender() + "님이 채팅방에서 나갔습니다.");
-        }
-
+//        ChatMessage.MessageType type = message.getType();
+//        if (type.equals(ChatMessage.MessageType.ENTER)) {
+//            message.setContent(message.getSender() + "님이 채팅방에 참여하였습니다.");
+//        } else if (type.equals(ChatMessage.MessageType.QUIT)) {
+//            message.setContent(message.getSender() + "님이 채팅방에서 나갔습니다.");
+//        }
         ChatRoom room = chatRoomRepository.findByRoomId(message.getRoomId()).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-        chatMessageRepository.save(new ChatMessage(user, message.getContent(), room, message.getType()));
-        template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+        ChatMessage chatMessage = new ChatMessage(user, message.getContent(), room);
+        chatMessageRepository.save(chatMessage);
+        template.convertAndSend("/sub/chat/room/" + message.getRoomId(), chatMessage);
     }
 
     private User getConversationPartner(ChatRoom chatRoom, User user) {
