@@ -1,7 +1,8 @@
 package com.sparta.village.domain.product.entity;
 
-import com.sparta.village.domain.image.entity.Image;
+
 import com.sparta.village.domain.product.dto.ProductRequestDto;
+import com.sparta.village.domain.reservation.entity.Timestamped;
 import com.sparta.village.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,24 +10,36 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class Product {
+public class Product extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String title;
+
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false)
     private int price;
+
     @Column(nullable = false)
     private String location;
-    @ManyToOne
+
+    @ManyToOne// This specifies the foreign key column name in the database
     private User user;
+
+
+    @Column
+    private String primeImageUrl;
+
+
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
@@ -34,5 +47,6 @@ public class Product {
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
         this.user = user;
+        // Add this line
     }
 }

@@ -2,10 +2,12 @@ package com.sparta.village.domain.user.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @Entity(name = "users")
 public class User {
@@ -32,6 +34,7 @@ public class User {
         this.profile = profile;
         this.role = role;
     }
+
 
 
 }
