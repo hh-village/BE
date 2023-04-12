@@ -18,6 +18,5 @@ public class ProductResponseDto {
         this.location = product.getLocation();
         this.price = product.getPrice();
         this.image = primeImageUrl;
-
     }
 }

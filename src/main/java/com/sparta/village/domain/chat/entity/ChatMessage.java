@@ -23,13 +23,6 @@ public class ChatMessage {
     @ManyToOne
     private ChatRoom room;
 
-//    @Column(nullable = false)
-//    private MessageType type;
-//
-//    public enum MessageType {
-//        ENTER, TALK, QUIT
-//    }
-
     public ChatMessage(User sender, String content, ChatRoom room) {
         this.sender = sender;
         this.content = content;

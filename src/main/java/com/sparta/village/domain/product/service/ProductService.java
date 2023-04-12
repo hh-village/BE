@@ -21,9 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,10 +64,7 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
-        boolean checkOwner = false;
-        if (userDetails != null) {
-            checkOwner = checkProductOwner(id, userDetails.getUser().getId());
-        }
+        boolean checkOwner = userDetails != null && checkProductOwner(id, userDetails.getUser().getId());
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList(id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
@@ -148,6 +143,6 @@ public class ProductService {
             productResponseDtoList.add(myProductResponseDto);
         }
 
-        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다",productResponseDtoList);
+        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
     }
 }

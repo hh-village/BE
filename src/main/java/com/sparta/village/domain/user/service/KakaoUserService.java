@@ -122,4 +122,11 @@ public class KakaoUserService {
         return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
+    public ResponseEntity<ResponseMessage> testLogin(String nickname, HttpServletResponse response) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String jwtToken = jwtUtil.createToken(nickname, user.getKakaoId());
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtToken);
+
+        return ResponseMessage.SuccessResponse("로그인 성공되었습니다.", user.getNickname());
+    }
 }

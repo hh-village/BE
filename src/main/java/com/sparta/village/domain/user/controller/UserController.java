@@ -7,10 +7,7 @@ import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +25,9 @@ public class UserController {
     @GetMapping("/users/login")
     public ResponseEntity<ResponseMessage> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
         // code: 프론트 엔드로부터 받은 인가 코드
+        System.out.println("컨트롤러 들어왔음!");
+        System.out.println(code);
         return kakaoUserService.kakaoLogin(code, response);
-
     }
 
     // 사용자의 닉네임을 업데이트 하기 위한 patch매핑
@@ -42,6 +40,12 @@ public class UserController {
         // userService의 updateNickname 메소드를 호출하여 닉네임을 업데이트하고, 결과를 반환
         return userService.updateNickname(requestDto.getNickname(), userDetails.getUser());
     }
+
+    @PostMapping("/test/login/{nickname}")
+    public ResponseEntity<ResponseMessage> testLogin(@PathVariable String nickname, HttpServletResponse response){
+        return kakaoUserService.testLogin(nickname, response);
+    }
+
 }
 
 
