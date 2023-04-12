@@ -1,8 +1,8 @@
 package com.sparta.village.domain.reservation.repository;
 
+
 import com.sparta.village.domain.product.entity.Product;
-import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
+
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,7 +36,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatus(String status);
 
+
+    List<Reservation> findByUser(User user);
 }
+
+
+
 
 
 

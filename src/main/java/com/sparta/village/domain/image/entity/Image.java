@@ -4,7 +4,7 @@ import com.sparta.village.domain.product.entity.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.w3c.dom.Text;
+
 
 import javax.persistence.*;
 

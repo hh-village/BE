@@ -1,11 +1,13 @@
 package com.sparta.village.domain.product.controller;
 
 import com.sparta.village.domain.product.dto.ProductRequestDto;
+import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -35,7 +38,10 @@ public class ProductController {
     public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         return productService.detailProduct(userDetails, id);
     }
-
+    @GetMapping("/users/products")
+    public List<ProductResponseDto> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return productService.getProducts(userDetails.getUser());
+    }
     @DeleteMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
       return productService.deleteProductById(id,userDetails.getUser());

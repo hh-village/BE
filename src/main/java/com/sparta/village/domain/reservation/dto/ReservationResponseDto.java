@@ -19,4 +19,6 @@ public class ReservationResponseDto {
 
     private String status;
     private String nickname;
+
+
 }

@@ -1,8 +1,11 @@
 package com.sparta.village.domain.product.service;
 
+import com.sparta.village.domain.image.entity.Image;
+import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
+import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
@@ -24,6 +27,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ImageRepository imageRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final KakaoUserService kakaoUserService;
@@ -112,5 +116,38 @@ public class ProductService {
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    public List<ProductResponseDto> getProducts(User user) {
+        // Retrieve the product list using the user ID.
+        List<Product> productList = productRepository.findByUserId(user.getId());
+
+        // Create an ArrayList to store the product ID list
+        List<Long> productIdList = new ArrayList<>();
+        // Add the product ID to the ArrayList while traversing the product list
+        for (Product product : productList) {
+            productIdList.add(product.getId());
+        }
+        // Retrieve product image using imageRepository instance
+        List<Image> images = imageRepository.findByProductIdIn(productIdList);
+        // Create an ArrayList to store the ProductResponseDto list
+        List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
+        // Create a ProductResponseDto for each product while iterating through the product list and add it to the list
+        for (Product product : productList) {
+            Image matchedImage = null;
+            // Find images that match the product.
+            for (Image image : images) {
+                if (image.getId() != null && image.getId().equals(product.getId())) {
+                    matchedImage = image;
+                    break;
+                }
+            }
+            // Create a ProductResponseDto with an image that matches the product
+            ProductResponseDto productResponseDto = new ProductResponseDto(product, matchedImage);
+            // Add the generated ProductResponseDto to the list
+            productResponseDtoList.add(productResponseDto);
+        }
+
+        return productResponseDtoList;
     }
 }

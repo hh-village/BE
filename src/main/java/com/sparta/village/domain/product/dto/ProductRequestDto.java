@@ -11,9 +11,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class ProductRequestDto {
+
     private String title;
     private String description;
     private int price;
     private String location;
     private List<MultipartFile> images;
+
 }

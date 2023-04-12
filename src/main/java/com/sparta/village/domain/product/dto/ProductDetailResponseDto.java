@@ -1,13 +1,12 @@
 package com.sparta.village.domain.product.dto;
 
-import com.sparta.village.domain.image.entity.Image;
+
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
-import com.sparta.village.domain.reservation.entity.Reservation;
 import lombok.Getter;
-import lombok.Setter;
 
-import javax.persistence.Column;
+
+
 import java.util.List;
 
 @Getter
