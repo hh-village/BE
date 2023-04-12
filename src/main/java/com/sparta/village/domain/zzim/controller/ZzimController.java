@@ -1,6 +1,6 @@
-package com.sparta.village.domain.follow.controller;
+package com.sparta.village.domain.zzim.controller;
 
-import com.sparta.village.domain.follow.service.FollowService;
+import com.sparta.village.domain.zzim.service.ZzimService;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class FollowController {
+public class ZzimController {
 
-    private final FollowService followService;
+    private final ZzimService zzimService;
 
-//    @PostMapping("/users/{id}/follow")
-//    public ResponseEntity<ResponseMessage> follow(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-//        return followService.follow(id, userDetails.getUser());
-//    }
+    @PostMapping("/products/{id}/zzim")
+    public ResponseEntity<ResponseMessage> zzim(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return zzimService.zzim(id, userDetails.getUser());
+    }
 }

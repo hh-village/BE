@@ -10,6 +10,8 @@ import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
+import com.sparta.village.domain.zzim.entity.Zzim;
+import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ZzimRepository zzimRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final KakaoUserService kakaoUserService;
@@ -61,10 +64,16 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
+    public ResponseEntity<ResponseMessage> detailProduct(User user, Long id) {
         boolean checkOwner = false;
-        if (userDetails != null) {
-            checkOwner = checkProductOwner(id, userDetails.getUser().getId());
+        boolean zzimStatus = false;
+        if (user != null) {
+            checkOwner = checkProductOwner(id, user.getId());
+
+            Product productZzim = findProductById(id);
+            User zzimByUser = user;
+            Optional<Zzim> zzim = zzimRepository.findByProductAndUser(productZzim, zzimByUser);
+            zzimStatus = zzim.isPresent();
         }
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList(id);
@@ -72,8 +81,9 @@ public class ProductService {
         User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUser().getId()));
         String ownerNickname = owner.getNickname();
         String ownerProfile = owner.getProfile();
+        int zzimCount = zzimRepository.countByProductId(id);
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, imageList, ownerNickname, ownerProfile, reservationList);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
