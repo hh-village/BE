@@ -20,11 +20,11 @@ public class Image {
     @Column(nullable = false, length = 500)
     private String imageUrl;
 
-    @Column(nullable = false)
-    private Long productId;
+    @ManyToOne
+    private Product product;
 
     public Image(Product product, String imageUrl) {
-        this.productId = product.getId();
+        this.product = product;
         this.imageUrl = imageUrl;
     }
 

@@ -46,7 +46,7 @@ public class ProductService {
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         // 사용자가 제품을 삭제할 권한이 있는지 확인
-        if (!(Objects.equals(product.getUserId(), user.getId()))) {
+        if (!(Objects.equals(product.getUser().getId(), user.getId()))) {
             throw new CustomException(ErrorCode.DELETE_NOT_FOUND);
         }
         // 데이터베이스에서 제품과 연결된 이미지를 검색
@@ -66,7 +66,7 @@ public class ProductService {
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList();
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
-        User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUserId()));
+        User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUser().getId()));
         String ownerNickname = owner.getNickname();
         String ownerProfile = owner.getProfile();
 
