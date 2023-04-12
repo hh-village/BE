@@ -1,7 +1,5 @@
 package com.sparta.village.domain.reservation.service;
 
-
-
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
@@ -32,7 +30,6 @@ public class ReservationService {
     @Transactional
     public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, User user) {
         //제품 있는지 체크(제품 등록 코드 완성되면 추가하기!!)
-
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
         );
@@ -62,11 +59,7 @@ public class ReservationService {
 //        productService.checkProductOwner(reservationRepository.findProductIdById(id), userId);
         reservationRepository.updateStatus(reservation.getId(), requestDto.getStatus());
         return ResponseMessage.SuccessResponse("상태 변경되었습니다.", "");
-
-
-
     }
-
 
     private Reservation findReservationById(Long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
@@ -75,7 +68,7 @@ public class ReservationService {
 
     public List<ReservationResponseDto> getReservationList(Long id){
         return reservationRepository.findByProductId(id).stream()
-                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname(), r.getProduct().getId())).toList();
+                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname())).toList();
     }
 
 
