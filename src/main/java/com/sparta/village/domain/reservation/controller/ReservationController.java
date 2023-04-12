@@ -28,7 +28,7 @@ public class ReservationController {
 
     @DeleteMapping("/products/reservation/{id}")
     public ResponseEntity<ResponseMessage> deleteReservation(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reservationService.deleteReservation(id, userDetails.getUser().getId());
+        return reservationService.deleteReservation(id, userDetails.getUser());
     }
     //
 

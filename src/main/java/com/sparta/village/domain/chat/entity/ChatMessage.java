@@ -15,27 +15,24 @@ public class ChatMessage {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
     private User sender;
 
     @Column(nullable = false)
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "room_id")
     private ChatRoom room;
 
-    @Column(nullable = false)
-    private MessageType type;
+//    @Column(nullable = false)
+//    private MessageType type;
+//
+//    public enum MessageType {
+//        ENTER, TALK, QUIT
+//    }
 
-    public enum MessageType {
-        ENTER, TALK, QUIT
-    }
-
-    public ChatMessage(User sender, String content, ChatRoom room, MessageType messageType) {
+    public ChatMessage(User sender, String content, ChatRoom room) {
         this.sender = sender;
         this.content = content;
         this.room = room;
-        this.type = messageType;
     }
 }
