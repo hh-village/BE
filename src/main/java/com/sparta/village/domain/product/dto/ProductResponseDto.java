@@ -5,11 +5,18 @@ import lombok.Getter;
 
 @Getter
 public class ProductResponseDto {
-    private Product product;
-    private String primeImageUrl;
+    private Long id;
+    private String title;
+    private String image;
+    private String location;
+    private int price;
 
     public ProductResponseDto(Product product, String primeImageUrl) {
-        this.product = product;
-        this.primeImageUrl = primeImageUrl;
+        this.id = product.getId();
+        this.title = product.getTitle();
+        this.location = product.getLocation();
+        this.price = product.getPrice();
+        this.image = primeImageUrl;
+
     }
 }
