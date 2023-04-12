@@ -21,6 +21,10 @@ public enum ErrorCode {
     NOT_SELLER(BAD_REQUEST, "상태 변경 권한이 없습니다."),
     WRONG_ADMIN_TOKEN(BAD_REQUEST, "관리자 암호가 틀려 등록이 불가능합니다."),
 
+
+
+
+
     /* 404 NOT_FOUND : Resource 를 찾을 수 없음 */
     USER_NOT_FOUND(NOT_FOUND, "등록된 사용자가 없습니다"),
     RESERVATION_NOT_FOUND(NOT_FOUND, "해당 예약을 찾을 수 없습니다."),

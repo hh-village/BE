@@ -1,5 +1,6 @@
 package com.sparta.village.domain.product.dto;
 
+
 import com.sparta.village.domain.product.entity.Product;
 import lombok.Getter;
 
