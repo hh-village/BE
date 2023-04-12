@@ -7,6 +7,8 @@ import com.sparta.village.domain.user.dto.UserInfoDto;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.entity.UserRoleEnum;
 import com.sparta.village.domain.user.repository.UserRepository;
+import com.sparta.village.global.exception.CustomException;
+import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -102,20 +104,25 @@ public class KakaoUserService {
     }
     // 3. 필요시에 회원가입
     private String registerOrUpdateKakaoUser(UserInfoDto kakaoUserInfo) {
+        User user = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId()).orElse(null);
         String nickname = "";
-        if (!userRepository.existsByKakaoId(kakaoUserInfo.getKakaoId())) {
+        if (user == null) {
             // 8-10자리의 랜덤 닉네임을 생성하여 사용자 정보에 추가하고, 데이터베이스에 저장합니다.
             nickname = UUID.randomUUID().toString().substring(0, 8);
             userRepository.save(new User(kakaoUserInfo.getKakaoId(), nickname, "", UserRoleEnum.USER));
         } else {
             // 카카오 ID에 해당하는 사용자 정보를 데이터베이스에서 검색하여 닉네임을 가져옵니다.
-            nickname = userRepository.findByKakaoId(kakaoUserInfo.getKakaoId()).getNickname();
+            nickname = user.getNickname();
         }
         // 등록 또는 업데이트된 사용자의 닉네임을 반환합니다.
         return nickname;
     }
     public User getUserByUserId(String userId) {
         return userRepository.findById(Long.parseLong(userId)).orElse(null);
+    }
+
+    public User getUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
 }

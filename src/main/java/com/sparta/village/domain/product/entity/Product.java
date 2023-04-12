@@ -25,16 +25,14 @@ public class Product {
     private int price;
     @Column(nullable = false)
     private String location;
-    @Column(nullable = false)
-    private Long userId;
-    @Column
-    private String primeImageUrl;
+    @ManyToOne
+    private User user;
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
-        this.userId = user.getId();
+        this.user = user;
     }
 }
