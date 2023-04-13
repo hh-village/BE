@@ -13,6 +13,8 @@ import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
+import com.sparta.village.domain.zzim.entity.Zzim;
+import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -27,6 +29,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ZzimRepository zzimRepository;
     private final ImageRepository imageRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
@@ -63,16 +66,18 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
-        boolean checkOwner = userDetails != null && checkProductOwner(id, userDetails.getUser().getId());
+    public ResponseEntity<ResponseMessage> detailProduct(User user, Long id) {
+        boolean checkOwner = user != null && checkProductOwner(id, user.getId());
+        boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(findProductById(id), user).isPresent();
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList(id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
         User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUser().getId()));
         String ownerNickname = owner.getNickname();
         String ownerProfile = owner.getProfile();
+        int zzimCount = zzimRepository.countByProductId(id);
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, imageList, ownerNickname, ownerProfile, reservationList);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
