@@ -29,11 +29,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-<<<<<<< HEAD
     private final ZzimRepository zzimRepository;
-=======
     private final ImageRepository imageRepository;
->>>>>>> 881bc84b9c304d8573af5430a6f45de4c216369a
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final KakaoUserService kakaoUserService;
@@ -71,11 +68,7 @@ public class ProductService {
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(User user, Long id) {
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
-        boolean zzimStatus = false;
-        Product productZzim = findProductById(id);
-        User zzimByUser = user;
-        Optional<Zzim> zzim = zzimRepository.findByProductAndUser(productZzim, zzimByUser);
-        zzimStatus = zzim.isPresent();
+        boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(findProductById(id), user).isPresent();
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList(id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
