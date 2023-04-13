@@ -46,7 +46,7 @@ public class ReservationService {
     @Transactional
     public ResponseEntity<ResponseMessage> deleteReservation(Long id, User user) {
         Reservation reservation = findReservationById(id);
-        if (checkReservationOwner(reservation, user)) {
+        if (!checkReservationOwner(reservation, user)) {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
         reservationRepository.deleteById(id);
@@ -66,7 +66,7 @@ public class ReservationService {
     }
 
     private boolean checkReservationOwner(Reservation reservation, User user) {
-        return reservation.getUser().getId().equals(user.getId()) && reservation.getStatus().equals("waiting");
+        return user != null && reservation.getUser().getId().equals(user.getId()) && reservation.getStatus().equals("waiting");
     }
 
 

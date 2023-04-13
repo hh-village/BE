@@ -1,9 +1,7 @@
 package com.sparta.village.domain.product.service;
 
-import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.image.service.ImageStorageService;
-import com.sparta.village.domain.product.dto.MyProductResponseDto;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.dto.ProductResponseDto;
@@ -13,7 +11,7 @@ import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
-import com.sparta.village.domain.zzim.entity.Zzim;
+import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
@@ -33,7 +31,7 @@ public class ProductService {
     private final ImageRepository imageRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
-    private final KakaoUserService kakaoUserService;
+    private final UserService userService;
 
     @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
@@ -66,15 +64,16 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> detailProduct(User user, Long id) {
+    public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
+        User user = userDetails == null ? null : userDetails.getUser();
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
         boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(findProductById(id), user).isPresent();
         Product product = findProductById(id);
         List<ReservationResponseDto> reservationList = reservationService.getReservationList(user, id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
-        User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUser().getId()));
+        User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
         String ownerNickname = owner.getNickname();
-        String ownerProfile = owner.getProfile();
+        String ownerProfile = userService.getUserProfile(owner);
         int zzimCount = zzimRepository.countByProductId(id);
 
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);

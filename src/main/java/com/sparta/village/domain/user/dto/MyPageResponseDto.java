@@ -15,9 +15,9 @@ public class MyPageResponseDto {
 
     private List<?> myList;
 
-    public MyPageResponseDto(User user, List<?> myList) {
+    public MyPageResponseDto(User user, String profile, List<?> myList) {
         this.nickname = user.getNickname();
-        this.profile = user.getProfile();
+        this.profile = profile;
         this.myList = myList;
     }
 }
