@@ -70,7 +70,7 @@ public class ProductService {
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
         boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(findProductById(id), user).isPresent();
         Product product = findProductById(id);
-        List<ReservationResponseDto> reservationList = reservationService.getReservationList(id);
+        List<ReservationResponseDto> reservationList = reservationService.getReservationList(user, id);
         List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
         User owner = kakaoUserService.getUserByUserId(Long.toString(product.getUser().getId()));
         String ownerNickname = owner.getNickname();

@@ -17,6 +17,7 @@ public class ReservationResponseDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
-    private String userNickname;
+    private String nickname;
+    private boolean checkOwner;
 
 }
