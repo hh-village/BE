@@ -87,21 +87,21 @@ public class ReservationService {
     }
 
 
-    public List<RentResponseDto> getRentedItems(User user) {
-        List<Reservation> reservationList = reservationRepository.findByUser(user);
-        List<RentResponseDto> rentalResponseDtoList = reservationList.stream()
-                .map(reservation -> new RentResponseDto(reservation,searchPrimeImageUrl(reservation)))
-                .toList();
-
-//        List<RentResponseDto> rentalResponseDtoList = new ArrayList<>();
+//    public List<RentResponseDto> getRentedItems(User user) {
+//        List<Reservation> reservationList = reservationRepository.findByUser(user);
+//        List<RentResponseDto> rentalResponseDtoList = reservationList.stream()
+//                .map(reservation -> new RentResponseDto(reservation,searchPrimeImageUrl(reservation)))
+//                .toList();
 //
-//        for (Reservation reservation :reservationList) {
-//            RentResponseDto rentResponseDto = new RentResponseDto(reservation);
-//            rentalResponseDtoList.add(rentResponseDto);
-//        }
-
-        return rentalResponseDtoList;
-    }
+////        List<RentResponseDto> rentalResponseDtoList = new ArrayList<>();
+////
+////        for (Reservation reservation :reservationList) {
+////            RentResponseDto rentResponseDto = new RentResponseDto(reservation);
+////            rentalResponseDtoList.add(rentResponseDto);
+////        }
+//
+//        return rentalResponseDtoList;
+//    }
     private String searchPrimeImageUrl(Reservation reservation) {
         List<String> imageUrlList = imageStorageService.getImageUrlsByProductId(reservation.getProduct().getId());
         return imageUrlList.get(0);

@@ -19,7 +19,7 @@ public class ProductDetailResponseDto {
     private final String description;
     private final int price;
     private final String location;
-    private boolean zzimStatus;
+    private final boolean zzimStatus;
     private final int zzimCount;
     private final boolean checkOwner;
     private final List<String> imageList;

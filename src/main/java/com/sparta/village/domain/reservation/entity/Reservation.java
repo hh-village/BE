@@ -46,4 +46,8 @@ public class Reservation extends Timestamped {
         this.endDate = requestDto.getEndDate();
         this.status = "waiting";
     }
+
+    public Product getProduct() {
+        return product;
+    }
 }

@@ -31,12 +31,10 @@ public class ReservationController {
         return reservationService.reserve(id, requestDto, userDetails.getUser());
     }
 
-    @GetMapping("/users/rents")
-    public List<RentResponseDto> getRentedItems(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return reservationService.getRentedItems(userDetails.getUser());
-    }
-
-
+//    @GetMapping("/users/rents")
+//    public List<RentResponseDto> getRentedItems(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return reservationService.getRentedItems(userDetails.getUser());
+//    }
 
     @DeleteMapping("/products/reservation/{id}")
     public ResponseEntity<ResponseMessage> deleteReservation(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {

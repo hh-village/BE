@@ -46,4 +46,8 @@ public class Zzim {
         this.zzimStatus = zzimStatus;
 
     }
+
+    public Product getProduct() {
+        return product;
+    }
 }

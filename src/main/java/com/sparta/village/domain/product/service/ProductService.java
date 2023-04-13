@@ -118,36 +118,36 @@ public class ProductService {
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    public ResponseEntity<ResponseMessage> getProducts(User user) {
-        // Retrieve the product list using the user ID.
-        List<Product> productList = productRepository.findByUserId(user.getId());
-
-        // Create an ArrayList to store the product ID list
-        List<Long> productIdList = new ArrayList<>();
-        // Add the product ID to the ArrayList while traversing the product list
-        for (Product product : productList) {
-            productIdList.add(product.getId());
-        }
-        // Retrieve product image using imageRepository instance
-        List<Image> images = imageRepository.findByProductIdIn(productIdList);
-        // Create an ArrayList to store the ProductResponseDto list
-        List< MyProductResponseDto> productResponseDtoList = new ArrayList<>();
-        // Create a ProductResponseDto for each product while iterating through the product list and add it to the list
-        for (Product product : productList) {
-            Image matchedImage = null;
-            // Find images that match the product.
-            for (Image image : images) {
-                if (image.getId() != null && image.getId().equals(product.getId())) {
-                    matchedImage = image;
-                    break;
-                }
-            }
-            // Create a ProductResponseDto with an image that matches the product
-            MyProductResponseDto myProductResponseDto = new MyProductResponseDto(product,matchedImage);
-            // Add the generated ProductResponseDto to the list
-            productResponseDtoList.add(myProductResponseDto);
-        }
-
-        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
-    }
+//    public ResponseEntity<ResponseMessage> getProducts(User user) {
+//        // Retrieve the product list using the user ID.
+//        List<Product> productList = productRepository.findByUserId(user.getId());
+//
+//        // Create an ArrayList to store the product ID list
+//        List<Long> productIdList = new ArrayList<>();
+//        // Add the product ID to the ArrayList while traversing the product list
+//        for (Product product : productList) {
+//            productIdList.add(product.getId());
+//        }
+//        // Retrieve product image using imageRepository instance
+//        List<Image> images = imageRepository.findByProductIdIn(productIdList);
+//        // Create an ArrayList to store the ProductResponseDto list
+//        List< MyProductResponseDto> productResponseDtoList = new ArrayList<>();
+//        // Create a ProductResponseDto for each product while iterating through the product list and add it to the list
+//        for (Product product : productList) {
+//            Image matchedImage = null;
+//            // Find images that match the product.
+//            for (Image image : images) {
+//                if (image.getId() != null && image.getId().equals(product.getId())) {
+//                    matchedImage = image;
+//                    break;
+//                }
+//            }
+//            // Create a ProductResponseDto with an image that matches the product
+//            MyProductResponseDto myProductResponseDto = new MyProductResponseDto(product,matchedImage);
+//            // Add the generated ProductResponseDto to the list
+//            productResponseDtoList.add(myProductResponseDto);
+//        }
+//
+//        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
+//    }
 }
