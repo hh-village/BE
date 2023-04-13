@@ -20,6 +20,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByTitleContaining (String title);
     List<Product> findByLocationContaining(String location);
 
-    List<Product> findByReservation(Reservation reservation);
-
 }

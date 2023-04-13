@@ -17,6 +17,6 @@ public class ReservationResponseDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
-    private String nickname;
+    private String userNickname;
 
 }

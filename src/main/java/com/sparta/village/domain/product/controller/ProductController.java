@@ -37,7 +37,7 @@ public class ProductController {
 
     @GetMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
-        return productService.detailProduct(userDetails, id);
+        return productService.detailProduct(userDetails.getUser(), id);
     }
     @GetMapping("/users/products")
     public ResponseEntity<ResponseMessage> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {

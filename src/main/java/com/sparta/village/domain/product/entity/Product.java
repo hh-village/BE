@@ -1,6 +1,7 @@
 package com.sparta.village.domain.product.entity;
 
 
+import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.reservation.entity.Timestamped;
 import com.sparta.village.domain.user.entity.User;
@@ -49,4 +50,5 @@ public class Product extends Timestamped{
         this.user = user;
         // Add this line
     }
+
 }
