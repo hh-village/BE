@@ -42,6 +42,11 @@ public class UserController {
         // userService의 updateNickname 메소드를 호출하여 닉네임을 업데이트하고, 결과를 반환
         return userService.updateNickname(requestDto.getNickname(), userDetails.getUser());
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<ResponseMessage> getUsersItems(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam(required = false) String key) {
+        return userService.getUsersItems(userDetails.getUser(), key);
+    }
 }
 
 

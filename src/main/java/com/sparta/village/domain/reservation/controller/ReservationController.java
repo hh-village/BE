@@ -36,8 +36,6 @@ public class ReservationController {
         return reservationService.getRentedItems(userDetails.getUser());
     }
 
-
-
     @DeleteMapping("/products/reservation/{id}")
     public ResponseEntity<ResponseMessage> deleteReservation(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return reservationService.deleteReservation(id, userDetails.getUser());
