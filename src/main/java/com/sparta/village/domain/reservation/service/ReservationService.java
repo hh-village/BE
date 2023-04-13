@@ -66,7 +66,7 @@ public class ReservationService {
     }
 
     private boolean checkReservationOwner(Reservation reservation, User user) {
-        return reservation.getUser().getId().equals(user.getId()) && !reservation.getStatus().equals("waiting");
+        return reservation.getUser().getId().equals(user.getId()) && reservation.getStatus().equals("waiting");
     }
 
 
