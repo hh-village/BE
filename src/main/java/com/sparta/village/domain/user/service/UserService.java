@@ -1,19 +1,21 @@
 package com.sparta.village.domain.user.service;
 
-
-import com.sparta.village.domain.product.entity.Product;
+import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.product.repository.ProductRepository;
-import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
+import com.sparta.village.domain.user.dto.*;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.repository.UserRepository;
+import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +23,12 @@ import java.util.Optional;
 @RequiredArgsConstructor // final @NonNull 필드를 사용하여 생성자를 자동으로 생성
 // User Service 클래스 선언
 public class UserService {
+    private final UserRepository userRepository;
+    private final ProductRepository productRepository;
+    private final ReservationRepository reservationRepository;
+    private final ZzimRepository zzimRepository;
 
-        private final UserRepository userRepository;
-        private final ProductRepository productRepository;
-        private final ReservationRepository reservationRepository;
-
-
+    @Transactional
     // 사용자의 닉네임을 업데이트하고 업데이트된 사용자를 저장하는 메소드
     public ResponseEntity<ResponseMessage> updateNickname(String newNickname, User user) {
 
@@ -38,20 +40,33 @@ public class UserService {
         // 사용자 객체의 닉네임을 새 닉네임으로 설정
         user.setNickname(newNickname);
         // userRepository에 변경된 사용자 정보를 저장
-
+        userRepository.save(user);
         // 변경이 완료되었음을 알리는 응답 메시지 생성
-        return ResponseMessage.SuccessResponse("변경 완료되었습니다.","");
+        return ResponseMessage.SuccessResponse("변경 완료되었습니다.",new UserResponseDto(user.getProfile(), user.getNickname()));
     }
 
-    public ResponseEntity<ResponseMessage> getUsersItems(User user, String key) {
-        List<Product> myProductList = productRepository.findAllByUser(user);
-
-        List<Product> myReservationProductList = reservationRepository.findByUser(user)
-                .stream()
-                .map(Reservation::getProduct)
-                .toList();
-
+    public ResponseEntity<ResponseMessage> getUserItemList(User user, String key, ImageRepository imageRepository) {
+        return ResponseMessage.SuccessResponse("조회가 완료되었습니다.", new MyPageResponseDto(user, setUserItemList(user, key, imageRepository)));
     }
+
+    private List<?> setUserItemList(User user, String key, ImageRepository imageRepository) {
+        List<?> productList = "products".equals(key) ? productRepository.findAllByUser(user).stream()
+                                        .map(product -> new MyProductsResponseDto(user, product, imageRepository))
+                                        .toList() :
+                                 "rents".equals(key) ? reservationRepository.findByUser(user).stream()
+                                        .map(reservation -> new MyReservationsResponseDto(user, reservation, imageRepository))
+                                        .toList() :
+                                 "zzims".equals(key) ? zzimRepository.findByUser(user).stream()
+                                        .map(zzim -> new ZzimsResponseDto(user, zzim, imageRepository))
+                                        .toList() :
+                                        null;
+        if(productList == null) {
+            throw new CustomException(ErrorCode.BAD_PARAMETER);
+        }
+        return productList;
+    }
+
+
 }
 
 
