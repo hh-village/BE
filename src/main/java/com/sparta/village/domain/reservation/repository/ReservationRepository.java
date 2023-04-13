@@ -3,6 +3,7 @@ package com.sparta.village.domain.reservation.repository;
 
 import com.sparta.village.domain.product.entity.Product;
 
+import com.sparta.village.domain.reservation.dto.UserLevelDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,8 +23,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByUser(User user);
 
-//    @Query(value = "select r.product from Reservation r where r.id = :id")
-//    Product findProductIdById(@Param("id") Long reservationId);
+    @Query(value = "select new com.sparta.village.domain.reservation.dto.UserLevelDto(r.startDate, r.endDate) " +
+            "from Reservation r " +
+            "left join Product p " +
+            "on r.product.id = p.id " +
+            "where p.user = :user and r.status = 'returned'")
+    List<UserLevelDto> findUserLevelData(@Param("user") User user);
 
     @Modifying
     @Query(value = "update Reservation r set r.status = :status where r.id = :id")

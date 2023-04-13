@@ -13,6 +13,7 @@ import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
+import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -32,7 +33,7 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessageSendingOperations template;
-    private final KakaoUserService userService;
+    private final UserService userService;
     private final ProductService productService;
 
     @Transactional
@@ -65,11 +66,7 @@ public class ChatRoomService {
     }
 
     private User getConversationPartner(ChatRoom chatRoom, User user) {
-        User partner = chatRoom.getUser();
-        if (partner.getId().equals(user.getId())) {
-            partner = chatRoom.getOwner();
-        }
-        return partner;
+        return chatRoom.getUser().getId().equals(user.getId()) ? chatRoom.getOwner() : chatRoom.getUser();
     }
 
     private ChatMessageResponseDto findMessageHistoryByRoomId(String roomId, User user) {
@@ -82,7 +79,7 @@ public class ChatRoomService {
         for (ChatRoom chatRoom : chatRoomList) {
             boolean target = chatRoom.getRoomId().equals(roomId);
             User other = getConversationPartner(chatRoom, user);
-            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), target));
+            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), userService.getUserProfile(other), target));
         }
         return new ChatMessageResponseDto(messageList, roomList);
     }
