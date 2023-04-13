@@ -17,13 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
@@ -125,4 +122,11 @@ public class KakaoUserService {
         return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
+    public ResponseEntity<ResponseMessage> testLogin(String nickname, HttpServletResponse response) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String jwtToken = jwtUtil.createToken(nickname, user.getKakaoId());
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtToken);
+
+        return ResponseMessage.SuccessResponse("로그인 성공되었습니다.", user.getNickname());
+    }
 }

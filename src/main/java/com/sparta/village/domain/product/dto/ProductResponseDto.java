@@ -1,5 +1,6 @@
 package com.sparta.village.domain.product.dto;
 
+
 import com.sparta.village.domain.product.entity.Product;
 import lombok.Getter;
 
@@ -17,6 +18,5 @@ public class ProductResponseDto {
         this.location = product.getLocation();
         this.price = product.getPrice();
         this.image = primeImageUrl;
-
     }
 }
