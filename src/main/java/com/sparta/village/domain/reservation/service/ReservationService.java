@@ -46,7 +46,7 @@ public class ReservationService {
     @Transactional
     public ResponseEntity<ResponseMessage> deleteReservation(Long id, User user) {
         Reservation reservation = findReservationById(id);
-        if (!reservation.getUser().getId().equals(user.getId())) {
+        if (checkReservationOwner(reservation, user)) {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
         reservationRepository.deleteById(id);
@@ -65,10 +65,15 @@ public class ReservationService {
         return reservationRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
+    private boolean checkReservationOwner(Reservation reservation, User user) {
+        return reservation.getUser().getId().equals(user.getId()) && !reservation.getStatus().equals("waiting");
+    }
 
-    public List<ReservationResponseDto> getReservationList(Long id){
+
+    public List<ReservationResponseDto> getReservationList(User user, Long id){
         return reservationRepository.findByProductId(id).stream()
-                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(), r.getUser().getNickname())).toList();
+                .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(),
+                        r.getUser().getNickname(), checkReservationOwner(r, user))).toList();
     }
 
 
