@@ -39,10 +39,10 @@ public class ProductController {
     public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         return productService.detailProduct(userDetails.getUser(), id);
     }
-    @GetMapping("/users/products")
-    public ResponseEntity<ResponseMessage> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return productService.getProducts(userDetails.getUser());
-    }
+//    @GetMapping("/users/products")
+//    public ResponseEntity<ResponseMessage> getProducts(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return productService.getProducts(userDetails.getUser());
+//    }
     @DeleteMapping("/products/{id}")
     public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
       return productService.deleteProductById(id,userDetails.getUser());
