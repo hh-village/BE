@@ -1,7 +1,5 @@
 package com.sparta.village.domain.product.entity;
 
-
-import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.reservation.entity.Timestamped;
 import com.sparta.village.domain.user.entity.User;
@@ -33,13 +31,22 @@ public class Product extends Timestamped{
     @Column(nullable = false)
     private String location;
 
+    @Column(nullable = false)
+    private int zzimCount = 0;
+
     @ManyToOne// This specifies the foreign key column name in the database
     private User user;
 
+    public void plusZzimCount() {
+        this.zzimCount ++;
+    }
+
+    public void minusZzimCount() {
+        this.zzimCount --;
+    }
+
     @Column
     private String primeImageUrl;
-
-
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
@@ -47,6 +54,7 @@ public class Product extends Timestamped{
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
         this.user = user;
+        this.zzimCount = getZzimCount();
         // Add this line
     }
 

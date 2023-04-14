@@ -29,15 +29,15 @@ public class ZzimService {
         Optional<Zzim> getZzim = zzimRepository.findByProductAndUser(product, user);
 
         if(getZzim.isEmpty()) {
-            Zzim zzimSave = new Zzim(user, product, true);
-            zzimSave.plusZzimCount();
-            zzimRepository.save(zzimSave);
-            return ResponseMessage.SuccessResponse("찜하기 성공", "");
+            zzimRepository.save(new Zzim(user, product, true));
+            product.plusZzimCount();
+            productRepository.save(product);
+            return ResponseMessage.SuccessResponse("찜하기 성공", true);
         }else {
-            Zzim zzimToDelete = getZzim.get();
-            zzimToDelete.minusZzimCount();
-            zzimRepository.delete(zzimToDelete);
-            return ResponseMessage.SuccessResponse("찜하기 취소", "");
+            zzimRepository.delete(getZzim.get());
+            product.minusZzimCount();
+            productRepository.save(product);
+            return ResponseMessage.SuccessResponse("찜하기 취소", false);
         }
     }
 }

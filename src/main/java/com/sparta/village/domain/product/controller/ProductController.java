@@ -31,8 +31,8 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ResponseMessage> searchProductList(@RequestParam(value = "name", required = false) String title, @RequestParam(value = "location", required = false) String location) {
-        return productService.searchProductList(title, location);
+    public ResponseEntity<ResponseMessage> searchProductList(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam(value = "name", required = false) String title, @RequestParam(value = "location", required = false) String location) {
+        return productService.searchProductList(userDetails, title, location);
     }
 
     @GetMapping("/products/{id}")

@@ -17,33 +17,16 @@ public class Zzim {
     private Long id;
 
     @Column(nullable = false)
-    private int zzimCount = 0;
-
-    @Column(nullable = false)
     private String productTitle;
-
-    @Column(nullable = false)
-    private boolean zzimStatus;
-
     @ManyToOne
     private Product product;
     @ManyToOne
     private User user;
 
-    public void plusZzimCount() {
-        this.zzimCount ++;
-    }
-
-    public void minusZzimCount() {
-        this.zzimCount --;
-    }
-
     public Zzim(User user, Product product, boolean zzimStatus) {
-        this.zzimCount = getZzimCount();
         this.productTitle = product.getTitle();
         this.product = product;
         this.user = user;
-        this.zzimStatus = zzimStatus;
 
     }
 
