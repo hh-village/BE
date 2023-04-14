@@ -2,11 +2,10 @@ package com.sparta.village.domain.product.service;
 
 import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.image.service.ImageStorageService;
-import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
-import com.sparta.village.domain.product.dto.ProductRequestDto;
-import com.sparta.village.domain.product.dto.ProductResponseDto;
+import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
@@ -115,6 +114,18 @@ public class ProductService {
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
+        User user = userDetails == null ? null : userDetails.getUser();
+        List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
+        List<MainProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
+                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), true, true)).toList();
+        List<MainProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
+                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), true, true)).toList();
+        int zzimCount = 0;
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimCount, randomProduct));
     }
 
 //    public ResponseEntity<ResponseMessage> getProducts(User user) {

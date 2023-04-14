@@ -36,7 +36,6 @@ public class Product extends Timestamped{
     @ManyToOne// This specifies the foreign key column name in the database
     private User user;
 
-
     @Column
     private String primeImageUrl;
 
