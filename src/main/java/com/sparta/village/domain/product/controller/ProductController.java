@@ -47,5 +47,10 @@ public class ProductController {
     public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
       return productService.deleteProductById(id,userDetails.getUser());
     }
+
+    @GetMapping("/main")
+    public ResponseEntity<ResponseMessage> getMainPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return productService.getMainPage(userDetails);
+    }
 }
 
