@@ -1,11 +1,10 @@
 package com.sparta.village.domain.product.service;
 
 import com.sparta.village.domain.image.service.ImageStorageService;
-import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
-import com.sparta.village.domain.product.dto.ProductRequestDto;
-import com.sparta.village.domain.product.dto.ProductResponseDto;
+import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
@@ -118,6 +117,18 @@ public class ProductService {
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
+    @Transactional
+    public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
+        User user = userDetails == null ? null : userDetails.getUser();
+        List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
+        List<MainProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
+                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), getMostProduct(p), getZzim(user, p))).toList();
+        List<MainProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
+                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), getMostProduct(p), getZzim(user, p))).toList();
+        int zzimCount = user != null ? zzimRepository.countByUser(user) : 0;
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimCount, randomProduct));
+    }
+
 //    public ResponseEntity<ResponseMessage> getProducts(User user) {
 //        // Retrieve the product list using the user ID.
 //        List<Product> productList = productRepository.findByUserId(user.getId());
@@ -154,7 +165,6 @@ public class ProductService {
     private boolean getMostProduct(Product product) {
         List<Object[]> reservationCounts = reservationRepository.countReservationWithProduct();
         reservationCounts.sort((o1, o2) -> Long.compare((Long) o2[1], (Long) o1[1]));
-        System.out.println(reservationCounts);
 
         return reservationCounts.stream()
                 .filter(countInfo -> (Long) countInfo[1] >= (Long) reservationCounts.get((int) Math.ceil(reservationCounts.size() * 0.1) - 1)[1])

@@ -15,4 +15,6 @@ public interface ZzimRepository extends JpaRepository<Zzim, Long> {
 
     List<Zzim> findByUser(User user);
 
+    int countByUser(User user);
+
 }
