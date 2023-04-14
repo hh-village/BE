@@ -74,9 +74,6 @@ public class UserService {
         long count = userLevelDtoList.size();
         long totalDate = 0L;
         for (UserLevelDto userLevelDto : userLevelDtoList) {
-            System.out.println(totalDate);
-            System.out.println(userLevelDto.getStartDate().toString());
-            System.out.println(userLevelDto.getEndDate().toString());
             totalDate += Duration.between(userLevelDto.getStartDate().atStartOfDay(), userLevelDto.getEndDate().atStartOfDay()).toDays();
         }
         String profile = (totalDate > 81 && count > 8) ? "profile5" :
