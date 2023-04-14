@@ -1,6 +1,5 @@
 package com.sparta.village.domain.product.service;
 
-import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
@@ -11,7 +10,6 @@ import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
-import com.sparta.village.domain.user.service.KakaoUserService;
 import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.global.exception.CustomException;
@@ -23,15 +21,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final ZzimRepository zzimRepository;
-    private final ImageRepository imageRepository;
-
     private final ReservationRepository reservationRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
@@ -159,11 +154,10 @@ public class ProductService {
     private boolean getMostProduct(Product product) {
         List<Object[]> reservationCounts = reservationRepository.countReservationWithProduct();
         reservationCounts.sort((o1, o2) -> Long.compare((Long) o2[1], (Long) o1[1]));
-
-        Long top10PercentReservationCount = (Long) reservationCounts.get((int) Math.ceil(reservationCounts.size() * 0.1) - 1)[1];
+        System.out.println(reservationCounts);
 
         return reservationCounts.stream()
-                .filter(countInfo -> (Long) countInfo[1] >= top10PercentReservationCount)
+                .filter(countInfo -> (Long) countInfo[1] >= (Long) reservationCounts.get((int) Math.ceil(reservationCounts.size() * 0.1) - 1)[1])
                 .map(countInfo -> productRepository.findById((Long) countInfo[0]))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
