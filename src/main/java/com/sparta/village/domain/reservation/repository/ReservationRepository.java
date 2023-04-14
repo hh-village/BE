@@ -41,6 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByUser(User user);
 
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.product = :product AND r.status = 'RETURNED'")
+    Long countReturnedReservationsForProduct(@Param("product") Product product);
+
 
 }
 

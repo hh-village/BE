@@ -23,7 +23,6 @@ public class UserController {
 
     private final UserService userService;
 
-    private final ImageRepository imageRepository;
 
     @GetMapping("/users/login")
     public ResponseEntity<ResponseMessage> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
@@ -46,7 +45,7 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<ResponseMessage> getUsersItems(@AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam(required = false) String key) {
-        return userService.getUserItemList(userDetails.getUser(), key, imageRepository);
+        return userService.getUserItemList(userDetails.getUser(), key);
     }
 
     @PostMapping("/test/login/{nickname}")

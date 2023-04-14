@@ -10,6 +10,7 @@ import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
+import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.KakaoUserService;
@@ -24,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ZzimRepository zzimRepository;
     private final ImageRepository imageRepository;
+
+    private final ReservationRepository reservationRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final KakaoUserService kakaoUserService;
@@ -96,7 +100,7 @@ public class ProductService {
         }
 
         List<ProductResponseDto> responseList = productList.stream()
-                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product)))
+                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product)))
                 .toList();
 
         return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
@@ -150,4 +154,22 @@ public class ProductService {
 //
 //        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
 //    }
+
+    public boolean getMostProduct(Product product) {
+        List<Long> returnedReservationCounts = productRepository.findAll().stream()
+                .map(p -> getProductReturnedReservationCount(p))
+                .toList();
+
+        int topPercentageIndex = (int) (returnedReservationCounts.size() * 0.1) - 1;
+        System.out.println("아이디" + product.getId() + "기준점" + topPercentageIndex);
+        System.out.println("=====================================================");
+        System.out.println("아이디" + product.getId() + "제품점수" + getProductReturnedReservationCount(product));
+
+
+        return topPercentageIndex >= 0 && getProductReturnedReservationCount(product) >= topPercentageIndex;
+    }
+
+    public long getProductReturnedReservationCount(Product product) {
+        return reservationRepository.countReturnedReservationsForProduct(product);
+    }
 }

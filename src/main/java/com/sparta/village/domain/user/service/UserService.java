@@ -27,6 +27,7 @@ public class UserService {
     private final ProductRepository productRepository;
     private final ReservationRepository reservationRepository;
     private final ZzimRepository zzimRepository;
+    private final ImageRepository imageRepository;
 
     @Transactional
     // 사용자의 닉네임을 업데이트하고 업데이트된 사용자를 저장하는 메소드
@@ -45,11 +46,11 @@ public class UserService {
         return ResponseMessage.SuccessResponse("변경 완료되었습니다.",new UserResponseDto(user.getProfile(), user.getNickname()));
     }
 
-    public ResponseEntity<ResponseMessage> getUserItemList(User user, String key, ImageRepository imageRepository) {
-        return ResponseMessage.SuccessResponse("조회가 완료되었습니다.", new MyPageResponseDto(user, setUserItemList(user, key, imageRepository)));
+    public ResponseEntity<ResponseMessage> getUserItemList(User user, String key) {
+        return ResponseMessage.SuccessResponse("조회가 완료되었습니다.", new MyPageResponseDto(user, setUserItemList(user, key)));
     }
 
-    private List<?> setUserItemList(User user, String key, ImageRepository imageRepository) {
+    private List<?> setUserItemList(User user, String key) {
         List<?> productList = "products".equals(key) ? productRepository.findAllByUser(user).stream()
                                         .map(product -> new MyProductsResponseDto(user, product, imageRepository))
                                         .toList() :

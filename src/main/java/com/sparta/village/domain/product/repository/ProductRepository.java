@@ -5,6 +5,8 @@ import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
 
 
@@ -19,5 +21,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByTitleContainingAndLocationContaining(String title, String location);
     List<Product> findByTitleContaining (String title);
     List<Product> findByLocationContaining(String location);
-
 }
