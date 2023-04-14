@@ -114,13 +114,6 @@ public class KakaoUserService {
         // 등록 또는 업데이트된 사용자의 닉네임을 반환합니다.
         return nickname;
     }
-    public User getUserByUserId(String userId) {
-        return userRepository.findById(Long.parseLong(userId)).orElse(null);
-    }
-
-    public User getUserByNickname(String nickname) {
-        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
 
     public ResponseEntity<ResponseMessage> testLogin(String nickname, HttpServletResponse response) {
         User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

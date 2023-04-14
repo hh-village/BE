@@ -2,6 +2,7 @@ package com.sparta.village.domain.user.service;
 
 import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.reservation.dto.UserLevelDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.user.dto.*;
 import com.sparta.village.domain.user.entity.User;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,8 +48,10 @@ public class UserService {
         return ResponseMessage.SuccessResponse("변경 완료되었습니다.",new UserResponseDto(user.getProfile(), user.getNickname()));
     }
 
+
     public ResponseEntity<ResponseMessage> getUserItemList(User user, String key) {
-        return ResponseMessage.SuccessResponse("조회가 완료되었습니다.", new MyPageResponseDto(user, setUserItemList(user, key)));
+        return ResponseMessage.SuccessResponse("조회가 완료되었습니다.", new MyPageResponseDto(user, getUserProfile(user), setUserItemList(user, key)));
+
     }
 
     private List<?> setUserItemList(User user, String key) {
@@ -67,6 +71,34 @@ public class UserService {
         return productList;
     }
 
+
+    public String getUserProfile(User user) {
+        List<UserLevelDto> userLevelDtoList = reservationRepository.findUserLevelData(user);
+        long count = userLevelDtoList.size();
+        long totalDate = 0L;
+        for (UserLevelDto userLevelDto : userLevelDtoList) {
+            System.out.println(totalDate);
+            System.out.println(userLevelDto.getStartDate().toString());
+            System.out.println(userLevelDto.getEndDate().toString());
+            totalDate += Duration.between(userLevelDto.getStartDate().atStartOfDay(), userLevelDto.getEndDate().atStartOfDay()).toDays();
+        }
+        String profile = (totalDate > 81 && count > 8) ? "profile5" :
+                (totalDate > 27 && count > 6) ? "profile4" :
+                (totalDate > 9 && count > 4) ? "profile3" :
+                (totalDate > 3 && count > 2) ? "profile2" :
+                "profile1";
+        user.setProfile(profile);
+        userRepository.save(user);
+        return profile;
+    }
+
+    public User getUserByUserId(String userId) {
+        return userRepository.findById(Long.parseLong(userId)).orElse(null);
+    }
+
+    public User getUserByNickname(String nickname) {
+        return userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
 
 }
 
