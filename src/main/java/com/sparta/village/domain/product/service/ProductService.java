@@ -80,12 +80,14 @@ public class ProductService {
         String ownerProfile = userService.getUserProfile(owner);
         int zzimCount = zzimRepository.countByProductId(id);
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
+                product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
 
-    public ResponseEntity<ResponseMessage> searchProductList(String qr, String location) {
+    public ResponseEntity<ResponseMessage> searchProductList(UserDetailsImpl userDetails, String qr, String location) {
+        User user = userDetails == null ? null : userDetails.getUser();
         List<Product> productList;
 
         if (qr == null && location == null) {
@@ -99,7 +101,7 @@ public class ProductService {
         }
 
         List<ProductResponseDto> responseList = productList.stream()
-                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product)))
+                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product), getZzim(user, product)))
                 .toList();
 
         return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
@@ -154,21 +156,21 @@ public class ProductService {
 //        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
 //    }
 
-    public boolean getMostProduct(Product product) {
-        List<Long> returnedReservationCounts = productRepository.findAll().stream()
-                .map(p -> getProductReturnedReservationCount(p))
-                .toList();
+    private boolean getMostProduct(Product product) {
+        List<Object[]> reservationCounts = reservationRepository.countReservationWithProduct();
+        reservationCounts.sort((o1, o2) -> Long.compare((Long) o2[1], (Long) o1[1]));
 
-        int topPercentageIndex = (int) (returnedReservationCounts.size() * 0.1) - 1;
-        System.out.println("아이디" + product.getId() + "기준점" + topPercentageIndex);
-        System.out.println("=====================================================");
-        System.out.println("아이디" + product.getId() + "제품점수" + getProductReturnedReservationCount(product));
+        Long top10PercentReservationCount = (Long) reservationCounts.get((int) Math.ceil(reservationCounts.size() * 0.1) - 1)[1];
 
-
-        return topPercentageIndex >= 0 && getProductReturnedReservationCount(product) >= topPercentageIndex;
+        return reservationCounts.stream()
+                .filter(countInfo -> (Long) countInfo[1] >= top10PercentReservationCount)
+                .map(countInfo -> productRepository.findById((Long) countInfo[0]))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .anyMatch(topProduct -> topProduct.getId().equals(product.getId()));
     }
 
-    public long getProductReturnedReservationCount(Product product) {
-        return reservationRepository.countReturnedReservationsForProduct(product);
+    private boolean getZzim(User user, Product product) {
+        return user != null && zzimRepository.findByProductAndUser(findProductById(product.getId()), user).isPresent();
     }
 }

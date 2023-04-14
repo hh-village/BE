@@ -41,6 +41,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByStatus(String status);
 
+    @Query("SELECT *")
+
 
     List<Reservation> findByProductId(Long productId);
 
@@ -48,8 +50,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT COUNT(r) FROM Reservation r WHERE r.product = :product AND r.status = 'RETURNED'")
     Long countReturnedReservationsForProduct(@Param("product") Product product);
-
-
 }
 
 
