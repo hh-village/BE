@@ -45,4 +45,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByProductId(Long productId);
 
     List<Reservation> findByUser(User user);
+
+    @Modifying
+    @Query("DELETE FROM Reservation r WHERE r.product.id = :productId")
+    void deleteByProductId(@Param("productId") Long id);
 }

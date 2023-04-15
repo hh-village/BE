@@ -78,4 +78,5 @@ public class ChatRoomService {
         }
         return new ChatMessageResponseDto(messageList, roomList);
     }
+
 }

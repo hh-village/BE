@@ -16,21 +16,14 @@ public class Zzim {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String productTitle;
     @ManyToOne
     private Product product;
     @ManyToOne
     private User user;
 
     public Zzim(User user, Product product, boolean zzimStatus) {
-        this.productTitle = product.getTitle();
         this.product = product;
         this.user = user;
 
-    }
-
-    public Product getProduct() {
-        return product;
     }
 }
