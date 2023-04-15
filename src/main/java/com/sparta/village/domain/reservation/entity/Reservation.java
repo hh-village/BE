@@ -22,6 +22,9 @@ public class Reservation extends Timestamped {
     private Long id;
 
     @Column(nullable = false)
+    private String status; //waiting, accepted, rejected, returned
+
+    @Column(nullable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDate startDate;
 
@@ -35,10 +38,6 @@ public class Reservation extends Timestamped {
     @ManyToOne
     private Product product;
 
-    //waiting, accepted, rejected, returned
-    @Column(nullable = false)
-    private String status;
-
     public Reservation(Product product, User user, ReservationRequestDto requestDto) {
         this.product = product;
         this.user = user;
@@ -47,7 +46,4 @@ public class Reservation extends Timestamped {
         this.status = "waiting";
     }
 
-    public Product getProduct() {
-        return product;
-    }
 }

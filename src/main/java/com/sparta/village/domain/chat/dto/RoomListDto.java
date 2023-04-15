@@ -1,6 +1,5 @@
 package com.sparta.village.domain.chat.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

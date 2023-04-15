@@ -16,7 +16,6 @@ public class MapController {
         return naverMapService.geocode(address);
     }
 
-    @PreAuthorize("hasRole('Role_USER')")
     @GetMapping("/gc")
     public String reverseGeocode(@RequestParam String coords) {
         return naverMapService.reverseGeocode(coords);
