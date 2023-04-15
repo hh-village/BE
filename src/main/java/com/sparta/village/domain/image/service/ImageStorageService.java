@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +58,7 @@ public class ImageStorageService {
     }
 
     public void deleteFile(String fileUrl) {
-        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+        String fileName = URLDecoder.decode(fileUrl.substring(fileUrl.lastIndexOf("/") + 1));
         amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
     }
 
