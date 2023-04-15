@@ -3,6 +3,7 @@ package com.sparta.village.domain.reservation.repository;
 
 import com.sparta.village.domain.product.entity.Product;
 
+import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.dto.UserLevelDto;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.user.entity.User;
@@ -10,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +40,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatus(String status);
 
     @Query("SELECT p.id, COUNT(*) FROM Reservation r LEFT JOIN Product p ON r.product.id = p.id WHERE r.status = 'returned' group by r.product")
-    List<Object[]> countReservationWithProduct();
+    List<ReservationCountResponseDto> countReservationWithProduct();
 
     List<Reservation> findByProductId(Long productId);
 

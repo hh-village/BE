@@ -1,6 +1,7 @@
 package com.sparta.village.domain.user.service;
 
 import com.sparta.village.domain.image.repository.ImageRepository;
+import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.UserLevelDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
@@ -29,6 +30,8 @@ public class UserService {
     private final ReservationRepository reservationRepository;
     private final ZzimRepository zzimRepository;
     private final ImageRepository imageRepository;
+
+    private final ImageStorageService imageStorageService;
 
     @Transactional
     // 사용자의 닉네임을 업데이트하고 업데이트된 사용자를 저장하는 메소드

@@ -9,11 +9,13 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
+import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.domain.zzim.repository.ZzimRepository;
+import com.sparta.village.domain.zzim.service.ZzimService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -28,24 +30,22 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    private final ZzimRepository zzimRepository;
-    private final ReservationRepository reservationRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final UserService userService;
+    private final ZzimService zzimService;
 
     @Transactional
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
         User user = userDetails == null ? null : userDetails.getUser();
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
         List<ProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), getZzim(user, p))).toList();
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
         List<ProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), getZzim(user, p))).toList();
-        int zzimCount = user != null ? zzimRepository.countByUser(user) : 0;
-        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimCount, randomProduct));
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimService.getZzimCount(user), randomProduct));
     }
 
     @Transactional
@@ -69,8 +69,8 @@ public class ProductService {
 
         chatMessageRepository.deleteMessagesByProductId(id);
         chatRoomRepository.deleteByProductId(id);
-        reservationRepository.deleteByProductId(id);
-        zzimRepository.deleteByProductId(id);
+        reservationService.deleteByProductId(id);
+        zzimService.deleteByProductId(id);
         imageStorageService.deleteImagesByProductId(id);
         productRepository.deleteById(id);
 
@@ -78,7 +78,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> updateProduct(Long id ,User user, ProductRequestDto productRequestDto) {
+    public ResponseEntity<ResponseMessage> updateProduct(Long id, User user, ProductRequestDto productRequestDto) {
 
         Product product = findProductById(id);
         if (!product.getUser().getId().equals(user.getId())) {
@@ -98,10 +98,9 @@ public class ProductService {
         Product product = findProductById(id);
         User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
-        boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(product, user).isPresent();
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
-                zzimRepository.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimService.getZzimStatus(user, product),
+                zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
                 owner.getNickname(), userService.getUserProfile(owner), reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
@@ -122,7 +121,7 @@ public class ProductService {
         }
 
         List<ProductResponseDto> responseList = productList.stream()
-                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product), getZzim(user, product)))
+                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product), zzimService.getZzimStatus(user, product)))
                 .toList();
 
         return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
@@ -143,18 +142,18 @@ public class ProductService {
     }
 
     private boolean getMostProduct(Product product) {
-        List<Object[]> reservationCounts = reservationRepository.countReservationWithProduct();
-        reservationCounts.sort((o1, o2) -> Long.compare((Long) o2[1], (Long) o1[1]));
+        List<ReservationCountResponseDto> reservationCounts = reservationService.reservationCount();
+        reservationCounts.sort(Comparator.comparingLong(ReservationCountResponseDto::getReservationCount).reversed());
 
+        int index = (int) Math.ceil(reservationCounts.size() * 0.1) - 1;
+        if (index < 0) return false;
+
+        int topCount = (int) (long) reservationCounts.get(index).getReservationCount();
         return reservationCounts.stream()
-                .filter(countInfo -> (Long) countInfo[1] >= (Long) reservationCounts.get((int) Math.ceil(reservationCounts.size() * 0.1) - 1)[1])
-                .map(countInfo -> productRepository.findById((Long) countInfo[0]))
+                .filter(countInfo -> countInfo.getReservationCount() >= topCount)
+                .map(countInfo -> productRepository.findById(countInfo.getProductId()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .anyMatch(topProduct -> topProduct.getId().equals(product.getId()));
-    }
-
-    private boolean getZzim(User user, Product product) {
-        return user != null && zzimRepository.findByProductAndUser(findProductById(product.getId()), user).isPresent();
     }
 }

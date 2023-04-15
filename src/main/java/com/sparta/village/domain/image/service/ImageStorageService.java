@@ -73,4 +73,8 @@ public class ImageStorageService {
     public List<String> getImageUrlListByProductId(Long id) {
         return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
     }
+
+//    public List<String> getFirstImageUrlByProductId(Long id) {
+//        return imageRepository.findFirstByProductId(id).stream().map(Image::getImageUrl).t;
+//    }
 }
