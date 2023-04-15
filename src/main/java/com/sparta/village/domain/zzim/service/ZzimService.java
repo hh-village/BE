@@ -29,7 +29,7 @@ public class ZzimService {
         Optional<Zzim> getZzim = zzimRepository.findByProductAndUser(product, user);
 
         if(getZzim.isEmpty()) {
-            zzimRepository.save(new Zzim(user, product, true));
+            zzimRepository.save(new Zzim(user, product));
             product.plusZzimCount();
             productRepository.save(product);
             return ResponseMessage.SuccessResponse("찜하기 성공", true);

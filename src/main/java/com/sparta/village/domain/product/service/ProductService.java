@@ -66,7 +66,6 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
 
-
         chatMessageRepository.deleteMessagesByProductId(id);
         chatRoomRepository.deleteByProductId(id);
         reservationRepository.deleteByProductId(id);
