@@ -1,6 +1,5 @@
 package com.sparta.village.domain.chat.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.village.domain.chat.dto.ChatMessageDto;
 import com.sparta.village.domain.chat.service.ChatRoomService;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -27,8 +26,7 @@ public class ChatRoomController {
     }
 
     @MessageMapping(value = "/chat/message")
-    public void message(ChatMessageDto message) throws JsonProcessingException {
-        System.out.println("컨트롤러 들어옴");
+    public void message(ChatMessageDto message) {
         chatRoomService.saveMessage(message);
     }
 }

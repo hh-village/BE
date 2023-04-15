@@ -43,7 +43,7 @@ public class NaverMapService {
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
         //네이버 지도 API 호출 URL 생성
-        String url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query="+address;
+        String url = "https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=" + address;
         //Rest Template를 사용해 네이버 지도 API에 요청을 보내고 응답을 받음
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         //응답을 반환

@@ -23,9 +23,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ImageStorageService {
-    private final AmazonS3 amazonS3;
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
+    private final AmazonS3 amazonS3;
     private final ImageRepository imageRepository;
 
     @Transactional
@@ -52,8 +52,7 @@ public class ImageStorageService {
 
     public void saveImageList(Product product, List<String> imageUrlList) {
         for (String imageUrl : imageUrlList) {
-            Image image = new Image(product, imageUrl);
-            imageRepository.saveAndFlush(image);
+            imageRepository.saveAndFlush(new Image(product, imageUrl));
         }
     }
 
@@ -65,13 +64,12 @@ public class ImageStorageService {
     public void deleteImagesByProductId(Long productId) {
         List<Image> imageList = imageRepository.findByProductId(productId);
         for (Image image : imageList) {
-            Long imageId = image.getId();
             deleteFile(image.getImageUrl());
-            imageRepository.deleteById(imageId);
+            imageRepository.deleteById(image.getId());
         }
     }
 
-    public List<String> getImageUrlsByProductId(Long id) {
+    public List<String> getImageUrlListByProductId(Long id) {
         return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
     }
 }

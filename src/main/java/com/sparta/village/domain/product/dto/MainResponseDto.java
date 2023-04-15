@@ -12,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class MainResponseDto {
     private List<AcceptReservationResponseDto> dealList;
-    private List<MainProductResponseDto> productList;
+    private List<ProductResponseDto> productList;
     private int zzimCount;
-    private List<MainProductResponseDto> randomProduct;
+    private List<ProductResponseDto> randomProduct;
 
 }

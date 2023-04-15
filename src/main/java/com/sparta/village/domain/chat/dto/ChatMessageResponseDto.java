@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class ChatMessageResponseDto {
     private List<MessageListDto> messageList;
-
     private List<RoomListDto> roomList;
 
 }

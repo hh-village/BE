@@ -32,21 +32,18 @@ public class Product extends Timestamped{
     private String location;
 
     @Column(nullable = false)
-    private int zzimCount = 0;
+    private int zzimCount;
 
-    @ManyToOne// This specifies the foreign key column name in the database
+    @ManyToOne
     private User user;
 
     public void plusZzimCount() {
-        this.zzimCount ++;
+        this.zzimCount++;
     }
 
     public void minusZzimCount() {
-        this.zzimCount --;
+        this.zzimCount--;
     }
-
-    @Column
-    private String primeImageUrl;
 
     public Product(User user, ProductRequestDto productRequestDto) {
         this.title = productRequestDto.getTitle();
@@ -54,8 +51,6 @@ public class Product extends Timestamped{
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
         this.user = user;
-        this.zzimCount = getZzimCount();
-        // Add this line
+        this.zzimCount = 0;
     }
-
 }

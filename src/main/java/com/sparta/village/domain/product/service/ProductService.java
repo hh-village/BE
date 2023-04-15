@@ -5,7 +5,6 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
@@ -32,50 +31,52 @@ public class ProductService {
     private final UserService userService;
 
     @Transactional
+    public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
+        User user = userDetails == null ? null : userDetails.getUser();
+        List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
+        List<ProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), getZzim(user, p))).toList();
+        List<ProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), getZzim(user, p))).toList();
+        int zzimCount = user != null ? zzimRepository.countByUser(user) : 0;
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimCount, randomProduct));
+    }
+
+    @Transactional
     public ResponseEntity<ResponseMessage> registProduct(User user, ProductRequestDto productRequestDto) {
-        // 이미지를 S3에 업로드하고 파일 URL 목록을 가져옴
-        List<String> fileUrlList = imageStorageService.storeFiles(productRequestDto.getImages());
-        // 새로운 Product 객체를 생성하고 저장합니다.
         Product newProduct = new Product(user, productRequestDto);
         productRepository.saveAndFlush(newProduct);
-        // 이미지 URL을 이용하여 이미지 엔티티를 생성하고 저장합니다.
-        imageStorageService.saveImageList(newProduct, fileUrlList);
+        imageStorageService.saveImageList(newProduct, imageStorageService.storeFiles(productRequestDto.getImages()));
 
         return ResponseMessage.SuccessResponse("성공적으로 제품 등록이 되었습니다.", "");
     }
 
     @Transactional
     public ResponseEntity<ResponseMessage> deleteProductById(Long id, User user) {
-        // 데이터베이스에서 지정된 ID의 제품을 검색
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        // 사용자가 제품을 삭제할 권한이 있는지 확인
-        if (!(Objects.equals(product.getUser().getId(), user.getId()))) {
-            throw new CustomException(ErrorCode.DELETE_NOT_FOUND);
+
+        if (!product.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
-        // 데이터베이스에서 제품과 연결된 이미지를 검색
+
         imageStorageService.deleteImagesByProductId(id);
-        // 데이터베이스에서 제품을 삭제
         productRepository.deleteById(id);
-        // 성공적인 응답을 반환
+
         return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.", "");
     }
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
         User user = userDetails == null ? null : userDetails.getUser();
-        boolean checkOwner = user != null && checkProductOwner(id, user.getId());
-        boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(findProductById(id), user).isPresent();
         Product product = findProductById(id);
-        List<ReservationResponseDto> reservationList = reservationService.getReservationList(user, id);
-        List<String> imageList = imageStorageService.getImageUrlsByProductId(id);
         User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
-        String ownerNickname = owner.getNickname();
-        String ownerProfile = userService.getUserProfile(owner);
-        int zzimCount = zzimRepository.countByProductId(id);
+        boolean checkOwner = user != null && checkProductOwner(id, user.getId());
+        boolean zzimStatus = user != null && zzimRepository.findByProductAndUser(product, user).isPresent();
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
-                product, checkOwner, zzimStatus, zzimCount, imageList, ownerNickname, ownerProfile, reservationList);
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
+                zzimRepository.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
+                owner.getNickname(), userService.getUserProfile(owner), reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
@@ -101,66 +102,19 @@ public class ProductService {
         return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
     }
 
+    @Transactional(readOnly = true)
+    public Product findProductById(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
     private String searchPrimeImageUrl(Product product) {
-        List<String> imageUrlList = imageStorageService.getImageUrlsByProductId(product.getId());
-        return imageUrlList.get(0);
+        return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
     }
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
     private boolean checkProductOwner(Long productId, Long userId) {
         return productRepository.existsByIdAndUserId(productId, userId);
     }
-
-    @Transactional(readOnly = true)
-    public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(
-                () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
-
-    @Transactional
-    public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
-        User user = userDetails == null ? null : userDetails.getUser();
-        List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
-        List<MainProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
-                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), getMostProduct(p), getZzim(user, p))).toList();
-        List<MainProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
-                .map(p -> new MainProductResponseDto(p.getId(), searchPrimeImageUrl(p), p.getTitle(), p.getLocation(), p.getPrice(), getMostProduct(p), getZzim(user, p))).toList();
-        int zzimCount = user != null ? zzimRepository.countByUser(user) : 0;
-        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimCount, randomProduct));
-    }
-
-//    public ResponseEntity<ResponseMessage> getProducts(User user) {
-//        // Retrieve the product list using the user ID.
-//        List<Product> productList = productRepository.findByUserId(user.getId());
-//
-//        // Create an ArrayList to store the product ID list
-//        List<Long> productIdList = new ArrayList<>();
-//        // Add the product ID to the ArrayList while traversing the product list
-//        for (Product product : productList) {
-//            productIdList.add(product.getId());
-//        }
-//        // Retrieve product image using imageRepository instance
-//        List<Image> images = imageRepository.findByProductIdIn(productIdList);
-//        // Create an ArrayList to store the ProductResponseDto list
-//        List< MyProductResponseDto> productResponseDtoList = new ArrayList<>();
-//        // Create a ProductResponseDto for each product while iterating through the product list and add it to the list
-//        for (Product product : productList) {
-//            Image matchedImage = null;
-//            // Find images that match the product.
-//            for (Image image : images) {
-//                if (image.getId() != null && image.getId().equals(product.getId())) {
-//                    matchedImage = image;
-//                    break;
-//                }
-//            }
-//            // Create a ProductResponseDto with an image that matches the product
-//            MyProductResponseDto myProductResponseDto = new MyProductResponseDto(product,matchedImage);
-//            // Add the generated ProductResponseDto to the list
-//            productResponseDtoList.add(myProductResponseDto);
-//        }
-//
-//        return ResponseMessage.SuccessResponse("내가 등록한 제품 조회가 되었습니다", productResponseDtoList);
-//    }
 
     private boolean getMostProduct(Product product) {
         List<Object[]> reservationCounts = reservationRepository.countReservationWithProduct();

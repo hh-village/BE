@@ -1,6 +1,5 @@
 package com.sparta.village.domain.chat.service;
 
-import com.amazonaws.services.alexaforbusiness.model.Room;
 import com.sparta.village.domain.chat.dto.ChatMessageDto;
 import com.sparta.village.domain.chat.dto.ChatMessageResponseDto;
 import com.sparta.village.domain.chat.dto.MessageListDto;
@@ -12,18 +11,15 @@ import com.sparta.village.domain.chat.repository.ChatRoomRepository;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.user.entity.User;
-import com.sparta.village.domain.user.service.KakaoUserService;
 import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
-import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +67,6 @@ public class ChatRoomService {
 
     private ChatMessageResponseDto findMessageHistoryByRoomId(String roomId, User user) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-//        String target = getConversationPartner(room, user).getNickname();
         List<MessageListDto> messageList = chatMessageRepository.findAllByRoom(room).stream()
                 .map(m -> new MessageListDto(m.getSender().getId(), m.getContent(), m.getRoom().getRoomId())).toList();
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllChatRoomByUser(user);

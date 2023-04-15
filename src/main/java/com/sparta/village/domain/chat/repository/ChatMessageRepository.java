@@ -1,6 +1,5 @@
 package com.sparta.village.domain.chat.repository;
 
-import com.amazonaws.services.alexaforbusiness.model.Room;
 import com.sparta.village.domain.chat.entity.ChatMessage;
 import com.sparta.village.domain.chat.entity.ChatRoom;
 import com.sparta.village.domain.user.entity.User;
