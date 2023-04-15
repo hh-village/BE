@@ -53,4 +53,14 @@ public class Product extends Timestamped{
         this.user = user;
         this.zzimCount = 0;
     }
+
+    public void update(ProductRequestDto productRequestDto) {
+        this.title = productRequestDto.getTitle();
+        this.description = productRequestDto.getDescription();
+        this.price = productRequestDto.getPrice();
+        this.location = productRequestDto.getLocation();
+        this.user = user;
+        this.zzimCount = 0;
+
+    }
 }

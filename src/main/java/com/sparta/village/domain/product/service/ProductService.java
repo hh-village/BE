@@ -52,7 +52,7 @@ public class ProductService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseMessage> deleteProductById(Long id, User user) {
+    public ResponseEntity<ResponseMessage> deleteProduct(Long id, User user) {
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -64,6 +64,22 @@ public class ProductService {
         productRepository.deleteById(id);
 
         return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.", "");
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseMessage> updateProduct(Long id ,User user, ProductRequestDto productRequestDto) {
+
+        Product product = findProductById(id);
+        if (!product.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.NOT_AUTHOR);
+        }
+        imageStorageService.storeFiles(productRequestDto.getImages());
+        imageStorageService.saveImageList(product, imageStorageService.storeFiles(productRequestDto.getImages()));
+
+        imageStorageService.deleteImagesByProductId(id);
+
+        product.update(productRequestDto);
+        return ResponseMessage.SuccessResponse("상품 수정이 되었습니다.", "");
     }
 
     @Transactional
