@@ -52,4 +52,14 @@ public class Product extends Timestamped{
         this.location = productRequestDto.getLocation();
         this.user = user;
     }
+
+    public void update(ProductRequestDto productRequestDto) {
+        this.title = productRequestDto.getTitle();
+        this.description = productRequestDto.getDescription();
+        this.price = productRequestDto.getPrice();
+        this.location = productRequestDto.getLocation();
+        this.user = user;
+        this.zzimCount = 0;
+
+    }
 }
