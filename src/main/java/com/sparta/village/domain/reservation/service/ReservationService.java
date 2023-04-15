@@ -76,6 +76,14 @@ public class ReservationService {
         return reservationRepository.findByStatus("accepted").stream()
                 .map(r -> new AcceptReservationResponseDto(r.getId(), r.getUser().getNickname(), r.getProduct().getUser().getNickname())).toList();
     }
+
+    public List<ReservationCountResponseDto> reservationCount() {
+        return reservationRepository.countReservationWithProduct();
+    }
+
+    public void deleteByProductId(Long id) {
+        reservationRepository.deleteByProductId(id);
+    }
 }
 
 

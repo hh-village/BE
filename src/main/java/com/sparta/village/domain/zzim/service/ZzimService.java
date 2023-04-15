@@ -26,18 +26,35 @@ public class ZzimService {
                 () -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)
         );
 
-        Optional<Zzim> getZzim = zzimRepository.findByProductAndUser(product, user);
-
-        if(getZzim.isEmpty()) {
+        if(!getZzim(product, user)) {
             zzimRepository.save(new Zzim(user, product, true));
             product.plusZzimCount();
             productRepository.save(product);
             return ResponseMessage.SuccessResponse("찜하기 성공", true);
         }else {
-            zzimRepository.delete(getZzim.get());
+            zzimRepository.delete(new Zzim(user, product, false));
             product.minusZzimCount();
             productRepository.save(product);
             return ResponseMessage.SuccessResponse("찜하기 취소", false);
         }
+    }
+    public boolean getZzim (Product product, User user) {
+        return zzimRepository.existsByProductAndUser(product, user);
+    }
+
+    public boolean getZzimStatus(User user, Product product) {
+        return user != null && zzimRepository.existsByProductAndUser(product, user);
+    }
+
+    public int getZzimCount(User user) {
+        return user != null ? zzimRepository.countByUser(user) : 0;
+    }
+
+    public int countByProductId(Long id) {
+        return zzimRepository.countByProductId(id);
+    }
+
+    public void deleteByProductId(Long id) {
+        zzimRepository.deleteByProductId(id);
     }
 }

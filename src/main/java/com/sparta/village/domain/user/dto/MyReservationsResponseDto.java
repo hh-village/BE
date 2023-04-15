@@ -18,12 +18,10 @@ public class MyReservationsResponseDto {
     private final LocalDate endDate;
     private final String status;
 
-    public MyReservationsResponseDto(User user, Reservation reservation, ImageRepository imageRepository) {
+    public MyReservationsResponseDto(User user, Reservation reservation, String imageUrl) {
         this.id = reservation.getId();
         this.title = reservation.getProduct().getTitle();
-        this.image = imageRepository.findFirstByProductId(reservation.getProduct().getId())
-                                       .map(Image::getImageUrl)
-                                       .orElse(null);
+        this.image = imageUrl;
         this.startDate = reservation.getStartDate();
         this.endDate = reservation.getEndDate();
         this.status = reservation.getStatus();
