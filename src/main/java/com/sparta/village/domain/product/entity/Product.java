@@ -32,7 +32,7 @@ public class Product extends Timestamped{
     private String location;
 
     @Column(nullable = false)
-    private int zzimCount = 0;
+    private int zzimCount;
 
     @ManyToOne
     private User user;
@@ -51,6 +51,7 @@ public class Product extends Timestamped{
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
         this.user = user;
+        this.zzimCount = 0;
     }
 
     public void update(ProductRequestDto productRequestDto) {
@@ -58,8 +59,5 @@ public class Product extends Timestamped{
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
-        this.user = user;
-        this.zzimCount = 0;
-
     }
 }

@@ -1,5 +1,9 @@
 package com.sparta.village.domain.product.service;
 
+import com.sparta.village.domain.chat.entity.ChatRoom;
+import com.sparta.village.domain.chat.repository.ChatMessageRepository;
+import com.sparta.village.domain.chat.repository.ChatRoomRepository;
+import com.sparta.village.domain.chat.service.ChatRoomService;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
@@ -26,6 +30,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ZzimRepository zzimRepository;
     private final ReservationRepository reservationRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final ImageStorageService imageStorageService;
     private final ReservationService reservationService;
     private final UserService userService;
@@ -60,6 +66,11 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
 
+
+        chatMessageRepository.deleteMessagesByProductId(id);
+        chatRoomRepository.deleteByProductId(id);
+        reservationRepository.deleteByProductId(id);
+        zzimRepository.deleteByProductId(id);
         imageStorageService.deleteImagesByProductId(id);
         productRepository.deleteById(id);
 
@@ -73,10 +84,9 @@ public class ProductService {
         if (!product.getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
-        imageStorageService.storeFiles(productRequestDto.getImages());
-        imageStorageService.saveImageList(product, imageStorageService.storeFiles(productRequestDto.getImages()));
 
         imageStorageService.deleteImagesByProductId(id);
+        imageStorageService.saveImageList(product, imageStorageService.storeFiles(productRequestDto.getImages()));
 
         product.update(productRequestDto);
         return ResponseMessage.SuccessResponse("상품 수정이 되었습니다.", "");
