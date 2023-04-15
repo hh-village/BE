@@ -30,12 +30,12 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
-    private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomRepository chatRoomRepository;
-    private final ImageStorageService imageStorageService;
-    private final ReservationService reservationService;
     private final UserService userService;
     private final ZzimService zzimService;
+    private final ChatRoomService chatRoomService;
+    private final ReservationService reservationService;
+    private final ImageStorageService imageStorageService;
+
 
     @Transactional
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
@@ -67,8 +67,8 @@ public class ProductService {
         }
 
 
-        chatMessageRepository.deleteMessagesByProductId(id);
-        chatRoomRepository.deleteByProductId(id);
+        chatRoomService.deleteMessagesByProductId(id);
+        chatRoomService.deleteByProductId(id);
         reservationService.deleteByProductId(id);
         zzimService.deleteByProductId(id);
         imageStorageService.deleteImagesByProductId(id);

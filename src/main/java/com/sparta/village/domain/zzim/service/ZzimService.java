@@ -56,6 +56,5 @@ public class ZzimService {
 
     public void deleteByProductId(Long id) {
         zzimRepository.deleteByProductId(id);
-        System.out.println("여기까지 오나");
     }
 }

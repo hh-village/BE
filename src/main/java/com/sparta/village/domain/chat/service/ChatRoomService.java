@@ -9,6 +9,7 @@ import com.sparta.village.domain.chat.entity.ChatRoom;
 import com.sparta.village.domain.chat.repository.ChatMessageRepository;
 import com.sparta.village.domain.chat.repository.ChatRoomRepository;
 import com.sparta.village.domain.product.entity.Product;
+import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -26,16 +27,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ChatRoomService {
+    private final ProductRepository productRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final SimpMessageSendingOperations template;
     private final UserService userService;
-    private final ProductService productService;
-
     @Transactional
     public ResponseEntity<ResponseMessage> enterRoom(Long productId, String nickname) {
         User user = userService.getUserByNickname(nickname);
-        Product product = productService.findProductById(productId);
+        Product product = productRepository.findById(productId).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         User owner = userService.getUserByUserId(String.valueOf(product.getUser().getId()));
         ChatRoom room = chatRoomRepository.findChatRoomByProductAndUser(product, user).orElse(null);
         if (room == null) {
@@ -77,6 +77,14 @@ public class ChatRoomService {
             roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), userService.getUserProfile(other), target));
         }
         return new ChatMessageResponseDto(messageList, roomList);
+    }
+
+    public void deleteByProductId(Long id) {
+        chatRoomRepository.deleteByProductId(id);
+    }
+
+    public void deleteMessagesByProductId(Long id) {
+        chatMessageRepository.deleteMessagesByProductId(id);
     }
 
 }

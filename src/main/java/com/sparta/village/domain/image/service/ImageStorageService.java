@@ -31,11 +31,11 @@ public class ImageStorageService {
 
     @Transactional
     public List<String> storeFiles(List<MultipartFile> imageList) {
-        if(imageList == null || imageList.isEmpty()) {
+        if (imageList == null || imageList.isEmpty()) {
             throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
         }
         List<String> imageUrlList = new ArrayList<>();
-        for(MultipartFile image : imageList) {
+        for (MultipartFile image : imageList) {
             String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
             try {
                 ObjectMetadata metadata = new ObjectMetadata();
@@ -74,7 +74,9 @@ public class ImageStorageService {
         return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
     }
 
-//    public List<String> getFirstImageUrlByProductId(Long id) {
-//        return imageRepository.findFirstByProductId(id).stream().map(Image::getImageUrl).t;
-//    }
+    public String getFirstImageUrlByProductId(Long id) {
+        return getImageUrlListByProductId(id).stream()
+                .findFirst()
+                .orElse(null);
+    }
 }

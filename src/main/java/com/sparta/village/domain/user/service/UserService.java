@@ -26,11 +26,10 @@ import java.util.Optional;
 // User Service 클래스 선언
 public class UserService {
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
-    private final ReservationRepository reservationRepository;
     private final ZzimRepository zzimRepository;
     private final ImageRepository imageRepository;
-
+    private final ProductRepository productRepository;
+    private final ReservationRepository reservationRepository;
     private final ImageStorageService imageStorageService;
 
     @Transactional
@@ -58,13 +57,13 @@ public class UserService {
 
     private List<?> setUserItemList(User user, String key) {
         List<?> productList = "products".equals(key) ? productRepository.findAllByUser(user).stream()
-                                        .map(product -> new MyProductsResponseDto(user, product, imageRepository))
+                                        .map(product -> new MyProductsResponseDto(user, product, imageStorageService.getFirstImageUrlByProductId(product.getId())))
                                         .toList() :
                                  "rents".equals(key) ? reservationRepository.findByUser(user).stream()
-                                        .map(reservation -> new MyReservationsResponseDto(user, reservation, imageRepository))
+                                        .map(reservation -> new MyReservationsResponseDto(user, reservation, imageStorageService.getFirstImageUrlByProductId(reservation.getProduct().getId())))
                                         .toList() :
                                  "zzims".equals(key) ? zzimRepository.findByUser(user).stream()
-                                        .map(zzim -> new ZzimsResponseDto(user, zzim, imageRepository))
+                                        .map(zzim -> new ZzimsResponseDto(user, zzim, imageStorageService.getFirstImageUrlByProductId(zzim.getProduct().getId())))
                                         .toList() :
                                         null;
         if(productList == null) {
