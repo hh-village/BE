@@ -94,12 +94,13 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
-        User user = userDetails == null ? null : userDetails.getUser();
         Product product = findProductById(id);
         User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
+        User user = userDetails == null ? null : userDetails.getUser();
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
+        boolean zzimStatus = user != null && zzimService.getZzimStatus(user, product);
 
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimService.getZzimStatus(user, product),
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
                 zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
                 owner.getNickname(), userService.getUserProfile(owner), reservationService.getReservationList(user, id));
 
