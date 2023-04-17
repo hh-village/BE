@@ -21,7 +21,7 @@ public class Zzim {
     @ManyToOne
     private User user;
 
-    public Zzim(User user, Product product, boolean zzimStatus) {
+    public Zzim(User user, Product product) {
         this.product = product;
         this.user = user;
 
