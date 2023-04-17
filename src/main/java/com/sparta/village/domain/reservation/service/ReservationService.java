@@ -7,6 +7,7 @@ import com.sparta.village.domain.reservation.dto.*;
 import com.sparta.village.domain.reservation.entity.Reservation;
 import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.user.entity.User;
+import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.Duration;
 import java.util.List;
 
 
@@ -25,7 +27,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ProductRepository productRepository;
-    private final ImageStorageService imageStorageService;
+    private final UserService userService;
 
     @Transactional
     public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, User user) {
@@ -50,10 +52,11 @@ public class ReservationService {
     @Transactional
     public ResponseEntity<ResponseMessage> changeStatus(Long id, StatusRequestDto requestDto, User user) {
         Reservation reservation = findReservationById(id);
-        if (reservationRepository.checkProductOwner(id, user)) {
+        if (!reservationRepository.checkProductOwner(id, user)) {
             throw new CustomException(ErrorCode.NOT_SELLER);
         }
         reservationRepository.updateStatus(reservation.getId(), requestDto.getStatus());
+        checkAndUpdateProfile(user);
         return ResponseMessage.SuccessResponse("상태 변경되었습니다.", "");
     }
 
@@ -69,7 +72,7 @@ public class ReservationService {
     public List<ReservationResponseDto> getReservationList(User user, Long id){
         return reservationRepository.findByProductId(id).stream()
                 .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(),
-                        r.getUser().getNickname(), checkReservationOwner(r, user))).toList();
+                        r.getUser().getNickname(), r.getUser().getProfile(), checkReservationOwner(r, user))).toList();
     }
 
     public List<AcceptReservationResponseDto> getAcceptedReservationList() {
@@ -83,6 +86,21 @@ public class ReservationService {
 
     public void deleteByProductId(Long id) {
         reservationRepository.deleteByProductId(id);
+    }
+
+    private void checkAndUpdateProfile(User user) {
+        List<UserLevelDto> userLevelDtoList = reservationRepository.findUserLevelData(user);
+        long count = userLevelDtoList.size();
+        long totalDate = 0L;
+        for (UserLevelDto userLevelDto : userLevelDtoList) {
+            totalDate += Duration.between(userLevelDto.getStartDate().atStartOfDay(), userLevelDto.getEndDate().atStartOfDay()).toDays();
+        }
+        String profile = (totalDate > 81 && count > 8) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile5.png" :
+                        (totalDate > 27 && count > 6) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile4.png" :
+                        (totalDate > 9 && count > 4) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile3.png" :
+                        (totalDate > 3 && count > 2) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile2.png" :
+                        "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile1.png";
+        userService.updateProfileIfNeeded(user, profile);
     }
 }
 

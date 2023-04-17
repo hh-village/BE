@@ -115,6 +115,7 @@ public class KakaoUserService {
         return nickname;
     }
 
+    @Transactional
     public ResponseEntity<ResponseMessage> testLogin(String nickname, HttpServletResponse response) {
         User user = userRepository.findByNickname(nickname).orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String jwtToken = jwtUtil.createToken(nickname, user.getKakaoId());
