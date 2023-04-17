@@ -27,7 +27,6 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final ZzimRepository zzimRepository;
-    private final ImageRepository imageRepository;
     private final ProductRepository productRepository;
     private final ReservationRepository reservationRepository;
     private final ImageStorageService imageStorageService;
@@ -80,11 +79,11 @@ public class UserService {
         for (UserLevelDto userLevelDto : userLevelDtoList) {
             totalDate += Duration.between(userLevelDto.getStartDate().atStartOfDay(), userLevelDto.getEndDate().atStartOfDay()).toDays();
         }
-        String profile = (totalDate > 81 && count > 8) ? "profile5" :
-                (totalDate > 27 && count > 6) ? "profile4" :
-                (totalDate > 9 && count > 4) ? "profile3" :
-                (totalDate > 3 && count > 2) ? "profile2" :
-                "profile1";
+        String profile = (totalDate > 81 && count > 8) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile5.png" :
+                (totalDate > 27 && count > 6) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile4.png" :
+                (totalDate > 9 && count > 4) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile3.png" :
+                (totalDate > 3 && count > 2) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile2.png" :
+                "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile1.png";
         user.setProfile(profile);
         userRepository.save(user);
         return profile;

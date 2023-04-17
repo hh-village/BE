@@ -25,7 +25,6 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ProductRepository productRepository;
-    private final ImageStorageService imageStorageService;
 
     @Transactional
     public ResponseEntity<ResponseMessage> reserve(Long productId, ReservationRequestDto requestDto, User user) {
@@ -69,7 +68,7 @@ public class ReservationService {
     public List<ReservationResponseDto> getReservationList(User user, Long id){
         return reservationRepository.findByProductId(id).stream()
                 .map(r -> new ReservationResponseDto(r.getId(), r.getStartDate(), r.getEndDate(), r.getStatus(),
-                        r.getUser().getNickname(), checkReservationOwner(r, user))).toList();
+                        r.getUser().getNickname(),r.getUser().getProfile(), checkReservationOwner(r, user))).toList();
     }
 
     public List<AcceptReservationResponseDto> getAcceptedReservationList() {
