@@ -13,11 +13,9 @@ public class ZzimsResponseDto {
     private final String productTitle;
     private final String image;
 
-    public ZzimsResponseDto(User user, Zzim zzim, ImageRepository imageRepository) {
+    public ZzimsResponseDto(User user, Zzim zzim, String imageUrl) {
         this.id = zzim.getProduct().getId();
         this.productTitle = zzim.getProduct().getTitle();
-        this.image = imageRepository.findFirstByProductId(zzim.getProduct().getId())
-                                       .map(Image::getImageUrl)
-                                       .orElse(null);
+        this.image = imageUrl;
     }
 }

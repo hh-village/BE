@@ -7,6 +7,7 @@ import com.sparta.village.domain.user.entity.User;
 import lombok.Getter;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Getter
 public class MyProductsResponseDto {
@@ -15,13 +16,11 @@ public class MyProductsResponseDto {
     private final String image;
     private final String createdAt;
 
-    public MyProductsResponseDto(User user, Product product, ImageRepository imageRepository) {
+    public MyProductsResponseDto(User user, Product product, String imageUrl) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         this.id = product.getId();
         this.title = product.getTitle();
-        this.image = imageRepository.findFirstByProductId(product.getId())
-                                       .map(Image::getImageUrl)
-                                       .orElse(null);
+        this.image = imageUrl;
         if (product.getCreatedAt() == null) {
             this.createdAt = null;
         } else {
