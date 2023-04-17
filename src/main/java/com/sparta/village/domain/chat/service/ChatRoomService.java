@@ -74,7 +74,7 @@ public class ChatRoomService {
         for (ChatRoom chatRoom : chatRoomList) {
             boolean target = chatRoom.getRoomId().equals(roomId);
             User other = getConversationPartner(chatRoom, user);
-            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), userService.getUserProfile(other), target));
+            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), target));
         }
         return new ChatMessageResponseDto(messageList, roomList);
     }

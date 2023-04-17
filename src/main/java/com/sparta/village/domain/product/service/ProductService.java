@@ -102,7 +102,7 @@ public class ProductService {
 
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
                 zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
-                owner.getNickname(), userService.getUserProfile(owner), reservationService.getReservationList(user, id));
+                owner.getNickname(), owner.getProfile(), reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
