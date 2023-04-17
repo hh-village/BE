@@ -32,7 +32,7 @@ public class ZzimService {
             productRepository.save(product);
             return ResponseMessage.SuccessResponse("찜하기 성공", true);
         }else {
-            zzimRepository.delete(new Zzim(user, product, false));
+            zzimRepository.delete(zzimRepository.findByProductAndUser(product, user));
             product.minusZzimCount();
             productRepository.save(product);
             return ResponseMessage.SuccessResponse("찜하기 취소", false);

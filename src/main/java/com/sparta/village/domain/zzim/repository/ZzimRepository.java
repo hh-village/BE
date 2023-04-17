@@ -13,6 +13,8 @@ import java.util.Optional;
 
 public interface ZzimRepository extends JpaRepository<Zzim, Long> {
 
+    Zzim findByProductAndUser(Product product, User user);
+
     boolean existsByProductAndUser(Product product, User user);
 
     int countByProductId(Long productId);
