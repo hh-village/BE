@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.StringReader;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
@@ -64,22 +62,21 @@ public class NaverMapService {
         //Rest Template를 사용해 네이버 지도 API에 요청을 보내고 응답을 받음
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-        // JSON 객체로 변환
-        JsonReader jsonReader = Json.createReader(new StringReader(response.getBody()));
-        JsonObject jsonResponse = jsonReader.readObject();
+        return findValueByKey(response.getBody(), "\"area1\":\\s*\\{(?:[^{}]*|\\{(?:[^{}]*|\\{[^}]*\\})*\\})*\"alias\":\\s*\"(.*?)\"") + " " +
+                findValueByKey(response.getBody(), "\"area2\":\\s*\\{[^}]*\"name\":\\s*\"(.*?)\"") + " " +
+                findValueByKey(response.getBody(), "\"land\":\\s*\\{(?:[^{}]*\\{[^}]*\\})*[^}]*\"name\":\\s*\"(.*?)\"") + " " +
+                findValueByKey(response.getBody(), "\"land\":\\s*\\{[^}]*\"number1\":\\s*\"(.*?)\"") + " " +
+                findValueByKey(response.getBody(), "\"addition0\":\\s*\\{[^}]*\"value\":\\s*\"(.*?)\"");
+    }
 
-        // results 배열에서 첫 번째 결과를 가져옴
-        JsonArray resultsArray = jsonResponse.getJsonArray("results");
-        JsonObject firstResult = resultsArray.getJsonObject(0);
+    private static String findValueByKey(String jsonString, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(jsonString);
 
-        // 필요한 정보 추출
-        String alias = firstResult.getJsonObject("region").getJsonObject("area1").getString("alias");
-        String middleName = firstResult.getJsonObject("region").getJsonObject("area2").getString("name");
-        String endName = firstResult.getJsonObject("land").getString("name");
-        String jiBun = firstResult.getJsonObject("land").getString("number1");
-        String additionValue = firstResult.getJsonObject("land").getJsonObject("addition0").getString("value");
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
 
-        // 추출한 정보를 반환 형식에 맞게 조합
-        return alias + " " + middleName +" " + endName + " " + jiBun + " " + additionValue;
+        return null;
     }
 }
