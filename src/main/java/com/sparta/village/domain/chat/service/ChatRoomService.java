@@ -48,9 +48,13 @@ public class ChatRoomService {
     @Transactional
     public ResponseEntity<ResponseMessage> findMessageHistory(String roomId, User user) {
         if (roomId == null) {
-            roomId = chatMessageRepository.findLastChatRoomId(user).get(0).getRoom().getRoomId();
+            List<ChatMessage> chatMessageList = chatMessageRepository.findLastChatMessage(user);
+            if (chatMessageList.size() > 0) {
+                roomId = chatMessageList.get(0).getRoom().getRoomId();
+            }
         }
-        return ResponseMessage.SuccessResponse("대화 불러오기 성공", findMessageHistoryByRoomId(roomId, user));
+        ChatMessageResponseDto data = roomId == null ? null : findMessageHistoryByRoomId(roomId, user);
+        return ResponseMessage.SuccessResponse("대화 불러오기 성공", data);
     }
 
     @Transactional
@@ -68,13 +72,15 @@ public class ChatRoomService {
     private ChatMessageResponseDto findMessageHistoryByRoomId(String roomId, User user) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
         List<MessageListDto> messageList = chatMessageRepository.findAllByRoom(room).stream()
-                .map(m -> new MessageListDto(m.getSender().getId(), m.getContent(), m.getRoom().getRoomId())).toList();
+                .map(m -> new MessageListDto(m.getSender().getNickname(), m.getContent(), m.getRoom().getRoomId())).toList();
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllChatRoomByUser(user);
         List<RoomListDto> roomList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
             boolean target = chatRoom.getRoomId().equals(roomId);
             User other = getConversationPartner(chatRoom, user);
-            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), target));
+            List<ChatMessage> chatMessageList = chatMessageRepository.findLastMessageByRoom(chatRoom);
+            String lastMessage = chatMessageList.size() > 0 ? chatMessageList.get(0).getContent() : null;
+            roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), lastMessage, target));
         }
         return new ChatMessageResponseDto(messageList, roomList);
     }
@@ -86,5 +92,6 @@ public class ChatRoomService {
     public void deleteMessagesByProductId(Long id) {
         chatMessageRepository.deleteMessagesByProductId(id);
     }
+
 
 }
