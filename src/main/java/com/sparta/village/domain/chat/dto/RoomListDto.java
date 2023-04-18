@@ -11,5 +11,6 @@ public class RoomListDto {
     private String roomId;
     private String nickname;
     private String profile;
+    private String lastMessage;
     private boolean target;
 }
