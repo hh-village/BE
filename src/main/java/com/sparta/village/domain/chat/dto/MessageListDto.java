@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageListDto {
-    private Long sender;
+    private String sender;
     private String content;
     private String roomId;
 }
