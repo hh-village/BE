@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.*;
 
 @Service
@@ -85,8 +87,11 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
 
-        imageStorageService.deleteImagesByProductId(id);
-        imageStorageService.saveImageList(product, imageStorageService.storeFiles(productRequestDto.getImages()));
+        List<MultipartFile> images = productRequestDto.getImages();
+        if (images != null && !images.isEmpty()) {
+            imageStorageService.deleteImagesByProductId(id);
+            imageStorageService.saveImageList(product, imageStorageService.storeFiles(images));
+        }
 
         product.update(productRequestDto);
         return ResponseMessage.SuccessResponse("상품 수정이 되었습니다.", "");
