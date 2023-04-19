@@ -1,9 +1,7 @@
 package com.sparta.village.domain.image.entity;
 
 import com.sparta.village.domain.product.entity.Product;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 import javax.persistence.*;
@@ -11,7 +9,9 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

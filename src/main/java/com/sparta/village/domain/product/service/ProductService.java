@@ -133,16 +133,16 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    private String searchPrimeImageUrl(Product product) {
+    public String searchPrimeImageUrl(Product product) {
         return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
     }
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
-    private boolean checkProductOwner(Long productId, Long userId) {
+    public boolean checkProductOwner(Long productId, Long userId) {
         return productRepository.existsByIdAndUserId(productId, userId);
     }
 
-    private boolean getMostProduct(Product product) {
+    public boolean getMostProduct(Product product) {
         List<ReservationCountResponseDto> reservationCounts = reservationService.reservationCount();
         reservationCounts.sort(Comparator.comparingLong(ReservationCountResponseDto::getReservationCount).reversed());
 
