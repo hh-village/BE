@@ -15,6 +15,8 @@ import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.entity.UserRoleEnum;
 import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.domain.zzim.service.ZzimService;
+import com.sparta.village.global.exception.CustomException;
+import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +33,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -163,6 +166,48 @@ public class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("제품수정-권한없음")
+    public void testUpdateProductNotAUTHOR() {
+        // Given
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        User anotherUser = User.builder()
+                .id(2L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .build();
+
+        Product product = new Product(anotherUser, productRequestDto);
+
+        given(productRepository.findById(product.getId())).willReturn(Optional.of(product));
+
+        // when
+        CustomException expectedException = assertThrows(
+                CustomException.class,
+                () -> productService.updateProduct(product.getId(), user, productRequestDto),
+                "CustomException이 발생할 것으로 예상했지만 throw되지 않았습니다."
+        );
+
+        // then
+        assertEquals(ErrorCode.NOT_AUTHOR, expectedException.getErrorCode());
+    }
+
+    @Test
     public void testDetailProduct() {
         // Given
         Long productId = 1L;
@@ -227,41 +272,190 @@ public class ProductServiceTest {
     public void testDetailProductUserIsNull() {
         // given
         Long productId = 1L;
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .build();
+
         UserDetailsImpl userDetails = null;
 
-        Product product = new Product();
-        when(productService.findProductById(product.getId())).thenReturn(product);
+        Product product = new Product(user, productRequestDto);
 
-        User owner = mock(User.class);
-        when(userService.getUserByUserId(anyString())).thenReturn(owner);
+        User owner = User.builder()
+                .nickname("owner")
+                .profile("profile")
+                .build();
 
-        when(productService.checkProductOwner(product.getId(), anyLong())).thenReturn(false);
-        when(zzimService.getZzimStatus(any(User.class), any(Product.class))).thenReturn(false);
-        when(zzimService.countByProductId(product.getId())).thenReturn(0);
-        when(imageStorageService.getImageUrlListByProductId(product.getId())).thenReturn(Arrays.asList("image_url"));
-        when(reservationService.getReservationList(any(User.class), eq(product.getId()))).thenReturn(new ArrayList<>());
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(userService.getUserByUserId(Long.toString(product.getUser().getId()))).thenReturn(owner);
+        when(zzimService.countByProductId(productId)).thenReturn(2);
+        List<String> imageUrls = Arrays.asList("url1", "url2");
+        when(imageStorageService.getImageUrlListByProductId(productId)).thenReturn(imageUrls);
+        List<ReservationResponseDto> reservationList = new ArrayList<>();
+        when(reservationService.getReservationList(null, productId)).thenReturn(reservationList);
 
-        // when
-        ResponseEntity<ResponseMessage> response = productService.detailProduct(userDetails, product.getId());
+        // When
+        ResponseEntity<ResponseMessage> response = productService.detailProduct(userDetails, productId);
 
-        // then
+        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("제품 조회가 완료되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+        ProductDetailResponseDto productDetailResponseDto = (ProductDetailResponseDto) response.getBody().getData();
+        assertEquals(product.getId(), productDetailResponseDto.getId());
+        assertFalse(productDetailResponseDto.isCheckOwner());
+        assertFalse(productDetailResponseDto.isZzimStatus());
+        assertEquals(2, productDetailResponseDto.getZzimCount());
+        assertEquals(imageUrls, productDetailResponseDto.getImageList());
+        assertEquals("owner", productDetailResponseDto.getOwnerNickname());
+        assertEquals("profile", productDetailResponseDto.getProfile());
+        assertEquals(reservationList, productDetailResponseDto.getReservationList());
 
-        // verify
-        verify(productService, times(1)).findProductById(product.getId());
-        verify(userService, times(1)).getUserByUserId(anyString());
-        verify(zzimService, times(0)).getZzimStatus(any(User.class), any(Product.class));
-        verify(zzimService, times(1)).countByProductId(product.getId());
-        verify(imageStorageService, times(1)).getImageUrlListByProductId(product.getId());
-        verify(reservationService, times(1)).getReservationList(any(User.class), eq(product.getId()));
+        // Verify
+        verify(productRepository, times(1)).findById(productId);
+        verify(userService, times(1)).getUserByUserId(Long.toString(product.getUser().getId()));
+        verify(zzimService, times(1)).countByProductId(productId);
+        verify(imageStorageService, times(1)).getImageUrlListByProductId(productId);
+        verify(reservationService, times(1)).getReservationList(null, productId);
     }
 
+    @Test
+    @DisplayName("제품상세조회-OwnerIsTrue")
+    public void testDetailOwnerIsTrue() {
+        // given
+        Long productId = 1L;
+        Long userId = 1L;
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
 
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .build();
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
+
+        Product product = new Product(userDetails.getUser(), productRequestDto);
+
+        User owner = User.builder()
+                .nickname("owner")
+                .profile("profile")
+                .build();
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(userService.getUserByUserId(Long.toString(product.getUser().getId()))).thenReturn(owner);
+        when(productService.checkProductOwner(productId,userId)).thenReturn(true);
+        when(zzimService.countByProductId(productId)).thenReturn(2);
+        List<String> imageUrls = Arrays.asList("url1", "url2");
+        when(imageStorageService.getImageUrlListByProductId(productId)).thenReturn(imageUrls);
+        List<ReservationResponseDto> reservationList = new ArrayList<>();
+        when(reservationService.getReservationList(user, productId)).thenReturn(reservationList);
+
+        // When
+        ResponseEntity<ResponseMessage> response = productService.detailProduct(userDetails, productId);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("제품 조회가 완료되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+        ProductDetailResponseDto productDetailResponseDto = (ProductDetailResponseDto) response.getBody().getData();
+        assertEquals(product.getId(), productDetailResponseDto.getId());
+        assertTrue(productDetailResponseDto.isCheckOwner());
+        assertFalse(productDetailResponseDto.isZzimStatus());
+        assertEquals(2, productDetailResponseDto.getZzimCount());
+        assertEquals(imageUrls, productDetailResponseDto.getImageList());
+        assertEquals("owner", productDetailResponseDto.getOwnerNickname());
+        assertEquals("profile", productDetailResponseDto.getProfile());
+        assertEquals(reservationList, productDetailResponseDto.getReservationList());
+
+        // Verify
+        verify(productRepository, times(1)).findById(productId);
+        verify(userService, times(1)).getUserByUserId(Long.toString(product.getUser().getId()));
+        verify(zzimService, times(1)).countByProductId(productId);
+        verify(imageStorageService, times(1)).getImageUrlListByProductId(productId);
+        verify(reservationService, times(1)).getReservationList(user, productId);
+    }
+
+    @Test
+    @DisplayName("제품상세조회-ZzimIsTrue")
+    public void testDetailZzimIsTrue() {
+        // given
+        Long productId = 1L;
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .build();
+
+        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
+
+        Product product = new Product(userDetails.getUser(), productRequestDto);
+
+        User owner = User.builder()
+                .nickname("owner")
+                .profile("profile")
+                .build();
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(userService.getUserByUserId(Long.toString(product.getUser().getId()))).thenReturn(owner);
+        when(zzimService.getZzimStatus(user, product)).thenReturn(true);
+        when(zzimService.countByProductId(productId)).thenReturn(2);
+        List<String> imageUrls = Arrays.asList("url1", "url2");
+        when(imageStorageService.getImageUrlListByProductId(productId)).thenReturn(imageUrls);
+        List<ReservationResponseDto> reservationList = new ArrayList<>();
+        when(reservationService.getReservationList(user, productId)).thenReturn(reservationList);
+
+        // When
+        ResponseEntity<ResponseMessage> response = productService.detailProduct(userDetails, productId);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("제품 조회가 완료되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+        ProductDetailResponseDto productDetailResponseDto = (ProductDetailResponseDto) response.getBody().getData();
+        assertEquals(product.getId(), productDetailResponseDto.getId());
+        assertFalse(productDetailResponseDto.isCheckOwner());
+        assertTrue(productDetailResponseDto.isZzimStatus());
+        assertEquals(2, productDetailResponseDto.getZzimCount());
+        assertEquals(imageUrls, productDetailResponseDto.getImageList());
+        assertEquals("owner", productDetailResponseDto.getOwnerNickname());
+        assertEquals("profile", productDetailResponseDto.getProfile());
+        assertEquals(reservationList, productDetailResponseDto.getReservationList());
+
+        // Verify
+        verify(productRepository, times(1)).findById(productId);
+        verify(userService, times(1)).getUserByUserId(Long.toString(product.getUser().getId()));
+        verify(zzimService, times(1)).countByProductId(productId);
+        verify(imageStorageService, times(1)).getImageUrlListByProductId(productId);
+        verify(reservationService, times(1)).getReservationList(user, productId);
+    }
 
     @Test
     @DisplayName("제품검색-key값 둘다 입력한 케이스")
-    void testKeyQueryAndLocationSearchProductList() {
+    public void testKeyQueryAndLocationSearchProductList() {
         // Given
         User user = User.builder()
                 .id(1L)
@@ -357,6 +551,48 @@ public class ProductServiceTest {
         // Verify
         verify(productRepository).findAll();
         verify(zzimService).getZzimStatus(user, product);
+    }
+
+    @Test
+    @DisplayName("제품검색-UserIsNull")
+    void testUserIsNullSearchProductList() {
+        // Given
+        UserDetailsImpl userDetails = null;
+
+        Product product = Product.builder()
+                .id(1L)
+                .title("제목")
+                .description("내용")
+                .price(15000)
+                .location("서울 강남구")
+                .zzimCount(3)
+                .build();
+
+        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
+        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
+
+        List<Product> mockProductList = Arrays.asList(product);
+        when(productRepository.findAll()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+
+        String mockImageUrl = "https://example.com/image.jpg";
+        when(zzimService.getZzimStatus(null, product)).thenReturn(false);
+
+        // When
+        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, null);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
+        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
+        assertEquals(mockImageUrl, responseList.get(0).getImage());
+
+        // Verify
+        verify(productRepository).findAll();
+        verify(zzimService).getZzimStatus(null, product);
     }
 
     @Test
@@ -458,6 +694,7 @@ public class ProductServiceTest {
         verify(productRepository).findByTitleContaining("qr");
         verify(zzimService).getZzimStatus(user, product);
     }
+
 
     @Test
     @DisplayName("인기제품-정상케이스")
