@@ -56,6 +56,7 @@ public class ProductServiceTest {
     private UserService userService;
     @Mock
     private UserDetailsImpl userDetails;
+
     @Test
     @DisplayName("제품등록-정상케이스")
     public void testRegistProduct() {
@@ -129,6 +130,48 @@ public class ProductServiceTest {
         verify(reservationService, times(1)).deleteByProductId(productId);
         verify(zzimService, times(1)).deleteByProductId(productId);
         verify(imageStorageService, times(1)).deleteImagesByProductId(productId);
+    }
+
+    @Test
+    @DisplayName("제품삭제-권한없음")
+    public void testDeleteProductNotAUTHOR() {
+        // Given
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        User anotherUser = User.builder()
+                .id(2L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
+
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .build();
+
+        Product product = new Product(anotherUser, productRequestDto);
+
+        given(productRepository.findById(product.getId())).willReturn(Optional.of(product));
+
+        // when
+        CustomException expectedException = assertThrows(
+                CustomException.class,
+                () -> productService.deleteProduct(product.getId(), user),
+                "CustomException이 발생할 것으로 예상했지만 throw되지 않았습니다."
+        );
+
+        // then
+        assertEquals(ErrorCode.NOT_AUTHOR, expectedException.getErrorCode());
     }
 
     @Test
@@ -360,7 +403,7 @@ public class ProductServiceTest {
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
         when(userService.getUserByUserId(Long.toString(product.getUser().getId()))).thenReturn(owner);
-        when(productService.checkProductOwner(productId,userId)).thenReturn(true);
+        when(productService.checkProductOwner(productId, userId)).thenReturn(true);
         when(zzimService.countByProductId(productId)).thenReturn(2);
         List<String> imageUrls = Arrays.asList("url1", "url2");
         when(imageStorageService.getImageUrlListByProductId(productId)).thenReturn(imageUrls);
@@ -697,8 +740,8 @@ public class ProductServiceTest {
 
 
     @Test
-    @DisplayName("인기제품-정상케이스")
-    void testGetMostProduct() {
+    @DisplayName("인기제품-True")
+    void testGetMostProductTrue() {
         // Given
         Product product = Product.builder()
                 .id(1L)
@@ -716,8 +759,7 @@ public class ProductServiceTest {
         when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
 
         // When
-        boolean isMostProduct = productService.getMostProduct(product);
-
+        boolean isMostProduct = productService.isMostProduct(product);
 
         // Then
         assertTrue(isMostProduct);
@@ -725,6 +767,36 @@ public class ProductServiceTest {
         // Verify
         verify(reservationService).reservationCount();
         verify(productRepository).findById(countResponseDto.getProductId());
+    }
+
+    @Test
+    @DisplayName("인기제품-False")
+    void testGetMostProductFalse() {
+        // Given
+        Product product = Product.builder()
+                .id(1L)
+                .title("제목")
+                .description("내용")
+                .price(15000)
+                .location("서울 강남구")
+                .zzimCount(2)
+                .build();
+
+        ReservationCountResponseDto countResponseDto = new ReservationCountResponseDto(2L, 40L);
+        List<ReservationCountResponseDto> reservationCounts = Collections.singletonList(countResponseDto);
+
+        when(reservationService.reservationCount()).thenReturn(reservationCounts);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        // When
+        boolean isMostProduct = productService.isMostProduct(product);
+
+        // Then
+        assertFalse(isMostProduct);
+
+        // Verify
+        verify(reservationService).reservationCount();
+        verify(productRepository).findById(2L);
     }
 
     @Test
@@ -761,6 +833,89 @@ public class ProductServiceTest {
         verify(imageStorageService, times(randomProducts1.size() + randomProducts2.size())).getImageUrlListByProductId(anyLong());
         verify(zzimService, times(randomProducts1.size() + randomProducts2.size())).getZzimStatus(any(User.class), any(Product.class));
         verify(zzimService, times(1)).getZzimCount(user);
+    }
+
+    @Test
+    @DisplayName("전체조회-UserIsNull")
+    public void testGetMainPageUserIsNull() {
+        // given
+        UserDetailsImpl userDetails = null;
+
+        List<AcceptReservationResponseDto> dealList = new ArrayList<>();
+        when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
+
+        List<Product> randomProducts1 = new ArrayList<>();
+        List<Product> randomProducts2 = new ArrayList<>();
+        when(productRepository.findRandomProduct(8)).thenReturn(randomProducts1);
+        when(productRepository.findRandomProduct(6)).thenReturn(randomProducts2);
+
+        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(Arrays.asList("image_url"));
+
+        // when
+        ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
+
+        // then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("메인페이지 조회되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+
+        // verify
+        verify(reservationService, times(1)).getAcceptedReservationList();
+        verify(productRepository, times(1)).findRandomProduct(8);
+        verify(productRepository, times(1)).findRandomProduct(6);
+        verify(imageStorageService, times(randomProducts1.size() + randomProducts2.size())).getImageUrlListByProductId(anyLong());
+        verify(zzimService, times(0)).getZzimStatus(any(User.class), any(Product.class));
+        verify(zzimService, times(0)).getZzimCount(any(User.class));
+    }
+
+    @Test
+    @DisplayName("상품 ID로 상품 조회 성공")
+    void testFindProductByIdSuccess() {
+// Given
+        Long id = 1L;
+        Product product = Product.builder()
+                .id(id)
+                .title("제목")
+                .description("내용")
+                .price(15000)
+                .location("서울 강남구")
+                .zzimCount(2)
+                .build();
+
+        when(productRepository.findById(id)).thenReturn(Optional.of(product));
+
+        // When
+        Product foundProduct = productService.findProductById(id);
+
+        // Then
+        assertAll(
+                () -> assertNotNull(foundProduct),
+                () -> assertEquals(product.getId(), foundProduct.getId()),
+                () -> assertEquals(product.getTitle(), foundProduct.getTitle()),
+                () -> assertEquals(product.getDescription(), foundProduct.getDescription()),
+                () -> assertEquals(product.getPrice(), foundProduct.getPrice()),
+                () -> assertEquals(product.getLocation(), foundProduct.getLocation()),
+                () -> assertEquals(product.getZzimCount(), foundProduct.getZzimCount())
+        );
+
+        verify(productRepository, times(1)).findById(id);
+    }
+
+    @Test
+    @DisplayName("상품 ID로 상품 조회 실패")
+    void testFindProductByIdFailure() {
+        // Given
+        Long id = 1L;
+        when(productRepository.findById(id)).thenReturn(Optional.empty());
+
+        // When, Then
+        CustomException expectedException = assertThrows(
+                CustomException.class,
+                () -> productService.findProductById(id),
+                "CustomException이 발생할 것으로 예상했지만 throw되지 않았습니다."
+        );
+
+        //then
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, expectedException.getErrorCode());
     }
 }
 
