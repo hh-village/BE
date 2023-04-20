@@ -144,17 +144,18 @@ public class ProductService {
 
     public boolean isMostProduct(Product product) {
         List<ReservationCountResponseDto> reservationCountList = reservationService.reservationCount();
-        reservationCountList.sort(Comparator.comparingLong(ReservationCountResponseDto::getReservationCount).reversed());
 
         int index = (int) Math.ceil(reservationCountList.size() * 0.1) - 1;
         if (index < 0) return false;
 
-        int topCount = Math.toIntExact(reservationCountList.get(index).getReservationCount());
-        return reservationCountList.stream()
-                .filter(countInfo -> countInfo.getReservationCount() >= topCount)
-                .map(countInfo -> productRepository.findById(countInfo.getProductId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .anyMatch(topProduct -> topProduct.getId().equals(product.getId()));
+        for (ReservationCountResponseDto responseDto : reservationCountList) {
+            if (responseDto.getReservationCount() >= Math.toIntExact(reservationCountList.get(index).getReservationCount())) {
+                Optional<Product> isMostProduct = productRepository.findById(responseDto.getProductId());
+                if (isMostProduct.isPresent() && isMostProduct.get().getId().equals(product.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
