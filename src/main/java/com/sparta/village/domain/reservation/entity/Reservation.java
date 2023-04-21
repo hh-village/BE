@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Setter
 public class Reservation extends Timestamped {
     @Id

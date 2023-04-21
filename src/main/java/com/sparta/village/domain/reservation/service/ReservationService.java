@@ -1,6 +1,5 @@
 package com.sparta.village.domain.reservation.service;
 
-import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.*;
@@ -15,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 import java.time.Duration;
 import java.util.List;
 
@@ -100,6 +97,7 @@ public class ReservationService {
                         (totalDate > 9 && count > 4) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile3.png" :
                         (totalDate > 3 && count > 2) ? "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile2.png" :
                         "https://s3-village-image.s3.ap-northeast-2.amazonaws.com/profile1.png";
+//        System.out.println(profile);
         userService.updateProfileIfNeeded(user, profile);
     }
 }

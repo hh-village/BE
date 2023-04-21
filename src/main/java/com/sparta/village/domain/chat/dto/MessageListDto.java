@@ -11,4 +11,22 @@ public class MessageListDto {
     private String sender;
     private String content;
     private String roomId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null)
+            return false;
+
+        if (o == this)
+            return true;
+
+        if (o.getClass() != getClass())
+            return false;
+
+        MessageListDto m = (MessageListDto) o;
+
+        return this.getSender().equals(m.getSender()) &&
+                this.getContent().equals(m.getContent()) &&
+                this.getRoomId().equals(m.getRoomId());
+    }
 }
