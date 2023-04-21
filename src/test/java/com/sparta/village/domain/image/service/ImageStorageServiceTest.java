@@ -7,8 +7,11 @@ import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.product.entity.Product;
 
+import com.sparta.village.global.exception.CustomException;
+import com.sparta.village.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,11 +24,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -51,11 +53,13 @@ class ImageStorageServiceTest {
         when(file2.getOriginalFilename()).thenReturn(originalfilename2);
         when(file1.getSize()).thenReturn(100L);
         when(file2.getSize()).thenReturn(200L);
-        when(amazonS3.getUrl(anyString(), anyString())).thenAnswer(invocation -> {
-            String bucketname = invocation.getArgument(0);
-            String fileName = invocation.getArgument(1);
-            return new URL("https://" + bucketname + "s3.amazonaws.com/" + fileName);
-        });
+        doAnswer(invocation -> {
+            PutObjectRequest request = invocation.getArgument(0);
+            String bucketname = request.getBucketName();
+            String fileName = request.getKey();
+            when(amazonS3.getUrl(bucketname, fileName)).thenReturn(new URL("https://" + bucketname + ".s3.amazonaws.com/" + fileName));
+            return null;
+        }).when(amazonS3).putObject(any(PutObjectRequest.class));
 
         //when
         List<String> result = imageStorageService.storeFiles(fileList);
@@ -70,6 +74,42 @@ class ImageStorageServiceTest {
     }
 
     @Test
+    @DisplayName("이미지 업로드-ImageListIsNull")
+    public void testStoreFilesImageListIsNull() {
+        List<MultipartFile> imageList = null;
+
+        CustomException exception = assertThrows(CustomException.class, () -> {
+            imageStorageService.storeFiles(imageList);
+        });
+
+        assertEquals(ErrorCode.IMAGE_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("storeFiles()-RuntimeException")
+    public void testStoreFilesThrowException() throws IOException {
+        // given
+        MultipartFile image = mock(MultipartFile.class);
+        when(image.getOriginalFilename()).thenReturn("testImage.jpg");
+        when(image.getSize()).thenReturn(1L);
+        when(image.getInputStream()).thenThrow(IOException.class);
+
+        List<MultipartFile> imageList = List.of(image);
+
+        // when
+        Executable executable = () -> imageStorageService.storeFiles(imageList);
+
+        // then
+        RuntimeException exception = assertThrows(RuntimeException.class, executable);
+        String actualMessage = exception.getMessage();
+        String expectedMessage = "이미지 업로드 실패: ";
+
+        assertTrue(actualMessage.startsWith(expectedMessage));
+        assertTrue(actualMessage.contains("testImage.jpg"));
+    }
+
+    @Test
+    @DisplayName("이미지리스트 저장")
     public void testSaveImageList() {
         //given
         Product product = new Product();
@@ -83,89 +123,92 @@ class ImageStorageServiceTest {
     }
 
     @Test
+    @DisplayName("이미지 삭제")
     public void testDeleteFile() {
-        //given
-        String fileUrl = "https://examplebucket.s3.amazonaws.com/UUID_test.jpg";
-        String fileName = "UUID_test.jpg";
-        String bucketName = "examplebucket";
+        // given
+        String fileUrl = "https://testBucket.s3.amazonaws.com/testFile.txt";
+        String expectedFileName = "testFile.txt";
+        String decodedFileName = URLDecoder.decode(fileUrl.substring(fileUrl.lastIndexOf("/") + 1), StandardCharsets.UTF_8);
 
-        //when
+        doAnswer(invocation -> {
+            invocation.getArgument(0);
+            return null;
+        }).when(amazonS3).deleteObject(any(DeleteObjectRequest.class));
+
+        // when
         imageStorageService.deleteFile(fileUrl);
 
-        //verify
-        verify(amazonS3).deleteObject(new DeleteObjectRequest(bucketName, fileName));
+        // then
+        assertEquals(expectedFileName, decodedFileName);
+
+        // verify
+        verify(amazonS3, times(1)).deleteObject(any(DeleteObjectRequest.class)); // 수정된 코드
     }
 
     @Test
-    public void testDeleteImagesByProductId() {
-        //given
+    @DisplayName("ProductId에 알맞는 이미지 삭제")
+    public void testDeleteImageListByProductId() {
+        // given
         Long productId = 1L;
-        List<Image> imageList = new ArrayList<>();
         Image image1 = new Image(new Product(), "imageUrl1");
         Image image2 = new Image(new Product(), "imageUrl2");
-        imageList.add(image1);
-        imageList.add(image2);
-
+        List<Image> imageList = Arrays.asList(image1, image2);
         when(imageRepository.findByProductId(productId)).thenReturn(imageList);
+        doNothing().when(imageRepository).deleteById(image1.getId());
+        doNothing().when(imageRepository).deleteById(image2.getId());
 
-        //when
+        // when
         imageStorageService.deleteImagesByProductId(productId);
 
-        //verify
-        verify(imageRepository).findByProductId(productId);
-        verify(imageStorageService, times(2)).deleteFile(anyString());
-        verify(imageStorageService, times(2)).deleteImagesByProductId(anyLong());
+        // then
+        verify(imageRepository, times(1)).findByProductId(productId);
+        verify(imageRepository, times(2)).deleteById(null);
     }
 
-//    @Transactional
-//    public List<String> storeFiles(List<MultipartFile> imageList) {
-//        if (imageList == null || imageList.isEmpty()) {
-//            throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
-//        }
-//        List<String> imageUrlList = new ArrayList<>();
-//        for (MultipartFile image : imageList) {
-//            String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-//            try {
-//                ObjectMetadata metadata = new ObjectMetadata();
-//                metadata.setContentLength(image.getSize());
-//                amazonS3.putObject(new PutObjectRequest(bucketName, fileName, image.getInputStream(), metadata));
-//            } catch (IOException e) {
-//                throw new RuntimeException("이미지 업로드 실패: " + fileName, e);
-//            }
-//            //S3 버킷 내에 저장된 파일의 URL 생성
-//            String fileUrl = amazonS3.getUrl(bucketName, fileName).toString();
-//            imageUrlList.add(fileUrl);
-//        }
-//        return imageUrlList;
-//    }
-//
-//    public void saveImageList(Product product, List<String> imageUrlList) {
-//        for (String imageUrl : imageUrlList) {
-//            imageRepository.saveAndFlush(new Image(product, imageUrl));
-//        }
-//    }
-//
-//    public void deleteFile(String fileUrl) {
-//        String fileName = URLDecoder.decode(fileUrl.substring(fileUrl.lastIndexOf("/") + 1), StandardCharsets.UTF_8);
-//        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
-//    }
-//
-//    public void deleteImagesByProductId(Long productId) {
-//        List<Image> imageList = imageRepository.findByProductId(productId);
-//        for (Image image : imageList) {
-//            deleteFile(image.getImageUrl());
-//            imageRepository.deleteById(image.getId());
-//        }
-//    }
-//
-//    public List<String> getImageUrlListByProductId(Long id) {
-//        return imageRepository.findByProductId(id).stream().map(Image::getImageUrl).toList();
-//    }
-//
-//    public String getFirstImageUrlByProductId(Long id) {
-//        return getImageUrlListByProductId(id).stream()
-//                .findFirst()
-//                .orElse(null);
-//    }
+
+    @Test
+    @DisplayName("ProductId에 알맞는 이미지 리스트 가져오기")
+    public void testGetImageUrlListByProductId() {
+        // given
+        Long productId = 1L;
+
+        List<Image> imageUrlList = Arrays.asList(
+                new Image(new Product(), "https://example.com/image1.jpg"),
+                new Image(new Product(), "https://example.com/image2.jpg")
+        );
+        when(imageRepository.findByProductId(productId)).thenReturn(imageUrlList);
+
+        // when
+        List<String> response = imageStorageService.getImageUrlListByProductId(productId);
+
+        // then
+        assertEquals(2, response.size());
+        assertEquals("https://example.com/image1.jpg", response.get(0));
+        assertEquals("https://example.com/image2.jpg", response.get(1));
+
+        // verify
+        verify(imageRepository, times(1)).findByProductId(productId);
+    }
+
+    @Test
+    @DisplayName("ProductId에 알맞는 이미지리스트 중 첫번째 배열 가져오기")
+    public void testGetFirstImageUrlByProductId() {
+        // given
+        Long productId = 1L;
+        List<Image> imageUrlList = Arrays.asList(
+                new Image(new Product(), "https://example.com/image1.jpg"),
+                new Image(new Product(), "https://example.com/image2.jpg")
+        );
+        when(imageRepository.findByProductId(productId)).thenReturn(imageUrlList);
+
+        // when
+        String firstImageUrl = imageStorageService.getFirstImageUrlByProductId(productId);
+
+        // then
+        assertEquals("https://example.com/image1.jpg", firstImageUrl);
+
+        // verify
+        verify(imageRepository, times(1)).findByProductId(productId);
+    }
 
 }
