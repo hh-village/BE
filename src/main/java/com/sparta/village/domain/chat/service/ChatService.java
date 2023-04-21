@@ -47,9 +47,9 @@ public class ChatService {
     @Transactional
     public ResponseEntity<ResponseMessage> findMessageHistory(String roomId, User user) {
         if (roomId == null) {
-            List<String> RoomList = chatMessageRepository.findLastChatMessageRoom(user);
-            if (RoomList.size() > 0) {
-                roomId = RoomList.get(0);
+            List<String> roomList = chatMessageRepository.findRoomIdOfLastChatMessage(user.getId());
+            if (roomList.size() > 0) {
+                roomId = roomList.get(0);
             }
         }
         ChatMessageResponseDto data = roomId == null ? null : findMessageHistoryByRoomId(roomId, user);

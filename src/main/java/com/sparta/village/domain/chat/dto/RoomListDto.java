@@ -25,10 +25,18 @@ public class RoomListDto {
         if (o.getClass() != getClass())
             return false;
         RoomListDto r = (RoomListDto) o;
+
+        if (this.lastMessage == null) {
+            return this.nickname.equals(r.getNickname()) &&
+                    this.profile.equals(r.getProfile()) &&
+                    this.roomId.equals(r.getRoomId()) &&
+                    r.getLastMessage() == null &&
+                    this.isTarget() == r.isTarget();
+        }
         return this.nickname.equals(r.getNickname()) &&
                 this.profile.equals(r.getProfile()) &&
                 this.roomId.equals(r.getRoomId()) &&
-                this.lastMessage.equals(r.getLastMessage()) &&
+                this.getLastMessage().equals(r.getLastMessage()) &&
                 this.isTarget() == r.isTarget();
     }
 }
