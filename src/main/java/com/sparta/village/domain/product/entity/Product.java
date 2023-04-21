@@ -3,6 +3,7 @@ package com.sparta.village.domain.product.entity;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.reservation.entity.Timestamped;
 import com.sparta.village.domain.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Product extends Timestamped{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

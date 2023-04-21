@@ -1,20 +1,15 @@
 package com.sparta.village.domain.product.service;
 
-import com.sparta.village.domain.chat.entity.ChatRoom;
-import com.sparta.village.domain.chat.repository.ChatMessageRepository;
-import com.sparta.village.domain.chat.repository.ChatRoomRepository;
-import com.sparta.village.domain.chat.service.ChatRoomService;
+import com.sparta.village.domain.chat.service.ChatService;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
-import com.sparta.village.domain.reservation.repository.ReservationRepository;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
-import com.sparta.village.domain.zzim.repository.ZzimRepository;
 import com.sparta.village.domain.zzim.service.ZzimService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
@@ -34,7 +29,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final UserService userService;
     private final ZzimService zzimService;
-    private final ChatRoomService chatRoomService;
+    private final ChatService chatRoomService;
     private final ReservationService reservationService;
     private final ImageStorageService imageStorageService;
 
@@ -155,6 +150,14 @@ public class ProductService {
         if (index < 0) return false;
 
         int topCount = (int) (long) reservationCounts.get(index).getReservationCount();
+
+//        for (ReservationCountResponseDto responseDto : reservationCounts) {
+//            if (responseDto.getReservationCount() < topCount) {
+//                return false;
+//            } else if (responseDto.getProductId().equals(product.getId())) {
+//                return true;
+//            }
+//        }
         return reservationCounts.stream()
                 .filter(countInfo -> countInfo.getReservationCount() >= topCount)
                 .map(countInfo -> productRepository.findById(countInfo.getProductId()))
