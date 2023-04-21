@@ -28,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -194,8 +195,11 @@ public class ProductServiceTest {
                 .location("서울")
                 .build();
 
+        List<String> imageUrlList = new ArrayList<>();
         Product product = new Product(user, productRequestDto);
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        doNothing().when(imageStorageService).deleteImagesByProductId(productId);
+        doNothing().when(imageStorageService).saveImageList(product, imageUrlList);
 
         // When
         ResponseEntity<ResponseMessage> response = productService.updateProduct(productId, user, productRequestDto);
@@ -205,7 +209,9 @@ public class ProductServiceTest {
         assertEquals("상품 수정이 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
 
         // Verify
+        verify(productRepository).findById(productId);
         verify(imageStorageService, times(1)).deleteImagesByProductId(productId);
+        verify(imageStorageService).saveImageList(product, imageUrlList);
     }
 
     @Test
