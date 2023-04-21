@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class MyReservationsResponseDto {
 
     private final Long id;
+    private final Long productId;
     private final String title;
     private final String image;
     private final LocalDate startDate;
@@ -20,6 +21,7 @@ public class MyReservationsResponseDto {
 
     public MyReservationsResponseDto(User user, Reservation reservation, String imageUrl) {
         this.id = reservation.getId();
+        this.productId = reservation.getProduct().getId();
         this.title = reservation.getProduct().getTitle();
         this.image = imageUrl;
         this.startDate = reservation.getStartDate();
