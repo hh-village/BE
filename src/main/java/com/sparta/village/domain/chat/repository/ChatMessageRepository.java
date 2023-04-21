@@ -13,8 +13,8 @@ import java.util.List;
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findAllByRoom(ChatRoom room);
 
-    @Query(value = "select m from ChatRoom r left join ChatMessage m on r.id = m.room.id where r.user = :user or r.owner = :user order by m.id desc")
-    List<ChatMessage> findLastChatMessage(@Param("user") User user);
+    @Query(value = "select r.room_id from chat_room r left join chat_message m on r.id = m.room_id where r.user_id = 3 or r.owner_id = 3 order by m.id desc;", nativeQuery = true)
+    List<String> findLastChatMessageRoom(@Param("user") User user);
 
 
     @Modifying
