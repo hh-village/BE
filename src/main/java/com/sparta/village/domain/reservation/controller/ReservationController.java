@@ -18,8 +18,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping("/products/{id}/reserve")
-    public ResponseEntity<ResponseMessage> reserve(@PathVariable Long id, @RequestBody ReservationRequestDto requestDto,
-                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ResponseMessage> reserve(@PathVariable Long id, @RequestBody ReservationRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (requestDto.getStartDate().isAfter(requestDto.getEndDate())) {
             throw new CustomException(ErrorCode.NOT_PROPER_DATE);
         }

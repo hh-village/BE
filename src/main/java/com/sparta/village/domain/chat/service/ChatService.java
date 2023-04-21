@@ -10,7 +10,6 @@ import com.sparta.village.domain.chat.repository.ChatMessageRepository;
 import com.sparta.village.domain.chat.repository.ChatRoomRepository;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
-import com.sparta.village.domain.product.service.ProductService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
 import com.sparta.village.global.exception.CustomException;
@@ -26,7 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ChatRoomService {
+public class ChatService {
     private final ProductRepository productRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -36,7 +35,7 @@ public class ChatRoomService {
     public ResponseEntity<ResponseMessage> enterRoom(Long productId, String nickname) {
         User user = userService.getUserByNickname(nickname);
         Product product = productRepository.findById(productId).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        User owner = userService.getUserByUserId(String.valueOf(product.getUser().getId()));
+        User owner = userService.getUserByNickname(product.getUser().getNickname());
         ChatRoom room = chatRoomRepository.findChatRoomByProductAndUser(product, user).orElse(null);
         if (room == null) {
             room = new ChatRoom(product, user, owner);
@@ -48,9 +47,9 @@ public class ChatRoomService {
     @Transactional
     public ResponseEntity<ResponseMessage> findMessageHistory(String roomId, User user) {
         if (roomId == null) {
-            List<ChatMessage> chatMessageList = chatMessageRepository.findLastChatMessage(user);
-            if (chatMessageList.size() > 0) {
-                roomId = chatMessageList.get(0).getRoom().getRoomId();
+            List<String> RoomList = chatMessageRepository.findLastChatMessageRoom(user);
+            if (RoomList.size() > 0) {
+                roomId = RoomList.get(0);
             }
         }
         ChatMessageResponseDto data = roomId == null ? null : findMessageHistoryByRoomId(roomId, user);
