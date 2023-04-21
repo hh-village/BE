@@ -1,5 +1,7 @@
 package com.sparta.village.chat;
 
+import com.amazonaws.services.servicecatalog.model.CreateProvisionedProductPlanRequest;
+import com.sparta.village.domain.chat.dto.ChatMessageDto;
 import com.sparta.village.domain.chat.dto.ChatMessageResponseDto;
 import com.sparta.village.domain.chat.dto.MessageListDto;
 import com.sparta.village.domain.chat.dto.RoomListDto;
@@ -187,6 +189,211 @@ public class ChatServiceTest {
         verify(chatMessageRepository, times(1)).findLastMessageByRoom(room2);
     }
 
+    @Test
+    @DisplayName("메세지 기록 찾기 - 정상 케이스(방이 있는 경우) - 로그인한 유저가 제품 주인이 아님")
+    public void findMessageHistorySuccessTest_NotProductOwner() {
+        //given
+        String roomId = "roomId1";
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room1 = new ChatRoom(1L, "roomId1", product, owner, user);
+        ChatRoom room2 = new ChatRoom(2L, "roomId2", product, owner, user);
+        ChatMessageResponseDto responseDto = new ChatMessageResponseDto(getMessageDtoList(room1, user), getChatRoomDtoList(room1, room2));
+
+        doReturn(Optional.of(room1)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(getMessageList(room1, user)).when(chatMessageRepository).findAllByRoom(room1);
+        doReturn(Arrays.asList(room1, room2)).when(chatRoomRepository).findAllChatRoomByUser(user);
+        doReturn(getLastMessageList(room1, user)).when(chatMessageRepository).findLastMessageByRoom(room1);
+        doReturn(getLastMessageList(room2, user)).when(chatMessageRepository).findLastMessageByRoom(room2);
+
+        //when
+        ResponseEntity<ResponseMessage> response = chatService.findMessageHistory(roomId, user);
+        ChatMessageResponseDto chatMessageResponseDto = (ChatMessageResponseDto) Objects.requireNonNull(response.getBody()).getData();
+
+        //then
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertEquals(Objects.requireNonNull(response.getBody()).getMessage(), "대화 불러오기 성공");
+        assertIterableEquals(chatMessageResponseDto.getMessageList(), responseDto.getMessageList());
+        assertIterableEquals(chatMessageResponseDto.getRoomList(), responseDto.getRoomList());
+
+        // verify
+        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
+        verify(chatRoomRepository, times(1)).findAllChatRoomByUser(user);
+        verify(chatMessageRepository, times(1)).findAllByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room2);
+    }
+
+    @Test
+    @DisplayName("메세지 기록 찾기 - 인풋으로 방아이디를 받았지만 그 방을 찾을 수 없을 때")
+    public void findMessageHistoryTest_RoomIdNotFound() {
+        //given
+        String roomId = "roomId1";
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room1 = new ChatRoom(1L, "roomId1", product, user, owner);
+
+        doReturn(Optional.empty()).when(chatRoomRepository).findByRoomId(roomId);
+
+        //when
+//        ResponseEntity<ResponseMessage> response = chatService.findMessageHistory(roomId, user);
+//        ChatMessageResponseDto chatMessageResponseDto = (ChatMessageResponseDto) Objects.requireNonNull(response.getBody()).getData();
+
+        //then
+        assertThrows(CustomException.class, () -> chatService.findMessageHistory(roomId, user));
+
+        // verify
+        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
+        verify(chatRoomRepository, times(0)).findAllChatRoomByUser(user);
+        verify(chatMessageRepository, times(0)).findAllByRoom(room1);
+        verify(chatMessageRepository, times(0)).findLastMessageByRoom(room1);
+    }
+
+    @Test
+    @DisplayName("메세지 기록 찾기 - 정상 케이스(방이 있는 경우) - lastMessage가 없는 경우")
+    public void findMessageHistorySuccessTest_NoLastMessage() {
+        //given
+        String roomId = "roomId1";
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room1 = new ChatRoom(1L, "roomId1", product, user, owner);
+        ChatRoom room2 = new ChatRoom(2L, "roomId2", product, user, owner);
+        ChatMessageResponseDto responseDto = new ChatMessageResponseDto(new ArrayList<MessageListDto>(), getChatRoomDtoList_NoLastMessage(room1, room2));
+
+        doReturn(Optional.of(room1)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(new ArrayList<ChatMessage>()).when(chatMessageRepository).findAllByRoom(room1);
+        doReturn(Arrays.asList(room1, room2)).when(chatRoomRepository).findAllChatRoomByUser(user);
+        doReturn(new ArrayList<ChatMessage>()).when(chatMessageRepository).findLastMessageByRoom(room1);
+        doReturn(new ArrayList<ChatMessage>()).when(chatMessageRepository).findLastMessageByRoom(room2);
+
+        //when
+        ResponseEntity<ResponseMessage> response = chatService.findMessageHistory(roomId, user);
+        ChatMessageResponseDto chatMessageResponseDto = (ChatMessageResponseDto) Objects.requireNonNull(response.getBody()).getData();
+
+        //then
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertEquals(Objects.requireNonNull(response.getBody()).getMessage(), "대화 불러오기 성공");
+        assertIterableEquals(chatMessageResponseDto.getMessageList(), responseDto.getMessageList());
+        assertIterableEquals(chatMessageResponseDto.getRoomList(), responseDto.getRoomList());
+
+        // verify
+        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
+        verify(chatRoomRepository, times(1)).findAllChatRoomByUser(user);
+        verify(chatMessageRepository, times(1)).findAllByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room2);
+    }
+
+    @Test
+    @DisplayName("메세지 기록 찾기 - 정상 케이스(매개변수에 방이 없는 경우)")
+    public void findMessageHistorySuccessTest_NoInputRoomId() {
+        //given
+        String roomId = "roomId1";
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room1 = new ChatRoom(1L, "roomId1", product, user, owner);
+        ChatRoom room2 = new ChatRoom(2L, "roomId2", product, user, owner);
+        ChatMessageResponseDto responseDto = new ChatMessageResponseDto(getMessageDtoList(room1, user), getChatRoomDtoList(room1, room2));
+
+        doReturn(List.of(roomId)).when(chatMessageRepository).findRoomIdOfLastChatMessage(user.getId());
+        doReturn(Optional.of(room1)).when(chatRoomRepository).findByRoomId(roomId);
+        doReturn(getMessageList(room1, user)).when(chatMessageRepository).findAllByRoom(room1);
+        doReturn(Arrays.asList(room1, room2)).when(chatRoomRepository).findAllChatRoomByUser(user);
+        doReturn(getLastMessageList(room1, user)).when(chatMessageRepository).findLastMessageByRoom(room1);
+        doReturn(getLastMessageList(room2, user)).when(chatMessageRepository).findLastMessageByRoom(room2);
+
+        //when
+        ResponseEntity<ResponseMessage> response = chatService.findMessageHistory(null, user);
+        ChatMessageResponseDto chatMessageResponseDto = (ChatMessageResponseDto) Objects.requireNonNull(response.getBody()).getData();
+
+        //then
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertEquals(Objects.requireNonNull(response.getBody()).getMessage(), "대화 불러오기 성공");
+        assertIterableEquals(chatMessageResponseDto.getMessageList(), responseDto.getMessageList());
+        assertIterableEquals(chatMessageResponseDto.getRoomList(), responseDto.getRoomList());
+
+        // verify
+        verify(chatMessageRepository, times(1)).findRoomIdOfLastChatMessage(1L);
+        verify(chatRoomRepository, times(1)).findByRoomId(roomId);
+        verify(chatRoomRepository, times(1)).findAllChatRoomByUser(user);
+        verify(chatMessageRepository, times(1)).findAllByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room1);
+        verify(chatMessageRepository, times(1)).findLastMessageByRoom(room2);
+    }
+
+    @Test
+    @DisplayName("메세지 기록 찾기 - 정상 케이스(방이 없는 경우) - 방 생성 기록도 없는 경우")
+    public void findMessageHistorySuccessTest_NoChatRoom() {
+        //given
+        String roomId = "roomId1";
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room1 = new ChatRoom(1L, "roomId1", product, user, owner);
+        ChatRoom room2 = new ChatRoom(2L, "roomId2", product, user, owner);
+
+        doReturn(new ArrayList<String>()).when(chatMessageRepository).findRoomIdOfLastChatMessage(user.getId());
+
+        //when
+        ResponseEntity<ResponseMessage> response = chatService.findMessageHistory(null, user);
+
+        //then
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        assertEquals(Objects.requireNonNull(response.getBody()).getMessage(), "대화 불러오기 성공");
+        assertNull(Objects.requireNonNull(response.getBody()).getData());
+
+        // verify
+        verify(chatMessageRepository, times(1)).findRoomIdOfLastChatMessage(1L);
+        verify(chatRoomRepository, times(0)).findByRoomId(roomId);
+        verify(chatRoomRepository, times(0)).findAllChatRoomByUser(user);
+        verify(chatMessageRepository, times(0)).findAllByRoom(room1);
+        verify(chatMessageRepository, times(0)).findLastMessageByRoom(room1);
+        verify(chatMessageRepository, times(0)).findLastMessageByRoom(room2);
+    }
+
+    @Test
+    @DisplayName("메세지 보내기")
+    public void saveMessageSuccessTest() {
+        //given
+        ChatMessageDto chatMessageDto = new ChatMessageDto("roomId", "nickname", "content");
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
+        ChatRoom room = new ChatRoom(1L, "roomId", product, user, owner);
+        ChatMessage chatMessage = new ChatMessage(1L, user,"content", room);
+
+        doReturn(user).when(userService).getUserByNickname("nickname");
+        doReturn(Optional.of(room)).when(chatRoomRepository).findByRoomId("roomId");
+        doReturn(chatMessage).when(chatMessageRepository).save(any(ChatMessage.class));
+
+        //when
+        chatService.saveMessage(chatMessageDto);
+
+        //then
+
+        // verify
+        verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
+        verify(simpMessageSendingOperations, times(1)).convertAndSend("/sub/chat/room/roomId", chatMessageDto);
+    }
+
+    @Test
+    @DisplayName("메세지 보내기 - 방을 못 찾을 경우")
+    public void saveMessageTest_NotFoundRoom() {
+        //given
+        ChatMessageDto chatMessageDto = new ChatMessageDto("roomId", "nickname", "content");
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+
+        doReturn(user).when(userService).getUserByNickname("nickname");
+        doReturn(Optional.empty()).when(chatRoomRepository).findByRoomId("roomId");
+
+        //when
+        assertThrows(CustomException.class, () -> chatService.saveMessage(chatMessageDto));
+
+        //then
+
+        // verify
+        verify(chatMessageRepository, times(0)).save(any(ChatMessage.class));
+        verify(simpMessageSendingOperations, times(0)).convertAndSend("/sub/chat/room/roomId", chatMessageDto);
+    }
+
     private List<ChatMessage> getMessageList(ChatRoom room, User user) {
         List<ChatMessage> messageList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -215,6 +422,13 @@ public class ChatServiceTest {
         List<RoomListDto> chatRoomList = new ArrayList<>();
         chatRoomList.add(new RoomListDto(room1.getRoomId(), "nickname1", "profile1", "content", true));
         chatRoomList.add(new RoomListDto(room2.getRoomId(), "nickname1", "profile1", "content", false));
+        return chatRoomList;
+    }
+
+    private List<RoomListDto> getChatRoomDtoList_NoLastMessage(ChatRoom room1, ChatRoom room2) {
+        List<RoomListDto> chatRoomList = new ArrayList<>();
+        chatRoomList.add(new RoomListDto(room1.getRoomId(), "nickname1", "profile1", null, true));
+        chatRoomList.add(new RoomListDto(room2.getRoomId(), "nickname1", "profile1", null, false));
         return chatRoomList;
     }
 
