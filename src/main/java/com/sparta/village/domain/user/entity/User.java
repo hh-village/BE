@@ -1,7 +1,6 @@
 package com.sparta.village.domain.user.entity;
 
 import lombok.*;
-
 import javax.persistence.*;
 
 @Getter

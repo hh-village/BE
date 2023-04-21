@@ -43,7 +43,7 @@ public class ProductController {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
     }
 
-    @PutMapping(value = "products/{id}", consumes = {"multipart/form-data"})
+    @PatchMapping(value = "products/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseMessage> updateProduct(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.updateProduct(id, userDetails.getUser(), productRequestDto);
     }
