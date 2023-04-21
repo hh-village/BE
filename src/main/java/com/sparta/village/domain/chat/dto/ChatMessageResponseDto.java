@@ -12,4 +12,5 @@ import java.util.List;
 public class ChatMessageResponseDto {
     private List<MessageListDto> messageList;
     private List<RoomListDto> roomList;
+
 }

@@ -2,6 +2,7 @@ package com.sparta.village.domain.chat.entity;
 
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.user.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
