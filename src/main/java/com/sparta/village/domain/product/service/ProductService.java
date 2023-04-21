@@ -39,9 +39,9 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
         List<ProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
         List<ProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), getMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
         return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimService.getZzimCount(user), randomProduct));
     }
 
@@ -122,7 +122,7 @@ public class ProductService {
         }
 
         List<ProductResponseDto> responseList = productList.stream()
-                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), getMostProduct(product), zzimService.getZzimStatus(user, product)))
+                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), isMostProduct(product), zzimService.getZzimStatus(user, product)))
                 .toList();
 
         return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
@@ -133,36 +133,29 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    private String searchPrimeImageUrl(Product product) {
+    public String searchPrimeImageUrl(Product product) {
         return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
     }
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
-    private boolean checkProductOwner(Long productId, Long userId) {
+    public boolean checkProductOwner(Long productId, Long userId) {
         return productRepository.existsByIdAndUserId(productId, userId);
     }
 
-    private boolean getMostProduct(Product product) {
-        List<ReservationCountResponseDto> reservationCounts = reservationService.reservationCount();
-        reservationCounts.sort(Comparator.comparingLong(ReservationCountResponseDto::getReservationCount).reversed());
+    public boolean isMostProduct(Product product) {
+        List<ReservationCountResponseDto> reservationCountList = reservationService.reservationCount();
 
-        int index = (int) Math.ceil(reservationCounts.size() * 0.1) - 1;
+        int index = (int) Math.ceil(reservationCountList.size() * 0.1) - 1;
         if (index < 0) return false;
 
-        int topCount = (int) (long) reservationCounts.get(index).getReservationCount();
-
-//        for (ReservationCountResponseDto responseDto : reservationCounts) {
-//            if (responseDto.getReservationCount() < topCount) {
-//                return false;
-//            } else if (responseDto.getProductId().equals(product.getId())) {
-//                return true;
-//            }
-//        }
-        return reservationCounts.stream()
-                .filter(countInfo -> countInfo.getReservationCount() >= topCount)
-                .map(countInfo -> productRepository.findById(countInfo.getProductId()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .anyMatch(topProduct -> topProduct.getId().equals(product.getId()));
+        for (ReservationCountResponseDto responseDto : reservationCountList) {
+            if (responseDto.getReservationCount() >= Math.toIntExact(reservationCountList.get(index).getReservationCount())) {
+                Optional<Product> isMostProduct = productRepository.findById(responseDto.getProductId());
+                if (isMostProduct.isPresent() && isMostProduct.get().getId().equals(product.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

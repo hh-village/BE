@@ -10,4 +10,12 @@ import lombok.NoArgsConstructor;
 public class ReservationCountResponseDto {
     private Long productId;
     private Long reservationCount;
+
+    @Override
+    public String toString() {
+        return "ReservationCountResponseDto{" +
+                "productId=" + productId +
+                ", reservationCount=" + reservationCount +
+                '}';
+    }
 }

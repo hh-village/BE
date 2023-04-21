@@ -69,7 +69,7 @@ public class NaverMapService {
                 findValueByKey(response.getBody(), "\"addition0\":\\s*\\{[^}]*\"value\":\\s*\"(.*?)\"");
     }
 
-    private static String findValueByKey(String jsonString, String regex) {
+    public static String findValueByKey(String jsonString, String regex) {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(jsonString);
 
