@@ -397,7 +397,7 @@ public class ChatServiceTest {
     private List<ChatMessage> getMessageList(ChatRoom room, User user) {
         List<ChatMessage> messageList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            messageList.add(new ChatMessage((long) i+1, user,"content", room, LocalDateTime.now()));
+            messageList.add(new ChatMessage((long) i+1, user,"content", room, ""));
         }
         return messageList;
     }
@@ -405,7 +405,7 @@ public class ChatServiceTest {
     private List<ChatMessage> getLastMessageList(ChatRoom room, User user) {
         List<ChatMessage> messageList = new ArrayList<>();
         for (int i = 5; i > 0; i--) {
-            messageList.add(new ChatMessage((long) i, user,"content", room, LocalDateTime.now()));
+            messageList.add(new ChatMessage((long) i, user,"content", room, ""));
         }
         return messageList;
     }
@@ -413,7 +413,7 @@ public class ChatServiceTest {
     private List<MessageListDto> getMessageDtoList(ChatRoom room, User user) {
         List<MessageListDto> messageList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            messageList.add(new MessageListDto("nickname", "content", "roomId1", LocalDateTime.now()));
+            messageList.add(new MessageListDto("nickname", "content", "roomId1", ""));
         }
         return messageList;
     }

@@ -10,6 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -30,12 +33,12 @@ public class ChatMessage {
     private ChatRoom room;
 
     @Column(nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @PrePersist
     private void setCreatedAt() {
-        this.createdAt = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).format(formatter);
     }
 
     public ChatMessage(User sender, String content, ChatRoom room) {
