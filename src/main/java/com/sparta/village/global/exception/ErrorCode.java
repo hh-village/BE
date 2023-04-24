@@ -21,6 +21,7 @@ public enum ErrorCode {
     NOT_SELLER(BAD_REQUEST, "상태 변경 권한이 없습니다."),
     WRONG_ADMIN_TOKEN(BAD_REQUEST, "관리자 암호가 틀려 등록이 불가능합니다."),
     BAD_PARAMETER(BAD_REQUEST, "파라미터 값이 공백 또는 일치하지 않습니다."),
+    BAD_NICKNAME(BAD_REQUEST, "닉네임은 공백으로 할 수 없습니다."),
 
 
 
