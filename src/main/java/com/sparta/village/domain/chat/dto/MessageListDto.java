@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,6 +14,7 @@ public class MessageListDto {
     private String sender;
     private String content;
     private String roomId;
+    private LocalDateTime creatAt;
 
     @Override
     public boolean equals(Object o) {

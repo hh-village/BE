@@ -60,7 +60,7 @@ public class ChatService {
     public void saveMessage(ChatMessageDto message) {
         User user = userService.getUserByNickname(message.getSender());
         ChatRoom room = chatRoomRepository.findByRoomId(message.getRoomId()).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-        chatMessageRepository.save(new ChatMessage(user, message.getContent(), room));
+        chatMessageRepository.saveAndFlush(new ChatMessage(user, message.getContent(), room));
         template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
     }
 
@@ -71,7 +71,7 @@ public class ChatService {
     private ChatMessageResponseDto findMessageHistoryByRoomId(String roomId, User user) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
         List<MessageListDto> messageList = chatMessageRepository.findAllByRoom(room).stream()
-                .map(m -> new MessageListDto(m.getSender().getNickname(), m.getContent(), m.getRoom().getRoomId())).toList();
+                .map(m -> new MessageListDto(m.getSender().getNickname(), m.getContent(), m.getRoom().getRoomId(), m.getCreatedAt())).toList();
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllChatRoomByUser(user);
         List<RoomListDto> roomList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
