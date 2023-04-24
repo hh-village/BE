@@ -11,27 +11,24 @@ import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 class ImageStorageServiceTest {
     @InjectMocks
     private ImageStorageService imageStorageService;
@@ -154,8 +151,6 @@ class ImageStorageServiceTest {
         Image image2 = new Image(new Product(), "imageUrl2");
         List<Image> imageList = Arrays.asList(image1, image2);
         when(imageRepository.findByProductId(productId)).thenReturn(imageList);
-        doNothing().when(imageRepository).deleteById(image1.getId());
-        doNothing().when(imageRepository).deleteById(image2.getId());
 
         // when
         imageStorageService.deleteImagesByProductId(productId);
