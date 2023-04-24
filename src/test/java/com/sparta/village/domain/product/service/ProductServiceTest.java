@@ -528,10 +528,10 @@ public class ProductServiceTest {
         when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
 
         List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+        when(productRepository.findAllOrderByIdDesc()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(anyString(), anyString())).thenReturn(mockProductList);
 
         String mockImageUrl = "https://example.com/image.jpg";
         when(zzimService.getZzimStatus(user, product)).thenReturn(false);
@@ -547,7 +547,7 @@ public class ProductServiceTest {
         assertEquals(mockImageUrl, responseList.get(0).getImage());
 
         // Verify
-        verify(productRepository).findByTitleContainingAndLocationContaining("qr", "location");
+        verify(productRepository).findByTitleContainingAndLocationContainingOrderByIdDesc("qr", "location");
         verify(zzimService).getZzimStatus(user, product);
     }
 
@@ -578,10 +578,10 @@ public class ProductServiceTest {
         when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
 
         List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+        when(productRepository.findAllOrderByIdDesc()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(anyString(), anyString())).thenReturn(mockProductList);
 
         String mockImageUrl = "https://example.com/image.jpg";
         when(zzimService.getZzimStatus(user, product)).thenReturn(false);
@@ -597,7 +597,7 @@ public class ProductServiceTest {
         assertEquals(mockImageUrl, responseList.get(0).getImage());
 
         // Verify
-        verify(productRepository).findAll();
+        verify(productRepository).findAllOrderByIdDesc();
         verify(zzimService).getZzimStatus(user, product);
     }
 
@@ -620,10 +620,10 @@ public class ProductServiceTest {
         when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
 
         List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+        when(productRepository.findAllOrderByIdDesc()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(anyString(), anyString())).thenReturn(mockProductList);
 
         String mockImageUrl = "https://example.com/image.jpg";
         when(zzimService.getZzimStatus(null, product)).thenReturn(false);
@@ -639,7 +639,7 @@ public class ProductServiceTest {
         assertEquals(mockImageUrl, responseList.get(0).getImage());
 
         // Verify
-        verify(productRepository).findAll();
+        verify(productRepository).findAllOrderByIdDesc();
         verify(zzimService).getZzimStatus(null, product);
     }
 
@@ -670,10 +670,10 @@ public class ProductServiceTest {
         when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
 
         List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+        when(productRepository.findAllOrderByIdDesc()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(anyString(), anyString())).thenReturn(mockProductList);
 
         String mockImageUrl = "https://example.com/image.jpg";
         when(zzimService.getZzimStatus(user, product)).thenReturn(false);
@@ -689,7 +689,7 @@ public class ProductServiceTest {
         assertEquals(mockImageUrl, responseList.get(0).getImage());
 
         // Verify
-        verify(productRepository).findByLocationContaining("location");
+        verify(productRepository).findByLocationContainingOrderByIdDesc("location");
         verify(zzimService).getZzimStatus(user, product);
     }
 
@@ -720,10 +720,10 @@ public class ProductServiceTest {
         when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
 
         List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
+        when(productRepository.findAllOrderByIdDesc()).thenReturn(mockProductList);
+        when(productRepository.findByLocationContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingOrderByIdDesc(anyString())).thenReturn(mockProductList);
+        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(anyString(), anyString())).thenReturn(mockProductList);
 
         String mockImageUrl = "https://example.com/image.jpg";
         when(zzimService.getZzimStatus(user, product)).thenReturn(false);
@@ -739,7 +739,7 @@ public class ProductServiceTest {
         assertEquals(mockImageUrl, responseList.get(0).getImage());
 
         // Verify
-        verify(productRepository).findByTitleContaining("qr");
+        verify(productRepository).findByTitleContainingOrderByIdDesc("qr");
         verify(zzimService).getZzimStatus(user, product);
     }
 

@@ -27,6 +27,9 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> updateNickname(String newNickname, User user) {
+        if (newNickname == null || newNickname.strip().equals("")) {
+            throw new CustomException(ErrorCode.BAD_NICKNAME);
+        }
         if (userRepository.findByNickname(newNickname).isPresent()) {
             throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
         }
