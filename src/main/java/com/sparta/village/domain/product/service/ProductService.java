@@ -112,13 +112,13 @@ public class ProductService {
         List<Product> productList;
 
         if (qr == null && location == null) {
-            productList = productRepository.findAll();
+            productList = productRepository.findAllOrderByIdDesc();
         } else if (qr == null) {
-            productList = productRepository.findByLocationContaining(location);
+            productList = productRepository.findByLocationContainingOrderByIdDesc(location);
         } else if (location == null) {
-            productList = productRepository.findByTitleContaining(qr);
+            productList = productRepository.findByTitleContainingOrderByIdDesc(qr);
         } else {
-            productList = productRepository.findByTitleContainingAndLocationContaining(qr, location);
+            productList = productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(qr, location);
         }
 
         List<ProductResponseDto> responseList = productList.stream()
