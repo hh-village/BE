@@ -101,10 +101,12 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
         boolean zzimStatus = user != null && zzimService.getZzimStatus(user, product);
-
+        int ownerReturned = reservationService.getReservationCountByUser(owner, "returned");
+        int ownerAccepted = reservationService.getReservationCountByUser(owner, "accepted");
+        int ownerWaiting = reservationService.getReservationCountByUser(owner, "waiting");
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
                 zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
-                owner.getNickname(), owner.getProfile(), reservationService.getReservationList(user, id));
+                owner.getNickname(), owner.getProfile(), ownerReturned, ownerAccepted, ownerWaiting, reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
