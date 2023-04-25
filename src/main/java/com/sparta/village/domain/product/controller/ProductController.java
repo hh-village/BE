@@ -29,8 +29,10 @@ public class ProductController {
     @GetMapping("/products")
     public ResponseEntity<ResponseMessage> searchProductList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                              @RequestParam(value = "name", required = false) String title,
-                                                             @RequestParam(value = "location", required = false) String location) {
-        return productService.searchProductList(userDetails, title, location);
+                                                             @RequestParam(value = "location", required = false) String location,
+                                                             @RequestParam(value = "lastId") Long lastId,
+                                                             @RequestParam(value = "size") int size) {
+        return productService.searchProductList(userDetails, title, location, lastId, size);
     }
 
     @GetMapping("/products/{id}")
