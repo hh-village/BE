@@ -100,6 +100,10 @@ public class ReservationService {
 //        System.out.println(profile);
         userService.updateProfileIfNeeded(user, profile);
     }
+
+    public int getReservationCountByUser(User owner, String status) {
+        return reservationRepository.findReservationCountByUserAndStatus(owner.getId(), status);
+    }
 }
 
 

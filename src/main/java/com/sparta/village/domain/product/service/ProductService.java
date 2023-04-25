@@ -5,6 +5,7 @@ import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.product.repository.SearchQueryRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
@@ -27,6 +28,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final SearchQueryRepository searchQueryRepository;
     private final UserService userService;
     private final ZzimService zzimService;
     private final ChatService chatRoomService;
@@ -99,33 +101,35 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         boolean checkOwner = user != null && checkProductOwner(id, user.getId());
         boolean zzimStatus = user != null && zzimService.getZzimStatus(user, product);
-
+        int ownerReturned = reservationService.getReservationCountByUser(owner, "returned");
+        int ownerAccepted = reservationService.getReservationCountByUser(owner, "accepted");
+        int ownerWaiting = reservationService.getReservationCountByUser(owner, "waiting");
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
                 zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
-                owner.getNickname(), owner.getProfile(), reservationService.getReservationList(user, id));
+                owner.getNickname(), owner.getProfile(), ownerReturned, ownerAccepted, ownerWaiting, reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
 
-    public ResponseEntity<ResponseMessage> searchProductList(UserDetailsImpl userDetails, String qr, String location) {
+    public ResponseEntity<ResponseMessage> searchProductList(UserDetailsImpl userDetails, String title, String location, Long lastId, int size) {
         User user = userDetails == null ? null : userDetails.getUser();
-        List<Product> productList;
+        List<Product> productList = searchQueryRepository.searchProduct(user, title, location, lastId, size);
 
-        if (qr == null && location == null) {
-            productList = productRepository.findAllOrderByIdDesc();
-        } else if (qr == null) {
-            productList = productRepository.findByLocationContainingOrderByIdDesc(location);
-        } else if (location == null) {
-            productList = productRepository.findByTitleContainingOrderByIdDesc(qr);
-        } else {
-            productList = productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(qr, location);
-        }
+//        if (qr == null && location == null) {
+//            productList = productRepository.findAllOrderByIdDesc();
+//        } else if (qr == null) {
+//            productList = productRepository.findByLocationContainingOrderByIdDesc(location);
+//        } else if (location == null) {
+//            productList = productRepository.findByTitleContainingOrderByIdDesc(qr);
+//        } else {
+//            productList = productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(qr, location);
+//        }
 
-        List<ProductResponseDto> responseList = productList.stream()
+        List<ProductResponseDto> productResponseDtoList = productList.stream()
                 .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), isMostProduct(product), zzimService.getZzimStatus(user, product)))
                 .toList();
 
-        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", responseList);
+        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", new SearchResponseDto(productResponseDtoList, productResponseDtoList.size() < size));
     }
 
     @Transactional(readOnly = true)
@@ -158,4 +162,5 @@ public class ProductService {
         }
         return false;
     }
+
 }
