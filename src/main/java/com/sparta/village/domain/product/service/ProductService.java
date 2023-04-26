@@ -115,16 +115,6 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         List<Product> productList = searchQueryRepository.searchProduct(user, title, location, lastId, size);
 
-//        if (qr == null && location == null) {
-//            productList = productRepository.findAllOrderByIdDesc();
-//        } else if (qr == null) {
-//            productList = productRepository.findByLocationContainingOrderByIdDesc(location);
-//        } else if (location == null) {
-//            productList = productRepository.findByTitleContainingOrderByIdDesc(qr);
-//        } else {
-//            productList = productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc(qr, location);
-//        }
-
         List<ProductResponseDto> productResponseDtoList = productList.stream()
                 .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), isMostProduct(product), zzimService.getZzimStatus(user, product)))
                 .toList();

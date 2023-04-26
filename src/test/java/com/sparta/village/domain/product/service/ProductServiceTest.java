@@ -9,6 +9,7 @@ import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.product.repository.SearchQueryRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
@@ -47,6 +48,8 @@ public class ProductServiceTest {
     private ProductService productService;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private SearchQueryRepository searchQueryRepository;
     @Mock
     private ImageStorageService imageStorageService;
     @Mock
@@ -563,8 +566,8 @@ public class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("제품검색-key값 둘다 입력한 케이스")
-    public void testKeyQueryAndLocationSearchProductList() {
+    @DisplayName("제품검색-정상케이스")
+    public void testSearchProductList() {
         // given
         User user = new User();
         Product product = new Product();
@@ -572,139 +575,51 @@ public class ProductServiceTest {
         List<Product> productList = Arrays.asList(product);
         String primeImageUrl = "https://example.com/image.png";
 
-        when(productRepository.findByTitleContainingAndLocationContainingOrderByIdDesc("qr", "location")).thenReturn(productList);
+        when(searchQueryRepository.searchProduct(eq(user), anyString(), anyString(), anyLong(), anyInt())).thenReturn(productList);
         when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
         when(reservationService.reservationCount()).thenReturn(Arrays.asList());
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
+        when(zzimService.getZzimStatus(eq(user), eq(product))).thenReturn(false);
 
         // when
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "qr", "location");
+        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "title", "location",123L,2);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
 
         // verify
-        verify(productRepository, times(1)).findByTitleContainingAndLocationContainingOrderByIdDesc("qr", "location");
+        verify(searchQueryRepository, times(1)).searchProduct(eq(user), anyString(), anyString(), anyLong(), anyInt());
         verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
         verify(reservationService, times(1)).reservationCount();
-        verify(zzimService, times(1)).getZzimStatus(user, product);
-    }
-
-    @Test
-    @DisplayName("제품검색-key값 둘다 Null 케이스")
-    void testKeyNullAndNullSearchProductList() {
-        // given
-        User user = new User();
-        Product product = new Product();
-        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
-        List<Product> productList = Arrays.asList(product);
-        String primeImageUrl = "https://example.com/image.png";
-
-        when(productRepository.findAllOrderByIdDesc()).thenReturn(productList);
-        when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
-        when(reservationService.reservationCount()).thenReturn(Arrays.asList());
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // when
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, null);
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-
-        // verify
-        verify(productRepository, times(1)).findAllOrderByIdDesc();
-        verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
-        verify(reservationService, times(1)).reservationCount();
-        verify(zzimService, times(1)).getZzimStatus(user, product);
+        verify(zzimService, times(1)).getZzimStatus(eq(user), eq(product));
     }
 
     @Test
     @DisplayName("제품검색-UserIsNull")
-    void testUserIsNullSearchProductList() {
+    void testSearchProductListUserIsNull() {
         // given
         Product product = new Product();
         List<Product> productList = Arrays.asList(product);
         String primeImageUrl = "https://example.com/image.png";
 
-        when(productRepository.findAllOrderByIdDesc()).thenReturn(productList);
+        when(searchQueryRepository.searchProduct(isNull(), anyString(), anyString(), anyLong(), anyInt())).thenReturn(productList);
         when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
         when(reservationService.reservationCount()).thenReturn(Arrays.asList());
-        when(zzimService.getZzimStatus(null, product)).thenReturn(false);
+        when(zzimService.getZzimStatus(isNull(), eq(product))).thenReturn(false);
 
         // when
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(null, null, null);
+        ResponseEntity<ResponseMessage> response = productService.searchProductList(null, "title", "location",123L,2);
 
         // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
 
         // verify
-        verify(productRepository, times(1)).findAllOrderByIdDesc();
+        verify(searchQueryRepository, times(1)).searchProduct(isNull(), anyString(), anyString(), anyLong(), anyInt());
         verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
         verify(reservationService, times(1)).reservationCount();
-        verify(zzimService, times(1)).getZzimStatus(null, product);
+        verify(zzimService, times(1)).getZzimStatus(isNull(), eq(product));
     }
-
-    @Test
-    @DisplayName("제품검색-key값 qr==Null 케이스")
-    void testKeyNullAndLocationSearchProductList() {
-        // given
-        User user = new User();
-        Product product = new Product();
-        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
-        List<Product> productList = Arrays.asList(product);
-        String primeImageUrl = "https://example.com/image.png";
-
-        when(productRepository.findByTitleContainingOrderByIdDesc("qr")).thenReturn(productList);
-        when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
-        when(reservationService.reservationCount()).thenReturn(Arrays.asList());
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // when
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "qr", null);
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-
-        // verify
-        verify(productRepository, times(1)).findByTitleContainingOrderByIdDesc("qr");
-        verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
-        verify(reservationService, times(1)).reservationCount();
-        verify(zzimService, times(1)).getZzimStatus(user, product);
-    }
-
-    @Test
-    @DisplayName("제품검색-key값 location==Null 케이스")
-    void testKeyQrAndNullSearchProductList() {
-        // given
-        User user = new User();
-        Product product = new Product();
-        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
-        List<Product> productList = Arrays.asList(product);
-        String primeImageUrl = "https://example.com/image.png";
-
-        when(productRepository.findByLocationContainingOrderByIdDesc("location")).thenReturn(productList);
-        when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
-        when(reservationService.reservationCount()).thenReturn(Arrays.asList());
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // when
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, "location");
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-
-        // verify
-        verify(productRepository, times(1)).findByLocationContainingOrderByIdDesc("location");
-        verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
-        verify(reservationService, times(1)).reservationCount();
-        verify(zzimService, times(1)).getZzimStatus(user, product);
-    }
-
 
     @Test
     @DisplayName("인기제품-True")
