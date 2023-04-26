@@ -53,6 +53,7 @@ public class WebSecurityConfig {
                 .antMatchers("/test/**").permitAll()
                 .antMatchers("/main").permitAll()
                 .antMatchers(HttpMethod.POST, "/chat/**").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/chat/**").permitAll()
                 .anyRequest().authenticated()
                 //JWT 인증/인가를 사용하기 위한 설정
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
