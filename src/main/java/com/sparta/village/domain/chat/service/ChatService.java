@@ -1,9 +1,6 @@
 package com.sparta.village.domain.chat.service;
 
-import com.sparta.village.domain.chat.dto.ChatMessageDto;
-import com.sparta.village.domain.chat.dto.ChatMessageResponseDto;
-import com.sparta.village.domain.chat.dto.MessageListDto;
-import com.sparta.village.domain.chat.dto.RoomListDto;
+import com.sparta.village.domain.chat.dto.*;
 import com.sparta.village.domain.chat.entity.ChatMessage;
 import com.sparta.village.domain.chat.entity.ChatRoom;
 import com.sparta.village.domain.chat.repository.ChatMessageRepository;
@@ -20,6 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ChatService {
                 roomId = roomList.get(0);
             }
         }
-        ChatMessageResponseDto data = roomId == null ? null : findMessageHistoryByRoomId(roomId, user);
+        MyChatRoomResponseDto data = roomId == null ? null : findMessageHistoryByRoomId(roomId, user);
         return ResponseMessage.SuccessResponse("대화 불러오기 성공", data);
     }
 
@@ -60,18 +61,20 @@ public class ChatService {
     public void saveMessage(ChatMessageDto message) {
         User user = userService.getUserByNickname(message.getSender());
         ChatRoom room = chatRoomRepository.findByRoomId(message.getRoomId()).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-        chatMessageRepository.save(new ChatMessage(user, message.getContent(), room));
-        template.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+        ChatMessage chatMessage = new ChatMessage(user, message.getContent(), room);
+        chatMessageRepository.saveAndFlush(chatMessage);
+        ChatMessageResponseDto responseDto = new ChatMessageResponseDto(chatMessage.getRoom().getRoomId(), chatMessage.getSender().getNickname(), chatMessage.getContent(), changeDateFormat(chatMessage.getCreatedAt()));
+        template.convertAndSend("/sub/chat/room/" + message.getRoomId(), responseDto);
     }
 
     private User getConversationPartner(ChatRoom chatRoom, User user) {
         return chatRoom.getUser().getId().equals(user.getId()) ? chatRoom.getOwner() : chatRoom.getUser();
     }
 
-    private ChatMessageResponseDto findMessageHistoryByRoomId(String roomId, User user) {
+    private MyChatRoomResponseDto findMessageHistoryByRoomId(String roomId, User user) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
         List<MessageListDto> messageList = chatMessageRepository.findAllByRoom(room).stream()
-                .map(m -> new MessageListDto(m.getSender().getNickname(), m.getContent(), m.getRoom().getRoomId())).toList();
+                .map(m -> new MessageListDto(m.getSender().getNickname(), m.getContent(), m.getRoom().getRoomId(), changeDateFormat(m.getCreatedAt()))).toList();
         List<ChatRoom> chatRoomList = chatRoomRepository.findAllChatRoomByUser(user);
         List<RoomListDto> roomList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
@@ -81,7 +84,14 @@ public class ChatService {
             String lastMessage = chatMessageList.size() > 0 ? chatMessageList.get(0).getContent() : null;
             roomList.add(new RoomListDto(chatRoom.getRoomId(), other.getNickname(), other.getProfile(), lastMessage, target));
         }
-        return new ChatMessageResponseDto(messageList, roomList);
+        return new MyChatRoomResponseDto(messageList, roomList);
+    }
+
+    private String changeDateFormat(String createdAt) {
+        String[] date = createdAt.split(" ");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String today = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).format(formatter);
+        return date[0].equals(today) ? date[1] : date[0];
     }
 
     public void deleteByProductId(Long id) {
@@ -92,5 +102,13 @@ public class ChatService {
         chatMessageRepository.deleteMessagesByProductId(id);
     }
 
-
+    @Transactional
+    public ResponseEntity<ResponseMessage> deleteRoom(String roomId) {
+        ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
+        if (chatMessageRepository.existsByRoom(room)) {
+            chatMessageRepository.deleteByRoom(room);
+        }
+        chatRoomRepository.deleteById(room.getId());
+        return ResponseMessage.SuccessResponse("채팅방 삭제 성공", "");
+    }
 }

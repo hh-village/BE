@@ -49,4 +49,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Modifying
     @Query("DELETE FROM Reservation r WHERE r.product.id = :productId")
     void deleteByProductId(@Param("productId") Long id);
+
+    @Query(value = "select count(*) from reservation r left join product p on r.product_id = p.id where p.user_id = :user_id and r.status = :status", nativeQuery = true)
+    int findReservationCountByUserAndStatus(@Param("user_id") Long id, @Param("status") String status);
 }

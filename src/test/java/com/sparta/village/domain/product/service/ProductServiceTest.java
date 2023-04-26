@@ -1,12 +1,15 @@
 package com.sparta.village.domain.product.service;
 
 import com.sparta.village.domain.chat.service.ChatService;
+import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.image.service.ImageStorageService;
+import com.sparta.village.domain.product.dto.MainResponseDto;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
 import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
+import com.sparta.village.domain.product.repository.SearchQueryRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
@@ -21,29 +24,32 @@ import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
 
     @InjectMocks
     private ProductService productService;
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private SearchQueryRepository searchQueryRepository;
     @Mock
     private ImageStorageService imageStorageService;
     @Mock
@@ -61,18 +67,38 @@ public class ProductServiceTest {
     @DisplayName("제품등록-정상케이스")
     public void testRegistProduct() {
         // given
-        User user = new User(12345L, "테스트 닉네임", "profile.jpg", UserRoleEnum.USER);
+        List<MultipartFile> imageFile = new ArrayList<>();
+        MultipartFile dummyImage1 = new MockMultipartFile("image1", "image1.jpg", "image/jpeg", new byte[10]);
+        MultipartFile dummyImage2 = new MockMultipartFile("image2", "image2.jpg", "image/jpeg", new byte[10]);
+        imageFile.add(dummyImage1);
+        imageFile.add(dummyImage2);
+
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
 
         ProductRequestDto productRequestDto = ProductRequestDto.builder()
                 .title("제품명")
                 .description("제품 설명")
                 .price(10000)
                 .location("서울")
+                .images(imageFile)
                 .build();
 
-        Product newProduct = new Product(user, productRequestDto);
+        Product product = new Product(user, productRequestDto);
+        List<String> imageUrlList = new ArrayList<>();
+        String imageUrl1 = "imageUrl1";
+        String imageUrl2 = "imageUrl2";
+        imageUrlList.add(imageUrl1);
+        imageUrlList.add(imageUrl2);
 
-        when(productRepository.saveAndFlush(any(Product.class))).thenReturn(newProduct);
+        when(productRepository.saveAndFlush(any(Product.class))).thenReturn(product);
+        doNothing().when(imageStorageService).saveImageList(any(Product.class), eq(imageUrlList));
+        when(imageStorageService.storeFiles(anyList())).thenReturn(imageUrlList);
 
         // When
         ResponseEntity<ResponseMessage> response = productService.registProduct(user, productRequestDto);
@@ -83,6 +109,8 @@ public class ProductServiceTest {
 
         // Verify
         verify(productRepository, times(1)).saveAndFlush(any(Product.class));
+        verify(imageStorageService).saveImageList(any(Product.class), eq(imageUrlList));
+        verify(imageStorageService).storeFiles(anyList());
     }
 
     @Test
@@ -133,6 +161,25 @@ public class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("제품삭제-제품없음")
+    void deleteProduct_whenProductNotFound_throwsCustomException() {
+        Long productId = 1L;
+        User user = new User();
+        user.setId(2L);
+
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        // Assert that the expected exception is thrown
+        CustomException exception = assertThrows(
+                CustomException.class,
+                () -> productService.deleteProduct(productId, user),
+                "CustomException throw 안시킴"
+        );
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
     @DisplayName("제품삭제-권한없음")
     public void testDeleteProductNotAUTHOR() {
         // Given
@@ -161,57 +208,71 @@ public class ProductServiceTest {
 
         Product product = new Product(anotherUser, productRequestDto);
 
-        given(productRepository.findById(product.getId())).willReturn(Optional.of(product));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         // when
         CustomException expectedException = assertThrows(
                 CustomException.class,
                 () -> productService.deleteProduct(product.getId(), user),
-                "CustomException이 발생할 것으로 예상했지만 throw되지 않았습니다."
+                "CustomException throw 안시킴"
         );
 
         // then
         assertEquals(ErrorCode.NOT_AUTHOR, expectedException.getErrorCode());
     }
+    @Test
+    @DisplayName("제품수정-정상 케이스")
+    public void testUpdateProduct() {
+        // Given
+        Long productId = 1L;
+        List<MultipartFile> imageFile = new ArrayList<>();
+        MultipartFile dummyImage1 = new MockMultipartFile("image1", "image1.jpg", "image/jpeg", new byte[10]);
+        MultipartFile dummyImage2 = new MockMultipartFile("image2", "image2.jpg", "image/jpeg", new byte[10]);
+        imageFile.add(dummyImage1);
+        imageFile.add(dummyImage2);
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
 
-//    @Test
-//    @DisplayName("제품수정-정상 케이스")
-//    public void testUpdateProduct() {
-//        // Given
-//        Long productId = 1L;
-//        User user = User.builder()
-//                .id(1L)
-//                .kakaoId(123L)
-//                .nickname("닉네임")
-//                .profile("프로필.jpg")
-//                .role(UserRoleEnum.USER)
-//                .build();
-//
-//        ProductRequestDto productRequestDto = ProductRequestDto.builder()
-//                .title("제품명")
-//                .description("제품 설명")
-//                .price(10000)
-//                .location("서울")
-//                .build();
-//
-//        List<String> imageUrlList = new ArrayList<>();
-//        Product product = new Product(user, productRequestDto);
-//        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-//        doNothing().when(imageStorageService).deleteImagesByProductId(productId);
-//        doNothing().when(imageStorageService).saveImageList(product, imageUrlList);
-//
-//        // When
-//        ResponseEntity<ResponseMessage> response = productService.updateProduct(productId, user, productRequestDto);
-//
-//        // Then
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals("상품 수정이 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-//
-//        // Verify
-//        verify(productRepository).findById(productId);
-//        verify(imageStorageService, times(1)).deleteImagesByProductId(productId);
-//        verify(imageStorageService).saveImageList(product, imageUrlList);
-//    }
+        ProductRequestDto productRequestDto = ProductRequestDto.builder()
+                .title("제품명")
+                .description("제품 설명")
+                .price(10000)
+                .location("서울")
+                .images(imageFile)
+                .build();
+
+        Product product = new Product(user, productRequestDto);
+
+        List<String> imageUrlList = new ArrayList<>();
+        String imageUrl1 = "imageUrl1";
+        String imageUrl2 = "imageUrl2";
+        imageUrlList.add(imageUrl1);
+        imageUrlList.add(imageUrl2);
+
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        doNothing().when(imageStorageService).deleteImagesByProductId(productId);
+        doNothing().when(imageStorageService).saveImageList(product, imageUrlList);
+        when(imageStorageService.storeFiles(anyList())).thenReturn(imageUrlList);
+
+        // When
+        ResponseEntity<ResponseMessage> response = productService.updateProduct(productId, user, productRequestDto);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("상품 수정이 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+
+        // Verify
+        verify(productRepository).findById(productId);
+        verify(imageStorageService, times(1)).deleteImagesByProductId(productId);
+        verify(imageStorageService).saveImageList(product, imageUrlList);
+        verify(imageStorageService).storeFiles(anyList());
+    }
 
     @Test
     @DisplayName("제품수정-권한없음")
@@ -248,7 +309,7 @@ public class ProductServiceTest {
         CustomException expectedException = assertThrows(
                 CustomException.class,
                 () -> productService.updateProduct(product.getId(), user, productRequestDto),
-                "CustomException이 발생할 것으로 예상했지만 throw되지 않았습니다."
+                "CustomException throw 안시킴"
         );
 
         // then
@@ -256,6 +317,7 @@ public class ProductServiceTest {
     }
 
     @Test
+    @DisplayName("상세페이지 조회")
     public void testDetailProduct() {
         // Given
         Long productId = 1L;
@@ -502,247 +564,60 @@ public class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("제품검색-key값 둘다 입력한 케이스")
-    public void testKeyQueryAndLocationSearchProductList() {
-        // Given
-        User user = User.builder()
-                .id(1L)
-                .kakaoId(123L)
-                .nickname("닉네임")
-                .profile("프로필.jpg")
-                .role(UserRoleEnum.USER)
-                .build();
+    @DisplayName("제품검색-정상케이스")
+    public void testSearchProductList() {
+        // given
+        User user = new User();
+        Product product = new Product();
+        UserDetailsImpl userDetails = new UserDetailsImpl(user, "123");
+        List<Product> productList = Arrays.asList(product);
+        String primeImageUrl = "https://example.com/image.png";
 
-        Product product = Product.builder()
-                .id(1L)
-                .title("제목")
-                .description("내용")
-                .price(15000)
-                .location("서울 강남구")
-                .zzimCount(3)
-                .build();
+        when(searchQueryRepository.searchProduct(eq(user), anyString(), anyString(), anyLong(), anyInt())).thenReturn(productList);
+        when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
+        when(reservationService.reservationCount()).thenReturn(Arrays.asList());
+        when(zzimService.getZzimStatus(eq(user), eq(product))).thenReturn(false);
 
-        when(userDetails.getUser()).thenReturn(user);
+        // when
+        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "title", "location",123L,2);
 
-        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
-
-        List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
-
-        String mockImageUrl = "https://example.com/image.jpg";
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // When
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "qr", "location");
-
-        // Then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
-        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
-        assertEquals(mockImageUrl, responseList.get(0).getImage());
+        assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
 
-        // Verify
-        verify(productRepository).findByTitleContainingAndLocationContaining("qr", "location");
-        verify(zzimService).getZzimStatus(user, product);
-    }
-
-    @Test
-    @DisplayName("제품검색-key값 둘다 Null 케이스")
-    void testKeyNullAndNullSearchProductList() {
-        // Given
-        User user = User.builder()
-                .id(1L)
-                .kakaoId(123L)
-                .nickname("닉네임")
-                .profile("프로필.jpg")
-                .role(UserRoleEnum.USER)
-                .build();
-
-        Product product = Product.builder()
-                .id(1L)
-                .title("제목")
-                .description("내용")
-                .price(15000)
-                .location("서울 강남구")
-                .zzimCount(3)
-                .build();
-
-        when(userDetails.getUser()).thenReturn(user);
-
-        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
-
-        List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
-
-        String mockImageUrl = "https://example.com/image.jpg";
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // When
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, null);
-
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
-        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
-        assertEquals(mockImageUrl, responseList.get(0).getImage());
-
-        // Verify
-        verify(productRepository).findAll();
-        verify(zzimService).getZzimStatus(user, product);
+        // verify
+        verify(searchQueryRepository, times(1)).searchProduct(eq(user), anyString(), anyString(), anyLong(), anyInt());
+        verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
+        verify(reservationService, times(1)).reservationCount();
+        verify(zzimService, times(1)).getZzimStatus(eq(user), eq(product));
     }
 
     @Test
     @DisplayName("제품검색-UserIsNull")
-    void testUserIsNullSearchProductList() {
-        // Given
-        UserDetailsImpl userDetails = null;
+    void testSearchProductListUserIsNull() {
+        // given
+        Product product = new Product();
+        List<Product> productList = Arrays.asList(product);
+        String primeImageUrl = "https://example.com/image.png";
 
-        Product product = Product.builder()
-                .id(1L)
-                .title("제목")
-                .description("내용")
-                .price(15000)
-                .location("서울 강남구")
-                .zzimCount(3)
-                .build();
+        when(searchQueryRepository.searchProduct(isNull(), anyString(), anyString(), anyLong(), anyInt())).thenReturn(productList);
+        when(imageStorageService.getImageUrlListByProductId(any())).thenReturn(Arrays.asList(primeImageUrl));
+        when(reservationService.reservationCount()).thenReturn(Arrays.asList());
+        when(zzimService.getZzimStatus(isNull(), eq(product))).thenReturn(false);
 
-        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
+        // when
+        ResponseEntity<ResponseMessage> response = productService.searchProductList(null, "title", "location",123L,2);
 
-        List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
-
-        String mockImageUrl = "https://example.com/image.jpg";
-        when(zzimService.getZzimStatus(null, product)).thenReturn(false);
-
-        // When
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, null);
-
-        // Then
+        // then
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
-        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
-        assertEquals(mockImageUrl, responseList.get(0).getImage());
+        assertEquals("검색 조회가 되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
 
-        // Verify
-        verify(productRepository).findAll();
-        verify(zzimService).getZzimStatus(null, product);
+        // verify
+        verify(searchQueryRepository, times(1)).searchProduct(isNull(), anyString(), anyString(), anyLong(), anyInt());
+        verify(imageStorageService, times(1)).getImageUrlListByProductId(any());
+        verify(reservationService, times(1)).reservationCount();
+        verify(zzimService, times(1)).getZzimStatus(isNull(), eq(product));
     }
-
-    @Test
-    @DisplayName("제품검색-key값 qr==Null 케이스")
-    void testKeyNullAndLocationSearchProductList() {
-        // Given
-        User user = User.builder()
-                .id(1L)
-                .kakaoId(123L)
-                .nickname("닉네임")
-                .profile("프로필.jpg")
-                .role(UserRoleEnum.USER)
-                .build();
-
-        Product product = Product.builder()
-                .id(1L)
-                .title("제목")
-                .description("내용")
-                .price(15000)
-                .location("서울 강남구")
-                .zzimCount(3)
-                .build();
-
-        when(userDetails.getUser()).thenReturn(user);
-
-        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
-
-        List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
-
-        String mockImageUrl = "https://example.com/image.jpg";
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // When
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, null, "location");
-
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
-        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
-        assertEquals(mockImageUrl, responseList.get(0).getImage());
-
-        // Verify
-        verify(productRepository).findByLocationContaining("location");
-        verify(zzimService).getZzimStatus(user, product);
-    }
-
-    @Test
-    @DisplayName("제품검색-key값 location==Null 케이스")
-    void testKeyQrAndNullSearchProductList() {
-        // Given
-        User user = User.builder()
-                .id(1L)
-                .kakaoId(123L)
-                .nickname("닉네임")
-                .profile("프로필.jpg")
-                .role(UserRoleEnum.USER)
-                .build();
-
-        Product product = Product.builder()
-                .id(1L)
-                .title("제목")
-                .description("내용")
-                .price(15000)
-                .location("서울 강남구")
-                .zzimCount(3)
-                .build();
-
-        when(userDetails.getUser()).thenReturn(user);
-
-        List<String> mockImageUrlList = Collections.singletonList("https://example.com/image.jpg");
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(mockImageUrlList);
-
-        List<Product> mockProductList = Arrays.asList(product);
-        when(productRepository.findAll()).thenReturn(mockProductList);
-        when(productRepository.findByLocationContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContaining(anyString())).thenReturn(mockProductList);
-        when(productRepository.findByTitleContainingAndLocationContaining(anyString(), anyString())).thenReturn(mockProductList);
-
-        String mockImageUrl = "https://example.com/image.jpg";
-        when(zzimService.getZzimStatus(user, product)).thenReturn(false);
-
-        // When
-        ResponseEntity<ResponseMessage> response = productService.searchProductList(userDetails, "qr", null);
-
-        // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("검색 조회가 되었습니다.", response.getBody().getMessage());
-        List<ProductResponseDto> responseList = (List<ProductResponseDto>) response.getBody().getData();
-        assertEquals(mockImageUrl, responseList.get(0).getImage());
-
-        // Verify
-        verify(productRepository).findByTitleContaining("qr");
-        verify(zzimService).getZzimStatus(user, product);
-    }
-
 
     @Test
     @DisplayName("인기제품-True")
@@ -778,6 +653,7 @@ public class ProductServiceTest {
     @DisplayName("인기제품-False")
     void testGetMostProductFalse() {
         // Given
+
         Product product = Product.builder()
                 .id(1L)
                 .title("제목")
@@ -787,41 +663,45 @@ public class ProductServiceTest {
                 .zzimCount(2)
                 .build();
 
-        ReservationCountResponseDto countResponseDto = new ReservationCountResponseDto(2L, 40L);
-        List<ReservationCountResponseDto> reservationCounts = Collections.singletonList(countResponseDto);
+        List<ReservationCountResponseDto> reservationCountList = Arrays.asList(
+                new ReservationCountResponseDto(2L, 10L),
+                new ReservationCountResponseDto(3L, 5L),
+                new ReservationCountResponseDto(4L, 1L)
+        );
 
-        when(reservationService.reservationCount()).thenReturn(reservationCounts);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        // when
+        when(reservationService.reservationCount()).thenReturn(reservationCountList);
+        when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // When
-        boolean isMostProduct = productService.isMostProduct(product);
+        // then
+        boolean result = productService.isMostProduct(product);
 
-        // Then
-        assertFalse(isMostProduct);
-
-        // Verify
+        // verify
+        assertFalse(result);
         verify(reservationService).reservationCount();
-        verify(productRepository).findById(2L);
+        verify(productRepository, times(1)).findById(anyLong());
     }
 
     @Test
     @DisplayName("전체조회-정상")
     public void testGetMainPage() {
         // given
-        UserDetailsImpl userDetails = mock(UserDetailsImpl.class);
-        User user = mock(User.class);
+        User user = User.builder()
+                .id(1L)
+                .kakaoId(123L)
+                .nickname("닉네임")
+                .profile("프로필.jpg")
+                .role(UserRoleEnum.USER)
+                .build();
         when(userDetails.getUser()).thenReturn(user);
 
         List<AcceptReservationResponseDto> dealList = new ArrayList<>();
         when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
 
-        List<Product> randomProducts1 = new ArrayList<>();
-        List<Product> randomProducts2 = new ArrayList<>();
-        when(productRepository.findRandomProduct(8)).thenReturn(randomProducts1);
-        when(productRepository.findRandomProduct(6)).thenReturn(randomProducts2);
-
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(Arrays.asList("image_url"));
-        when(zzimService.getZzimStatus(any(User.class), any(Product.class))).thenReturn(false);
+        List<Product> productList1 = new ArrayList<>();
+        List<Product> productList2 = new ArrayList<>();
+        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
+        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
         when(zzimService.getZzimCount(user)).thenReturn(0);
 
         // when
@@ -835,8 +715,8 @@ public class ProductServiceTest {
         verify(reservationService, times(1)).getAcceptedReservationList();
         verify(productRepository, times(1)).findRandomProduct(8);
         verify(productRepository, times(1)).findRandomProduct(6);
-        verify(imageStorageService, times(randomProducts1.size() + randomProducts2.size())).getImageUrlListByProductId(anyLong());
-        verify(zzimService, times(randomProducts1.size() + randomProducts2.size())).getZzimStatus(any(User.class), any(Product.class));
+        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
+        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
         verify(zzimService, times(1)).getZzimCount(user);
     }
 
@@ -849,12 +729,11 @@ public class ProductServiceTest {
         List<AcceptReservationResponseDto> dealList = new ArrayList<>();
         when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
 
-        List<Product> randomProducts1 = new ArrayList<>();
-        List<Product> randomProducts2 = new ArrayList<>();
-        when(productRepository.findRandomProduct(8)).thenReturn(randomProducts1);
-        when(productRepository.findRandomProduct(6)).thenReturn(randomProducts2);
-
-        when(imageStorageService.getImageUrlListByProductId(anyLong())).thenReturn(Arrays.asList("image_url"));
+        List<Product> productList1 = new ArrayList<>();
+        List<Product> productList2 = new ArrayList<>();
+        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
+        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
+        when(zzimService.getZzimCount(null)).thenReturn(0);
 
         // when
         ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
@@ -867,9 +746,9 @@ public class ProductServiceTest {
         verify(reservationService, times(1)).getAcceptedReservationList();
         verify(productRepository, times(1)).findRandomProduct(8);
         verify(productRepository, times(1)).findRandomProduct(6);
-        verify(imageStorageService, times(randomProducts1.size() + randomProducts2.size())).getImageUrlListByProductId(anyLong());
-        verify(zzimService, times(0)).getZzimStatus(any(User.class), any(Product.class));
-        verify(zzimService, times(0)).getZzimCount(any(User.class));
+        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
+        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
+        verify(zzimService, times(1)).getZzimCount(null);
     }
 
     @Test

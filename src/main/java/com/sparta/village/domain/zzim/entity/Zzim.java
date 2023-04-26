@@ -2,14 +2,18 @@ package com.sparta.village.domain.zzim.entity;
 
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.user.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Getter
+@Builder
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 public class Zzim {
 
     @Id

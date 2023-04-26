@@ -15,6 +15,9 @@ public class ProductDetailResponseDto {
     private final Long id;
     private final String profile;
     private final String ownerNickname;
+    private final int ownerReturned;
+    private final int ownerAccepted;
+    private final int ownerWaiting;
     private final String title;
     private final String description;
     private final int price;
@@ -26,10 +29,13 @@ public class ProductDetailResponseDto {
     private final List<ReservationResponseDto> reservationList;
 
 
-    public ProductDetailResponseDto(Product product, boolean checkOwner,boolean zzimStatus, int zzimCount, List<String> imageUrlList, String ownerNickname, String ownerProfile, List<ReservationResponseDto> reservationList) {
+    public ProductDetailResponseDto(Product product, boolean checkOwner,boolean zzimStatus, int zzimCount, List<String> imageUrlList, String ownerNickname, String ownerProfile, int ownerReturned, int ownerAccepted, int ownerWaiting, List<ReservationResponseDto> reservationList) {
         this.id = product.getId();
         this.profile = ownerProfile;
         this.ownerNickname = ownerNickname;
+        this.ownerReturned = ownerReturned;
+        this.ownerAccepted = ownerAccepted;
+        this.ownerWaiting = ownerWaiting;
         this.title = product.getTitle();
         this.description = product.getDescription();
         this.price = product.getPrice();

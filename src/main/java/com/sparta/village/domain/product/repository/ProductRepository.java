@@ -16,9 +16,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByUser(User user);
     boolean existsByIdAndUserId(Long id, Long userId);
 
-    List<Product> findByTitleContainingAndLocationContaining(String title, String location);
-    List<Product> findByTitleContaining (String title);
-    List<Product> findByLocationContaining(String location);
+    List<Product> findByTitleContainingAndLocationContainingOrderByIdDesc(String title, String location);
+    List<Product> findByTitleContainingOrderByIdDesc (String title);
+    List<Product> findByLocationContainingOrderByIdDesc(String location);
+
+    @Query("select p from Product p order by p.id desc")
+    List<Product> findAllOrderByIdDesc();
     @Query(value = "select * from product order by rand() limit :count", nativeQuery = true)
     List<Product> findRandomProduct(@Param("count") int count);
 

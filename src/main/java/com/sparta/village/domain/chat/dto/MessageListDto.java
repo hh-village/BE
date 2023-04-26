@@ -11,6 +11,7 @@ public class MessageListDto {
     private String sender;
     private String content;
     private String roomId;
+    private String createdAt;
 
     @Override
     public boolean equals(Object o) {

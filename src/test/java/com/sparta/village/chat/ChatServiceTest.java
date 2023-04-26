@@ -33,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -358,11 +359,10 @@ public class ChatServiceTest {
         User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
         User owner = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
         ChatRoom room = new ChatRoom(1L, "roomId", product, user, owner);
-        ChatMessage chatMessage = new ChatMessage(1L, user,"content", room);
 
         doReturn(user).when(userService).getUserByNickname("nickname");
         doReturn(Optional.of(room)).when(chatRoomRepository).findByRoomId("roomId");
-        doReturn(chatMessage).when(chatMessageRepository).save(any(ChatMessage.class));
+        when(chatMessageRepository.saveAndFlush(any(ChatMessage.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         //when
         chatService.saveMessage(chatMessageDto);
@@ -370,7 +370,7 @@ public class ChatServiceTest {
         //then
 
         // verify
-        verify(chatMessageRepository, times(1)).save(any(ChatMessage.class));
+        verify(chatMessageRepository, times(1)).saveAndFlush(any(ChatMessage.class));
         verify(simpMessageSendingOperations, times(1)).convertAndSend("/sub/chat/room/roomId", chatMessageDto);
     }
 
@@ -397,7 +397,7 @@ public class ChatServiceTest {
     private List<ChatMessage> getMessageList(ChatRoom room, User user) {
         List<ChatMessage> messageList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            messageList.add(new ChatMessage((long) i+1, user,"content", room));
+            messageList.add(new ChatMessage((long) i+1, user,"content", room, ""));
         }
         return messageList;
     }
@@ -405,7 +405,7 @@ public class ChatServiceTest {
     private List<ChatMessage> getLastMessageList(ChatRoom room, User user) {
         List<ChatMessage> messageList = new ArrayList<>();
         for (int i = 5; i > 0; i--) {
-            messageList.add(new ChatMessage((long) i, user,"content", room));
+            messageList.add(new ChatMessage((long) i, user,"content", room, ""));
         }
         return messageList;
     }
@@ -413,7 +413,7 @@ public class ChatServiceTest {
     private List<MessageListDto> getMessageDtoList(ChatRoom room, User user) {
         List<MessageListDto> messageList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            messageList.add(new MessageListDto("nickname", "content", "roomId1"));
+            messageList.add(new MessageListDto("nickname", "content", "roomId1", ""));
         }
         return messageList;
     }

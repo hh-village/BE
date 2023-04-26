@@ -26,9 +26,6 @@ public class UserController {
 
     @GetMapping("/users/login")
     public ResponseEntity<ResponseMessage> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
-        // code: 프론트 엔드로부터 받은 인가 코드
-        System.out.println("컨트롤러 들어왔음!");
-        System.out.println(code);
         return kakaoUserService.kakaoLogin(code, response);
     }
 

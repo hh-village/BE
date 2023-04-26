@@ -3,14 +3,15 @@ package com.sparta.village.domain.chat.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessageResponseDto {
-    private List<MessageListDto> messageList;
-    private List<RoomListDto> roomList;
-
+    private String roomId; // 방번호
+    private String sender; // nickname
+    private String content; // 메시지
+    private String createdAt;
 }

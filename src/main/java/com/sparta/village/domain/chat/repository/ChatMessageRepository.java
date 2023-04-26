@@ -23,4 +23,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
 
     @Query("select m from ChatMessage m where m.room = :room order by m.id desc")
     List<ChatMessage> findLastMessageByRoom(@Param("room") ChatRoom room);
+
+    boolean existsByRoom(ChatRoom room);
+    void deleteByRoom(ChatRoom room);
 }
