@@ -167,7 +167,6 @@ public class ProductServiceTest {
         User user = new User();
         user.setId(2L);
 
-        // Stub the productRepository.findById to return an empty Optional
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
         // Assert that the expected exception is thrown
@@ -177,7 +176,6 @@ public class ProductServiceTest {
                 "CustomException throw 안시킴"
         );
 
-        // Verify the exception contains the expected error code
         assertEquals(ErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
     }
 
