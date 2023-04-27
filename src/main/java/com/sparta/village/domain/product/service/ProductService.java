@@ -11,12 +11,14 @@ import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
+import com.sparta.village.domain.visitor.repository.VisitorCountRepository;
 import com.sparta.village.domain.zzim.service.ZzimService;
 import com.sparta.village.global.exception.CustomException;
 import com.sparta.village.global.exception.ErrorCode;
 import com.sparta.village.global.exception.ResponseMessage;
 import com.sparta.village.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,23 +30,25 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final VisitorCountRepository visitorCountRepository;
     private final SearchQueryRepository searchQueryRepository;
     private final UserService userService;
     private final ZzimService zzimService;
     private final ChatService chatRoomService;
     private final ReservationService reservationService;
     private final ImageStorageService imageStorageService;
-
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @Transactional
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
         User user = userDetails == null ? null : userDetails.getUser();
+        redisTemplate.opsForValue().increment("visitor_count",1);
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
         List<ProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
         List<ProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
-        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimService.getZzimCount(user), randomProduct));
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimService.getZzimCount(user), randomProduct, visitorCountRepository.findVisitorCountById()));
     }
 
     @Transactional
