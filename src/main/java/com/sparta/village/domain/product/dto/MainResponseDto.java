@@ -15,5 +15,6 @@ public class MainResponseDto {
     private List<ProductResponseDto> productList;
     private int zzimCount;
     private List<ProductResponseDto> randomProduct;
+    private Long visitorCount;
 
 }
