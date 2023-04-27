@@ -36,6 +36,12 @@ public class ImageStorageService {
             throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
         }
         List<String> imageUrlList = new ArrayList<>();
+
+        imageList.stream().forEach(image -> {
+            if (image.getSize() > 20 * 1024 * 1024) {
+                throw new RuntimeException("파일 용량 초과: " + image.getOriginalFilename());
+            }
+        });
         for (MultipartFile image : imageList) {
             String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
             try {
