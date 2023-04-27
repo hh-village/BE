@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @RequiredArgsConstructor
 public class WebMvcConfig implements WebMvcConfigurer {
-    private final RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

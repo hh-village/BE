@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 @RequiredArgsConstructor
 public class VisitInterceptor implements HandlerInterceptor {
-    private final RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

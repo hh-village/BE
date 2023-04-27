@@ -15,13 +15,13 @@ public class Visitor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private Long visitorCount;
+    private Integer visitorCount;
 
-    public Visitor(Long visitorCount) {
+    public Visitor(Integer visitorCount) {
         this.visitorCount = visitorCount;
     }
 
-    public void updateVisitorCount(Long visitorCount) {
+    public void updateVisitorCount(Integer visitorCount) {
         this.visitorCount = visitorCount;
     }
 }

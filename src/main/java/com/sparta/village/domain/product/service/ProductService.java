@@ -37,7 +37,7 @@ public class ProductService {
     private final ChatService chatRoomService;
     private final ReservationService reservationService;
     private final ImageStorageService imageStorageService;
-    private final RedisTemplate<String, Long> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @Transactional
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
