@@ -18,7 +18,7 @@ public class VisitorCountScheduler {
     private final RedisTemplate<String, Integer> redisTemplate;
     private final VisitorCountRepository visitorCountRepository;
 
-    @Scheduled(cron = "0 * * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     public void saveVisitorCountToDb() {
         try {
             Visitor visitor = visitorCountRepository.findById(1L).orElseGet(() -> new Visitor(redisTemplate.opsForValue().get("visitor_count")));
