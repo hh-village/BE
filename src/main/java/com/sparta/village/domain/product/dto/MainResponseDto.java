@@ -12,9 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 public class MainResponseDto {
     private List<AcceptReservationResponseDto> dealList;
-    private List<ProductResponseDto> productList;
-    private int zzimCount;
     private List<ProductResponseDto> randomProduct;
+    private int zzimCount;
+    private List<ProductResponseDto> latestProduct;
     private Integer visitorCount;
 
 }

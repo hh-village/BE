@@ -44,11 +44,11 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         redisTemplate.opsForValue().increment("visitor_count",1);
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
-        List<ProductResponseDto> productList = productRepository.findRandomProduct(8).stream()
+        List<ProductResponseDto> randomProduct = productRepository.findRandomEightProduct().stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
-        List<ProductResponseDto> randomProduct = productRepository.findRandomProduct(6).stream()
+        List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct().stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
-        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, productList, zzimService.getZzimCount(user), randomProduct, visitorCountRepository.findVisitorCountById()));
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, randomProduct, zzimService.getZzimCount(user), latestProduct, visitorCountRepository.findVisitorCountById()));
     }
 
     @Transactional
