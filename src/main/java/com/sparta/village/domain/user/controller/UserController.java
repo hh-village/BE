@@ -39,10 +39,10 @@ public class UserController {
         return userService.getUserItemList(userDetails.getUser(), key);
     }
 
-    @PostMapping("/test/login/{nickname}")
-    public ResponseEntity<ResponseMessage> testLogin(@PathVariable String nickname, HttpServletResponse response){
-        return kakaoUserService.testLogin(nickname, response);
-    }
+//    @PostMapping("/test/login/{nickname}")
+//    public ResponseEntity<ResponseMessage> testLogin(@PathVariable String nickname, HttpServletResponse response){
+//        return kakaoUserService.testLogin(nickname, response);
+//    }
 }
 
 
