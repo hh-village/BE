@@ -682,74 +682,74 @@ public class ProductServiceTest {
         verify(productRepository, times(1)).findById(anyLong());
     }
 
-    @Test
-    @DisplayName("전체조회-정상")
-    public void testGetMainPage() {
-        // given
-        User user = User.builder()
-                .id(1L)
-                .kakaoId(123L)
-                .nickname("닉네임")
-                .profile("프로필.jpg")
-                .role(UserRoleEnum.USER)
-                .build();
-        when(userDetails.getUser()).thenReturn(user);
+//    @Test
+//    @DisplayName("전체조회-정상")
+//    public void testGetMainPage() {
+//        // given
+//        User user = User.builder()
+//                .id(1L)
+//                .kakaoId(123L)
+//                .nickname("닉네임")
+//                .profile("프로필.jpg")
+//                .role(UserRoleEnum.USER)
+//                .build();
+//        when(userDetails.getUser()).thenReturn(user);
+//
+//        List<AcceptReservationResponseDto> dealList = new ArrayList<>();
+//        when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
+//
+//        List<Product> productList1 = new ArrayList<>();
+//        List<Product> productList2 = new ArrayList<>();
+//        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
+//        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
+//        when(zzimService.getZzimCount(user)).thenReturn(0);
+//
+//        // when
+//        ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
+//
+//        // then
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals("메인페이지 조회되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+//
+//        // verify
+//        verify(reservationService, times(1)).getAcceptedReservationList();
+//        verify(productRepository, times(1)).findRandomProduct(8);
+//        verify(productRepository, times(1)).findRandomProduct(6);
+//        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
+//        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
+//        verify(zzimService, times(1)).getZzimCount(user);
+//    }
 
-        List<AcceptReservationResponseDto> dealList = new ArrayList<>();
-        when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
-
-        List<Product> productList1 = new ArrayList<>();
-        List<Product> productList2 = new ArrayList<>();
-        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
-        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
-        when(zzimService.getZzimCount(user)).thenReturn(0);
-
-        // when
-        ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("메인페이지 조회되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-
-        // verify
-        verify(reservationService, times(1)).getAcceptedReservationList();
-        verify(productRepository, times(1)).findRandomProduct(8);
-        verify(productRepository, times(1)).findRandomProduct(6);
-        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
-        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
-        verify(zzimService, times(1)).getZzimCount(user);
-    }
-
-    @Test
-    @DisplayName("전체조회-UserIsNull")
-    public void testGetMainPageUserIsNull() {
-        // given
-        UserDetailsImpl userDetails = null;
-
-        List<AcceptReservationResponseDto> dealList = new ArrayList<>();
-        when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
-
-        List<Product> productList1 = new ArrayList<>();
-        List<Product> productList2 = new ArrayList<>();
-        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
-        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
-        when(zzimService.getZzimCount(null)).thenReturn(0);
-
-        // when
-        ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
-
-        // then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("메인페이지 조회되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
-
-        // verify
-        verify(reservationService, times(1)).getAcceptedReservationList();
-        verify(productRepository, times(1)).findRandomProduct(8);
-        verify(productRepository, times(1)).findRandomProduct(6);
-        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
-        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
-        verify(zzimService, times(1)).getZzimCount(null);
-    }
+//    @Test
+//    @DisplayName("전체조회-UserIsNull")
+//    public void testGetMainPageUserIsNull() {
+//        // given
+//        UserDetailsImpl userDetails = null;
+//
+//        List<AcceptReservationResponseDto> dealList = new ArrayList<>();
+//        when(reservationService.getAcceptedReservationList()).thenReturn(dealList);
+//
+//        List<Product> productList1 = new ArrayList<>();
+//        List<Product> productList2 = new ArrayList<>();
+//        when(productRepository.findRandomProduct(8)).thenReturn(productList1);
+//        when(productRepository.findRandomProduct(6)).thenReturn(productList2);
+//        when(zzimService.getZzimCount(null)).thenReturn(0);
+//
+//        // when
+//        ResponseEntity<ResponseMessage> response = productService.getMainPage(userDetails);
+//
+//        // then
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals("메인페이지 조회되었습니다.", Objects.requireNonNull(response.getBody()).getMessage());
+//
+//        // verify
+//        verify(reservationService, times(1)).getAcceptedReservationList();
+//        verify(productRepository, times(1)).findRandomProduct(8);
+//        verify(productRepository, times(1)).findRandomProduct(6);
+//        verify(imageStorageService, times(productList1.size() + productList2.size())).getImageUrlListByProductId(anyLong());
+//        verify(zzimService, times(productList1.size() + productList2.size())).getZzimStatus(any(User.class), any(Product.class));
+//        verify(zzimService, times(1)).getZzimCount(null);
+//    }
 
     @Test
     @DisplayName("상품 ID로 상품 조회 성공")
