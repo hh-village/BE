@@ -134,6 +134,7 @@ public class ProductService {
     }
 
     public String searchPrimeImageUrl(Product product) {
+        System.out.println(product.getId());
         return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
     }
 
