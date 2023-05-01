@@ -105,9 +105,6 @@ public class ChatService {
     @Transactional
     public ResponseEntity<ResponseMessage> deleteRoom(String roomId) {
         ChatRoom room = chatRoomRepository.findByRoomId(roomId).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
-        if (chatMessageRepository.existsByRoom(room)) {
-            chatMessageRepository.deleteByRoom(room);
-        }
         chatRoomRepository.deleteById(room.getId());
         return ResponseMessage.SuccessResponse("채팅방 삭제 성공", "");
     }

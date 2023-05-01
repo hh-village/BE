@@ -1,6 +1,9 @@
 package com.sparta.village.domain.user.entity;
 
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import javax.persistence.*;
 
 @Getter
@@ -8,6 +11,8 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "is_deleted = false")
+@SQLDelete(sql = "update users set is_deleted = true where id = ?")
 @Entity(name = "users")
 public class User {
     @Id
@@ -26,6 +31,8 @@ public class User {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
+
+    private boolean isDeleted = Boolean.FALSE;
 
     public User(Long kakaoId, String nickname, String profile, UserRoleEnum role) {
         this.kakaoId = kakaoId;

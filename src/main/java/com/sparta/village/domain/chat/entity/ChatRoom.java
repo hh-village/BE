@@ -5,14 +5,19 @@ import com.sparta.village.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Where(clause = "is_deleted = false")
+@SQLDelete(sql = "update chat_room set is_deleted = true where id = ?")
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +32,10 @@ public class ChatRoom {
     private User user;
     @ManyToOne
     private User owner;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    private List<ChatMessage> chatMessageList;
+    private boolean isDeleted = Boolean.FALSE;
 
     public ChatRoom(Product product, User user, User owner) {
         this.roomId = UUID.randomUUID().toString().substring(0, 8);
