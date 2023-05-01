@@ -44,10 +44,16 @@ public class ProductService {
         User user = userDetails == null ? null : userDetails.getUser();
         redisTemplate.opsForValue().increment("visitor_count",1);
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
-        List<ProductResponseDto> randomProduct = productRepository.findRandomEightProduct().stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct().stream()
+                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList());
         List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct().stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+        Product randomPopularProduct = getOneRandomPopularProduct();
+        if (randomPopularProduct != null) {
+            int randomIndex = (int) (Math.random() * (8));
+            randomProduct.set(randomIndex, new ProductResponseDto(randomPopularProduct, searchPrimeImageUrl(randomPopularProduct), true, zzimService.getZzimStatus(user, randomPopularProduct)));
+        }
+
         return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, randomProduct, zzimService.getZzimCount(user), latestProduct, visitorCountRepository.findVisitorCountById()));
     }
 
@@ -155,6 +161,24 @@ public class ProductService {
             }
         }
         return false;
+    }
+
+    public Product getOneRandomPopularProduct() {
+        List<ReservationCountResponseDto> reservationCountList = reservationService.reservationCount();
+
+        int index = (int) Math.ceil(reservationCountList.size() * 0.1) - 1;
+        if (index < 0) return null;
+
+        int lastIndex = 0;
+        for (int i = 0; i < reservationCountList.size(); i++) {
+            if (reservationCountList.get(i).getReservationCount() < Math.toIntExact(reservationCountList.get(index).getReservationCount())) {
+                lastIndex = i-1;
+            }
+        }
+
+        int randomIndex = (int) (Math.random() * (lastIndex+ 1));
+
+        return findProductById(reservationCountList.get(randomIndex).getProductId());
     }
 
 }
