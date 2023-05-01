@@ -23,7 +23,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "select * from product order by id desc limit 6 ", nativeQuery = true)
     List<Product> findLatestSixProduct();
 
-    @Query(value = "select * from product order by rand() limit 8", nativeQuery = true)
-    List<Product> findRandomEightProduct();
+    @Query(value = "select * from product where id != :id and is_deleted = false order by rand() limit 8", nativeQuery = true)
+    List<Product> findRandomEightProduct(@Param("id") Long id);
 
 }

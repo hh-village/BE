@@ -37,9 +37,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = "update Reservation r set r.status = :status where r.id = :id")
     void updateStatus(@Param("id") Long reservationId, @Param("status") String status);
 
-    List<Reservation> findByStatus(String status);
+    @Query(value = "select r from Reservation r where r.status = :status and r.product.isDeleted = false")
+    List<Reservation> findByStatus(@Param("status") String status);
 
-    @Query(value = "SELECT new com.sparta.village.domain.reservation.dto.ReservationCountResponseDto(p.id, COUNT(*)) FROM Reservation r LEFT JOIN Product p ON r.product.id = p.id WHERE r.status = 'returned' group by r.product order by COUNT(*) DESC")
+    @Query(value = "SELECT new com.sparta.village.domain.reservation.dto.ReservationCountResponseDto(p.id, COUNT(*)) FROM Reservation r LEFT JOIN Product p ON r.product.id = p.id WHERE r.status = 'returned' and p.isDeleted = false group by r.product order by COUNT(*) DESC")
     List<ReservationCountResponseDto> countReservationWithProduct();
 
     List<Reservation> findByProductId(Long productId);
@@ -50,6 +51,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("DELETE FROM Reservation r WHERE r.product.id = :productId")
     void deleteByProductId(@Param("productId") Long id);
 
-    @Query(value = "select count(*) from reservation r left join product p on r.product_id = p.id where p.user_id = :user_id and r.status = :status", nativeQuery = true)
+    @Query(value = "select count(*) from reservation r left join product p on r.product_id = p.id where p.user_id = :user_id and r.status = :status and p.is_deleted = false", nativeQuery = true)
     int findReservationCountByUserAndStatus(@Param("user_id") Long id, @Param("status") String status);
 }
