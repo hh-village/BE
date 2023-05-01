@@ -43,12 +43,14 @@ public class ProductService {
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
         User user = userDetails == null ? null : userDetails.getUser();
         redisTemplate.opsForValue().increment("visitor_count",1);
+        Product randomPopularProduct = getOneRandomPopularProduct();
+        Long randomPopularProductId = randomPopularProduct != null ? randomPopularProduct.getId() : 0;
         List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
-        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct().stream()
+        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct(randomPopularProductId).stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList());
         List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct().stream()
                 .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
-        Product randomPopularProduct = getOneRandomPopularProduct();
+
         if (randomPopularProduct != null) {
             int randomIndex = (int) (Math.random() * (8));
             randomProduct.set(randomIndex, new ProductResponseDto(randomPopularProduct, searchPrimeImageUrl(randomPopularProduct), true, zzimService.getZzimStatus(user, randomPopularProduct)));
@@ -75,12 +77,6 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
 
-
-        chatRoomService.deleteMessagesByProductId(id);
-        chatRoomService.deleteByProductId(id);
-        reservationService.deleteByProductId(id);
-        zzimService.deleteByProductId(id);
-        imageStorageService.deleteImagesByProductId(id);
         productRepository.deleteById(id);
 
         return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.", "");

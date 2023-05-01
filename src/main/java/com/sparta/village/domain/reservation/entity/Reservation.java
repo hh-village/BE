@@ -5,6 +5,8 @@ import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.reservation.dto.ReservationRequestDto;
 import com.sparta.village.domain.user.entity.User;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
+@Where(clause = "is_deleted = false")
+@SQLDelete(sql = "update reservation set is_deleted = true where id = ?")
 public class Reservation extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +40,8 @@ public class Reservation extends Timestamped {
 
     @ManyToOne
     private Product product;
+
+    private boolean isDeleted = Boolean.FALSE;
 
     public Reservation(Product product, User user, ReservationRequestDto requestDto) {
         this.product = product;
