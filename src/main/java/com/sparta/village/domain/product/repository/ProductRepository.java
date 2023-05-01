@@ -20,7 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByTitleContainingOrderByIdDesc (String title);
     List<Product> findByLocationContainingOrderByIdDesc(String location);
 
-    @Query(value = "select * from product order by id desc limit 6 ", nativeQuery = true)
+    @Query(value = "select * from product where is_deleted = false order by id desc limit 6", nativeQuery = true)
     List<Product> findLatestSixProduct();
 
     @Query(value = "select * from product where id != :id and is_deleted = false order by rand() limit 8", nativeQuery = true)
