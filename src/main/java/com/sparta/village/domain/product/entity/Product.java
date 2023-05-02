@@ -46,18 +46,6 @@ public class Product extends Timestamped{
     @ManyToOne
     private User user;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Zzim> zzimList;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Reservation> reservationList;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<Image> imageList;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    private List<ChatRoom> chatRoomListList;
-
     private boolean isDeleted = Boolean.FALSE;
 
     public void plusZzimCount() {

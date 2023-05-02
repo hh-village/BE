@@ -77,7 +77,7 @@ public class ProductService {
             throw new CustomException(ErrorCode.NOT_AUTHOR);
         }
 
-        productRepository.deleteById(id);
+        productRepository.deleteAllAboutProductById(id);
 
         return ResponseMessage.SuccessResponse("상품 삭제가 되었습니다.", "");
     }
