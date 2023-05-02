@@ -22,4 +22,13 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     @Modifying
     @Query("DELETE FROM ChatRoom cr WHERE cr.product.id = :productId")
     void deleteByProductId(@Param("productId") Long productId);
+
+
+    @Modifying
+    @Query(value = "update chat_room r " +
+            "left join chat_message on r.id = chat_message.room_id " +
+            "set r.is_deleted = true, " +
+            "chat_message.is_deleted = true " +
+            "where r.id = :id", nativeQuery = true)
+    void deleteAllAboutRoomById(@Param("id") Long id);
 }
