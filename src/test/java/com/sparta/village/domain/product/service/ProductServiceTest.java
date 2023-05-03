@@ -1,16 +1,12 @@
 package com.sparta.village.domain.product.service;
 
 import com.sparta.village.domain.chat.service.ChatService;
-import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.image.service.ImageStorageService;
-import com.sparta.village.domain.product.dto.MainResponseDto;
 import com.sparta.village.domain.product.dto.ProductDetailResponseDto;
 import com.sparta.village.domain.product.dto.ProductRequestDto;
-import com.sparta.village.domain.product.dto.ProductResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
-import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
@@ -31,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 

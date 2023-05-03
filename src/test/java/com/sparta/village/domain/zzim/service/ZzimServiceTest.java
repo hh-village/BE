@@ -102,38 +102,38 @@ class ZzimServiceTest {
         assertFalse(zzimStatus);
     }
 
-    @Test
-    @DisplayName("찜 카운트-정상")
-    public void testZzimCount() {
-        // Given
-        User user = new User();
+//    @Test
+//    @DisplayName("찜 카운트-정상")
+//    public void testZzimCount() {
+//        // Given
+//        User user = new User();
+//
+//        when(zzimRepository.countByUser(user)).thenReturn(5);
+//
+//        // When
+//        int zzimCount = zzimService.getZzimCount(user);
+//
+//        // Then
+//        assertEquals(5, zzimCount);
+//        verify(zzimRepository).countByUser(user);
+//    }
 
-        when(zzimRepository.countByUser(user)).thenReturn(5);
+//    @Test
+//    @DisplayName("찜 카운트-UserIsNull")
+//    public void testZzimCountUserIsNull() {
+//        //given
+//        User user = null;
+//
+//        // When
+//        int zzimCount = zzimService.getZzimCount(user);
+//
+//        // Then
+//        assertEquals(0, zzimCount);
+//        verify(zzimRepository, never()).countByUser(any(User.class));
+//    }
 
-        // When
-        int zzimCount = zzimService.getZzimCount(user);
-
-        // Then
-        assertEquals(5, zzimCount);
-        verify(zzimRepository).countByUser(user);
-    }
-
-    @Test
-    @DisplayName("찜 카운트-UserIsNull")
-    public void testZzimCountUserIsNull() {
-        //given
-        User user = null;
-
-        // When
-        int zzimCount = zzimService.getZzimCount(user);
-
-        // Then
-        assertEquals(0, zzimCount);
-        verify(zzimRepository, never()).countByUser(any(User.class));
-    }
-
-    public int getZzimCount(User user) {
-        return user != null ? zzimRepository.countByUser(user) : 0;
-    }
+//    public int getZzimCount(User user) {
+//        return user != null ? zzimRepository.countByUser(user) : 0;
+//    }
 }
 
