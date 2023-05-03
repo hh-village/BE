@@ -122,15 +122,11 @@ public class ProductService {
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<ResponseMessage> searchProductList(UserDetailsImpl userDetails, String title, String location, Long lastId, int size) {
-        User user = userDetails == null ? null : userDetails.getUser();
-        List<Product> productList = searchQueryRepository.searchProduct(user, title, location, lastId, size);
-
-        List<ProductResponseDto> productResponseDtoList = productList.stream()
-                .map(product -> new ProductResponseDto(product, searchPrimeImageUrl(product), isMostProduct(product), zzimService.getZzimStatus(user, product)))
-                .toList();
-
-        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", new SearchResponseDto(productResponseDtoList, productResponseDtoList.size() < size));
+        Long userId = userDetails == null ? null : userDetails.getUser().getId();
+        List<ProductResponseDto> productList = searchQueryRepository.searchProduct(userId, title, location, lastId, size);
+        return ResponseMessage.SuccessResponse("검색 조회가 되었습니다.", new SearchResponseDto(productList, productList.size() < size));
     }
 
     @Transactional(readOnly = true)
