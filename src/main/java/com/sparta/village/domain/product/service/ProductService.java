@@ -6,7 +6,7 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
-import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
+import com.sparta.village.domain.product.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
@@ -41,22 +41,27 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> getMainPage(UserDetailsImpl userDetails) {
-        User user = userDetails == null ? null : userDetails.getUser();
+//        double beforeTime = System.currentTimeMillis(); //코드 실행 전에 시간 받아오기
         redisTemplate.opsForValue().increment("visitor_count",1);
-        Product randomPopularProduct = getOneRandomPopularProduct();
-        Long randomPopularProductId = randomPopularProduct != null ? randomPopularProduct.getId() : 0;
-        List<AcceptReservationResponseDto> dealList = reservationService.getAcceptedReservationList();
-        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct(randomPopularProductId).stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList());
-        List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct().stream()
-                .map(p -> new ProductResponseDto(p, searchPrimeImageUrl(p), isMostProduct(p), zzimService.getZzimStatus(user, p))).toList();
+        Long userId = userDetails == null ? null : userDetails.getUser().getId();
+
+        Object[] randomPopularProduct = productRepository.getOnePopularProduct(userId).get(0);
+        Long randomPopularProductId = randomPopularProduct == null ? null : Long.parseLong(randomPopularProduct[0].toString());
+
+        List<AcceptReservationResponseDto> dealList = productRepository.getDealList();
+        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct(userId, randomPopularProductId).stream().map(p ->
+                new ProductResponseDto(Long.parseLong(p[0].toString()), (String) p[1], (String) p[2], (String) p[3], Integer.parseInt(String.valueOf(p[4])), Integer.parseInt(String.valueOf(p[5])) == 1, Integer.parseInt(String.valueOf(p[6])) == 1)).toList());
+        List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct(userId).stream().map(p ->
+                new ProductResponseDto(Long.parseLong(p[0].toString()), (String)p[1], (String)p[2], (String)p[3], Integer.parseInt(String.valueOf(p[4])), Integer.parseInt(String.valueOf(p[5])) == 1, Integer.parseInt(String.valueOf(p[6])) == 1)).toList();
 
         if (randomPopularProduct != null) {
             int randomIndex = (int) (Math.random() * (8));
-            randomProduct.set(randomIndex, new ProductResponseDto(randomPopularProduct, searchPrimeImageUrl(randomPopularProduct), true, zzimService.getZzimStatus(user, randomPopularProduct)));
+            randomProduct.set(randomIndex, new ProductResponseDto(randomPopularProductId, (String)randomPopularProduct[1], (String)randomPopularProduct[2], (String)randomPopularProduct[3], Integer.parseInt(String.valueOf(randomPopularProduct[4])), true, Integer.parseInt(String.valueOf(randomPopularProduct[5]))==1));
         }
-
-        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, randomProduct, zzimService.getZzimCount(user), latestProduct, visitorCountRepository.findVisitorCountById()));
+//        double afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
+//        double secDiffTime = (afterTime - beforeTime)/1000; //두 시간에 차 계산
+//        System.out.println("시간차이(m) : "+secDiffTime);
+        return ResponseMessage.SuccessResponse("메인페이지 조회되었습니다.", new MainResponseDto(dealList, randomProduct, zzimService.getZzimCount(userId), latestProduct, visitorCountRepository.findVisitorCountById()));
     }
 
     @Transactional
@@ -134,7 +139,6 @@ public class ProductService {
     }
 
     public String searchPrimeImageUrl(Product product) {
-        System.out.println(product.getId());
         return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
     }
 
@@ -160,22 +164,5 @@ public class ProductService {
         return false;
     }
 
-    public Product getOneRandomPopularProduct() {
-        List<ReservationCountResponseDto> reservationCountList = reservationService.reservationCount();
-
-        int index = (int) Math.ceil(reservationCountList.size() * 0.1) - 1;
-        if (index < 0) return null;
-
-        int lastIndex = 0;
-        for (int i = 0; i < reservationCountList.size(); i++) {
-            if (reservationCountList.get(i).getReservationCount() < Math.toIntExact(reservationCountList.get(index).getReservationCount())) {
-                lastIndex = i-1;
-            }
-        }
-
-        int randomIndex = (int) (Math.random() * (lastIndex+ 1));
-
-        return findProductById(reservationCountList.get(randomIndex).getProductId());
-    }
 
 }
