@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigInteger;
 import java.util.*;
 
 @Service
@@ -34,7 +35,6 @@ public class ProductService {
     private final SearchQueryRepository searchQueryRepository;
     private final UserService userService;
     private final ZzimService zzimService;
-    private final ChatService chatRoomService;
     private final ReservationService reservationService;
     private final ImageStorageService imageStorageService;
     private final RedisTemplate<String, Integer> redisTemplate;
@@ -102,17 +102,24 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
-        Product product = findProductById(id);
-        User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
         User user = userDetails == null ? null : userDetails.getUser();
-        boolean checkOwner = user != null && checkProductOwner(id, user.getId());
-        boolean zzimStatus = user != null && zzimService.getZzimStatus(user, product);
-        int ownerReturned = reservationService.getReservationCountByUser(owner, "returned");
-        int ownerAccepted = reservationService.getReservationCountByUser(owner, "accepted");
-        int ownerWaiting = reservationService.getReservationCountByUser(owner, "waiting");
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
-                zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
-                owner.getNickname(), owner.getProfile(), ownerReturned, ownerAccepted, ownerWaiting, reservationService.getReservationList(user, id));
+        List<Object[]> productDetailList = productRepository.findProductDetailList(id, userDetails.getUser().getId());
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
+                ((BigInteger) productDetailList.get(0)[0]).longValue(),
+                (String) productDetailList.get(0)[1],
+                (String) productDetailList.get(0)[2],
+                ((Integer) productDetailList.get(0)[3]),
+                (String) productDetailList.get(0)[4],
+                ((BigInteger) productDetailList.get(0)[5]).intValue() != 0,
+                ((BigInteger) productDetailList.get(0)[6]).intValue() != 0,
+                ((BigInteger) productDetailList.get(0)[7]).intValue(),
+                imageStorageService.getImageUrlListByProductId(id),
+                (String) productDetailList.get(0)[9],
+                (String) productDetailList.get(0)[10],
+                ((BigInteger) productDetailList.get(0)[11]).intValue(),
+                ((BigInteger) productDetailList.get(0)[12]).intValue(),
+                ((BigInteger) productDetailList.get(0)[13]).intValue(),
+                reservationService.getReservationList(userDetails.getUser(), id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
