@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
-
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
@@ -22,12 +19,14 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/main")
-    public ResponseEntity<ResponseMessage> getMainPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ResponseMessage> getMainPage(
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return productService.getMainPage(userDetails);
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ResponseMessage> searchProductList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<ResponseMessage> searchProductList(
+                                                             @AuthenticationPrincipal UserDetailsImpl userDetails,
                                                              @RequestParam(value = "name", required = false) String title,
                                                              @RequestParam(value = "location", required = false) String location,
                                                              @RequestParam(value = "lastId") Long lastId,
@@ -36,25 +35,27 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
-    public ResponseEntity<ResponseMessage> detailProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
+    public ResponseEntity<ResponseMessage> detailProduct(
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails, @PathVariable Long id) {
         return productService.detailProduct(userDetails, id);
     }
 
     @PostMapping(value = "/products", consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseMessage> registProduct(@AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
+    public ResponseEntity<ResponseMessage> registProduct(
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.registProduct(userDetails.getUser(), productRequestDto);
     }
 
     @PatchMapping(value = "products/{id}", consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseMessage> updateProduct(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
+    public ResponseEntity<ResponseMessage> updateProduct(
+                                                         @PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails, @ModelAttribute ProductRequestDto productRequestDto) {
         return productService.updateProduct(id, userDetails.getUser(), productRequestDto);
     }
 
     @DeleteMapping("/products/{id}")
-    public ResponseEntity<ResponseMessage> deleteProduct(@PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ResponseMessage> deleteProduct(
+                                                         @PathVariable Long id,@AuthenticationPrincipal UserDetailsImpl userDetails) {
       return productService.deleteProduct(id, userDetails.getUser());
     }
-
-
 }
 

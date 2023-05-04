@@ -5,6 +5,9 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
+import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
+import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
+import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -21,8 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -104,17 +108,24 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
-        Product product = findProductById(id);
-        User owner = userService.getUserByUserId(Long.toString(product.getUser().getId()));
         User user = userDetails == null ? null : userDetails.getUser();
-        boolean checkOwner = user != null && checkProductOwner(id, user.getId());
-        boolean zzimStatus = user != null && zzimService.getZzimStatus(user, product);
-        int ownerReturned = reservationService.getReservationCountByUser(owner, "returned");
-        int ownerAccepted = reservationService.getReservationCountByUser(owner, "accepted");
-        int ownerWaiting = reservationService.getReservationCountByUser(owner, "waiting");
-        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(product, checkOwner, zzimStatus,
-                zzimService.countByProductId(id), imageStorageService.getImageUrlListByProductId(id),
-                owner.getNickname(), owner.getProfile(), ownerReturned, ownerAccepted, ownerWaiting, reservationService.getReservationList(user, id));
+        List<Object[]> productDetailList = productRepository.findProductDetailList(id, user.getId());
+        ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
+                Long.parseLong(productDetailList.get(0)[0].toString()),
+                (String) productDetailList.get(0)[1],
+                (String) productDetailList.get(0)[2],
+                Integer.parseInt(productDetailList.get(0)[3].toString()),
+                (String) productDetailList.get(0)[4],
+                Integer.parseInt(productDetailList.get(0)[5].toString()) != 0,
+                (String) productDetailList.get(0)[6],
+                (String) productDetailList.get(0)[7],
+                Integer.parseInt(productDetailList.get(0)[8].toString()),
+                Integer.parseInt(productDetailList.get(0)[9].toString()),
+                Integer.parseInt(productDetailList.get(0)[10].toString()),
+                Integer.parseInt(productDetailList.get(0)[11].toString()),
+                Integer.parseInt(productDetailList.get(0)[12].toString()) != 0,
+                imageStorageService.getImageUrlListByProductId(id),
+                reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }

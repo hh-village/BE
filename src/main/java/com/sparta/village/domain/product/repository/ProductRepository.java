@@ -1,7 +1,6 @@
 
 package com.sparta.village.domain.product.repository;
 
-
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.user.entity.User;
@@ -163,4 +162,18 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "where p.id = :id", nativeQuery = true)
     void deleteAllAboutProductById(@Param("id") Long id);
 
+    @Query(value = "SELECT p.id, p.title, p.description, p.price, p.location, u.id as owner_id, u.nickname, u.profile, p.zzim_count, " +
+            "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'returned') as owner_returned, " +
+            "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'accepted') as owner_accepted, " +
+            "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'waiting') as owner_waiting, " +
+            "EXISTS(SELECT 1 FROM zzim z WHERE (:userId IS NULL OR z.user_id = :userId) AND z.product_id = p.id) as zzim_status, " +
+            "i.image_url, " +
+            "r.id as reservation_id, r.start_date, r.end_date, r.status as reservation_status, r.user_id as reservation_user_id, ru.nickname as reservation_user_nickname, ru.profile as reservation_user_profile " +
+            "FROM product p " +
+            "JOIN users u ON p.user_id = u.id " +
+            "JOIN image i ON p.id = i.product_id " +
+            "JOIN reservation r ON p.id = r.product_id " +
+            "JOIN users ru ON r.user_id = ru.id " +
+            "WHERE p.id = :productId", nativeQuery = true)
+    List<Object[]> findProductDetailList(@Param("productId") Long productId, @Param("userId") Long userId);
 }
