@@ -1,4 +1,4 @@
-package com.sparta.village.domain.reservation.dto;
+package com.sparta.village.domain.product.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

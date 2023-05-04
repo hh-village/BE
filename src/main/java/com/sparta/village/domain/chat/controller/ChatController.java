@@ -21,7 +21,7 @@ public class ChatController {
     }
 
     @GetMapping("/chat/room")
-    public ResponseEntity<ResponseMessage> findMessageHistory(@RequestParam(value = "roomId", required = false) String roomId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<ResponseMessage> findMessageHistory(@RequestParam(value = "roomId", required = false) Long roomId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return chatService.findMessageHistory(roomId, userDetails.getUser());
     }
 
@@ -31,7 +31,7 @@ public class ChatController {
     }
 
     @DeleteMapping("/chat/room/{roomId}")
-    public ResponseEntity<ResponseMessage> deleteRoom(@PathVariable String roomId) {
+    public ResponseEntity<ResponseMessage> deleteRoom(@PathVariable Long roomId) {
         return chatService.deleteRoom(roomId);
     }
 }
