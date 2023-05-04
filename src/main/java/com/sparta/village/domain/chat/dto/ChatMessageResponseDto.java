@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatMessageResponseDto {
-    private String roomId; // 방번호
+    private Long roomId; // 방번호
     private String sender; // nickname
     private String content; // 메시지
     private String createdAt;
