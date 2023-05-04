@@ -1,13 +1,10 @@
 package com.sparta.village.domain.product.service;
 
-import com.sparta.village.domain.chat.service.ChatService;
 import com.sparta.village.domain.image.service.ImageStorageService;
 import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
-import com.sparta.village.domain.product.dto.AcceptReservationResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -24,7 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +32,6 @@ public class ProductService {
     private final SearchQueryRepository searchQueryRepository;
     private final UserService userService;
     private final ZzimService zzimService;
-    private final ChatService chatRoomService;
     private final ReservationService reservationService;
     private final ImageStorageService imageStorageService;
     private final RedisTemplate<String, Integer> redisTemplate;
@@ -134,31 +131,12 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
-    public String searchPrimeImageUrl(Product product) {
-        return imageStorageService.getImageUrlListByProductId(product.getId()).get(0);
-    }
 
     //로그인한 유저가 제품 등록자가 맞는지 체크. 제품을 등록한 판매자이면 true 반환.
     public boolean checkProductOwner(Long productId, Long userId) {
         return productRepository.existsByIdAndUserId(productId, userId);
     }
 
-    public boolean isMostProduct(Product product) {
-        List<ReservationCountResponseDto> reservationCountList = reservationService.reservationCount();
-
-        int index = (int) Math.ceil(reservationCountList.size() * 0.1) - 1;
-        if (index < 0) return false;
-
-        for (ReservationCountResponseDto responseDto : reservationCountList) {
-            if (responseDto.getReservationCount() >= Math.toIntExact(reservationCountList.get(index).getReservationCount())) {
-                Optional<Product> isMostProduct = productRepository.findById(responseDto.getProductId());
-                if (isMostProduct.isPresent() && isMostProduct.get().getId().equals(product.getId())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
 
 }
