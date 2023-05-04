@@ -7,6 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -20,7 +23,6 @@ public class SearchQueryRepository {
         this.em = em;
         this.queryFactory = new JPAQueryFactory(em);
     }
-    QProduct product = QProduct.product;
 
     public List<ProductResponseDto> searchProduct(Long userId, String title, String location, Long lastId, int size) {
         String sql = "SELECT product.id, title, " +

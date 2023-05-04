@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomListDto {
-    private String roomId;
+    private Long roomId;
     private String nickname;
     private String profile;
     private String lastMessage;
