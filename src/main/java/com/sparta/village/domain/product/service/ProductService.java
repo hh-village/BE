@@ -8,6 +8,7 @@ import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
 import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
+import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -25,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -103,23 +105,23 @@ public class ProductService {
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
         User user = userDetails == null ? null : userDetails.getUser();
-        List<Object[]> productDetailList = productRepository.findProductDetailList(id, userDetails.getUser().getId());
+        List<Object[]> productDetailList = productRepository.findProductDetailList(id, user.getId());
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
-                ((BigInteger) productDetailList.get(0)[0]).longValue(),
+                Long.parseLong(productDetailList.get(0)[0].toString()),
                 (String) productDetailList.get(0)[1],
                 (String) productDetailList.get(0)[2],
-                ((Integer) productDetailList.get(0)[3]),
+                Integer.parseInt(productDetailList.get(0)[3].toString()),
                 (String) productDetailList.get(0)[4],
-                ((BigInteger) productDetailList.get(0)[5]).intValue() != 0,
-                ((BigInteger) productDetailList.get(0)[6]).intValue() != 0,
-                ((BigInteger) productDetailList.get(0)[7]).intValue(),
+                Integer.parseInt(productDetailList.get(0)[5].toString()) != 0,
+                (String) productDetailList.get(0)[6],
+                (String) productDetailList.get(0)[7],
+                Integer.parseInt(productDetailList.get(0)[8].toString()),
+                Integer.parseInt(productDetailList.get(0)[9].toString()),
+                Integer.parseInt(productDetailList.get(0)[10].toString()),
+                Integer.parseInt(productDetailList.get(0)[11].toString()),
+                Integer.parseInt(productDetailList.get(0)[12].toString()) != 0,
                 imageStorageService.getImageUrlListByProductId(id),
-                (String) productDetailList.get(0)[9],
-                (String) productDetailList.get(0)[10],
-                ((BigInteger) productDetailList.get(0)[11]).intValue(),
-                ((BigInteger) productDetailList.get(0)[12]).intValue(),
-                ((BigInteger) productDetailList.get(0)[13]).intValue(),
-                reservationService.getReservationList(userDetails.getUser(), id));
+                reservationService.getReservationList(user, id));
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }

@@ -29,7 +29,7 @@ public class ProductDetailResponseDto {
     private final List<ReservationResponseDto> reservationList;
 
 
-    public ProductDetailResponseDto(Long productId, String title, String description, int price, String location, boolean checkOwner,boolean zzimStatus, int zzimCount, List<String> imageUrlList, String ownerNickname, String ownerProfile, int ownerReturned, int ownerAccepted, int ownerWaiting, List<ReservationResponseDto> reservationList) {
+    public ProductDetailResponseDto(Long productId, String title, String description, int price, String location, boolean checkOwner,String ownerNickname,String ownerProfile,int zzimCount,int ownerReturned, int ownerAccepted, int ownerWaiting, boolean zzimStatus, List<String> imageUrlList, List<ReservationResponseDto> reservationList) {
         this.id = productId;
         this.title = title;
         this.description = description;
