@@ -5,9 +5,6 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
-import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -23,9 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.math.BigInteger;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
