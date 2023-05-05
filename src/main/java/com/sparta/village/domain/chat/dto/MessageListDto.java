@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class MessageListDto {
     private String sender;
     private String content;
-    private String roomId;
+    private Long roomId;
     private String createdAt;
 
     @Override

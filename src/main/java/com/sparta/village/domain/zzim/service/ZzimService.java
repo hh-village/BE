@@ -46,8 +46,8 @@ public class ZzimService {
         return user != null && zzimRepository.existsByProductAndUser(product, user);
     }
 
-    public int getZzimCount(User user) {
-        return user != null ? zzimRepository.countByUser(user) : 0;
+    public int getZzimCount(Long userId) {
+        return userId != null ? zzimRepository.countByUserId(userId) : 0;
     }
 
     public int countByProductId(Long id) {

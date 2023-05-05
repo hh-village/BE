@@ -1,5 +1,6 @@
 package com.sparta.village.domain.reservation.service;
 
+import com.sparta.village.domain.product.dto.AcceptReservationResponseDto;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.reservation.dto.*;

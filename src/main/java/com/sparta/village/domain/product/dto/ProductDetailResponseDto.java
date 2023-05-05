@@ -29,17 +29,17 @@ public class ProductDetailResponseDto {
     private final List<ReservationResponseDto> reservationList;
 
 
-    public ProductDetailResponseDto(Product product, boolean checkOwner,boolean zzimStatus, int zzimCount, List<String> imageUrlList, String ownerNickname, String ownerProfile, int ownerReturned, int ownerAccepted, int ownerWaiting, List<ReservationResponseDto> reservationList) {
-        this.id = product.getId();
+    public ProductDetailResponseDto(Long productId, String title, String description, int price, String location, boolean checkOwner,String ownerNickname,String ownerProfile,int zzimCount,int ownerReturned, int ownerAccepted, int ownerWaiting, boolean zzimStatus, List<String> imageUrlList, List<ReservationResponseDto> reservationList) {
+        this.id = productId;
+        this.title = title;
+        this.description = description;
+        this.price = price;
+        this.location = location;
         this.profile = ownerProfile;
         this.ownerNickname = ownerNickname;
         this.ownerReturned = ownerReturned;
         this.ownerAccepted = ownerAccepted;
         this.ownerWaiting = ownerWaiting;
-        this.title = product.getTitle();
-        this.description = product.getDescription();
-        this.price = product.getPrice();
-        this.location = product.getLocation();
         this.zzimStatus = zzimStatus;
         this.checkOwner = checkOwner;
         this.zzimCount = zzimCount;
