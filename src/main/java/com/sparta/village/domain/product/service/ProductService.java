@@ -5,9 +5,6 @@ import com.sparta.village.domain.product.dto.*;
 import com.sparta.village.domain.product.entity.Product;
 import com.sparta.village.domain.product.repository.ProductRepository;
 import com.sparta.village.domain.product.repository.SearchQueryRepository;
-import com.sparta.village.domain.reservation.dto.AcceptReservationResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationCountResponseDto;
-import com.sparta.village.domain.reservation.dto.ReservationResponseDto;
 import com.sparta.village.domain.reservation.service.ReservationService;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.user.service.UserService;
@@ -108,8 +105,10 @@ public class ProductService {
 
     @Transactional
     public ResponseEntity<ResponseMessage> detailProduct(UserDetailsImpl userDetails, Long id) {
+        double beforeTime = System.currentTimeMillis();
         User user = userDetails == null ? null : userDetails.getUser();
-        List<Object[]> productDetailList = productRepository.findProductDetailList(id, user.getId());
+        Long userId = user == null ? null : user.getId();
+        List<Object[]> productDetailList = productRepository.findProductDetailList(id, userId);
         ProductDetailResponseDto productDetailResponseDto = new ProductDetailResponseDto(
                 Long.parseLong(productDetailList.get(0)[0].toString()),
                 (String) productDetailList.get(0)[1],
@@ -126,6 +125,9 @@ public class ProductService {
                 Integer.parseInt(productDetailList.get(0)[12].toString()) != 0,
                 imageStorageService.getImageUrlListByProductId(id),
                 reservationService.getReservationList(user, id));
+        double afterTime = System.currentTimeMillis();
+        double secDiffTime = (afterTime - beforeTime)/1000;
+        System.out.println("시간차이(m) : "+secDiffTime);
 
         return ResponseMessage.SuccessResponse("제품 조회가 완료되었습니다.", productDetailResponseDto);
     }
