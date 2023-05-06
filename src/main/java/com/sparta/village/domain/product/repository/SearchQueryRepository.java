@@ -52,7 +52,7 @@ public class SearchQueryRepository {
                 "                  LEFT JOIN zzim ON p.id = zzim.product_id " +
                 "                  WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId)) AS checkZzim " +
                 "FROM product " +
-                "where product.id < :lastId " +
+                "where product.id < :lastId and product.is_deleted = false " +
                 "and (lower(product.title) like lower(:title) or :title is null) " +
                 "and (lower(product.location) like lower(:location) or :location is null) " +
                 "order by product.id desc limit :size";
