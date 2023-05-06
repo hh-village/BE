@@ -154,7 +154,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'returned') as owner_returned, " +
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'accepted') as owner_accepted, " +
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'waiting') as owner_waiting, " +
-            "EXISTS(SELECT 1 FROM zzim z WHERE z.user_id = :userId AND z.product_id = p.id) as zzim_status, " +
+            "EXISTS(SELECT 1 FROM zzim z WHERE z.user_id = :userId AND z.product_id = p.id AND z.is_deleted = false) as zzim_status, " +
             "EXISTS(SELECT 1 FROM product pr WHERE pr.user_id = :userId AND pr.id = p.id) as checkOwner, " +
             "i.image_url, " +
             "r.id as reservation_id, r.start_date, r.end_date, r.status as reservation_status, r.user_id as reservation_user_id, ru.nickname as reservation_user_nickname, ru.profile as reservation_user_profile " +
