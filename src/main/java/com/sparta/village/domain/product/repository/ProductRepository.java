@@ -45,7 +45,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " WHERE ranking <= lastIndex AND productId = product.id)) AS checkHot, " +
             "(SELECT EXISTS (SELECT p.id FROM product p " +
             "                LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId)) AS checkZzim " +
+            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
             "FROM product " +
             "JOIN (SELECT id FROM product WHERE is_deleted = false ORDER BY id desc LIMIT 6) AS lastestIds " +
             "ON product.id = lastestIds.id ", nativeQuery = true)
@@ -75,7 +75,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " WHERE ranking <= lastIndex AND productId = product.id)) AS checkHot, " +
             "(SELECT EXISTS (SELECT p.id FROM product p " +
             "                LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId)) AS checkZzim " +
+            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
             "FROM product " +
             "JOIN (SELECT id FROM product WHERE is_deleted = false and product.id != :productId ORDER BY RAND() LIMIT 8) AS randomIds " +
             "ON product.id = randomIds.id ", nativeQuery = true)
@@ -121,7 +121,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "   price, " +
             "   (SELECT EXISTS (SELECT p.id FROM product p " +
             "                  LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                  WHERE p.is_deleted = false AND p.id = (select productId from one_popular) AND zzim.user_id = :userId)) AS checkZzim " +
+            "                  WHERE p.is_deleted = false AND p.id = (select productId from one_popular) AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
             "FROM product " +
             "where product.id = (select productId from one_popular)", nativeQuery = true)
     List<Object[]> getOnePopularProduct(@Param("userId") Long userId);
