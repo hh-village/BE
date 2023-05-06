@@ -170,10 +170,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "i.image_url, " +
             "r.id as reservation_id, r.start_date, r.end_date, r.status as reservation_status, r.user_id as reservation_user_id, ru.nickname as reservation_user_nickname, ru.profile as reservation_user_profile " +
             "FROM product p " +
-            "JOIN users u ON p.user_id = u.id " +
-            "JOIN image i ON p.id = i.product_id " +
-            "JOIN reservation r ON p.id = r.product_id " +
-            "JOIN users ru ON r.user_id = ru.id " +
+            "left JOIN users u ON p.user_id = u.id " +
+            "left JOIN image i ON p.id = i.product_id " +
+            "left JOIN reservation r ON p.id = r.product_id " +
+            "left JOIN users ru ON r.user_id = ru.id " +
             "WHERE p.id = :productId and i.is_deleted = false ", nativeQuery = true)
     List<Object[]> findProductDetailList(@Param("productId") Long productId, @Param("userId") Long userId);
 }
