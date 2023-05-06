@@ -22,7 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByLocationContainingOrderByIdDesc(String location);
 
     @Query(value = "SELECT product.id, title, " +
-            "(SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
+            "(SELECT image_url FROM image where image.product_id = product.id and image.is_deleted = false limit 1) AS image_url, " +
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
@@ -52,7 +52,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Object[]> findLatestSixProduct(@Param("userId") Long userId);
 
     @Query(value = "SELECT product.id, title, " +
-            "(SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
+            "(SELECT image_url FROM image where image.product_id = product.id and image.is_deleted = false limit 1) AS image_url, " +
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
@@ -116,10 +116,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "where ranking <= lastIndex " +
             "order by rand() limit 1) " +
             "SELECT product.id, title, " +
-            " (SELECT image_url FROM product p " +
-            "   LEFT JOIN image ON p.id = image.product_id " +
-            "   WHERE p.is_deleted = false and image_url = false AND p.id = (select productId from one_popular) " +
-            "   GROUP BY p.id) AS image_url, " +
+            " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
             "   location, " +
             "   price, " +
             "   (SELECT EXISTS (SELECT p.id FROM product p " +
