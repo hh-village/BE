@@ -61,7 +61,7 @@ public class UserService {
                                                                                     ((java.sql.Date) r[6]).toLocalDate(),
                                                                                      r[7].toString())).toList():
                               key.equals("zzims")    ? userRepository.findZzimsByUserIdAndKey(user.getId(), key).stream().map(z ->
-                                                       new ZzimsResponseDto(Long.parseLong(z[1].toString()),
+                                                       new ZzimsResponseDto(Long.parseLong(z[2].toString()),
                                                                             z[2].toString(),
                                                                             z[3].toString())).toList():
                               null;
