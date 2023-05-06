@@ -45,7 +45,7 @@ public class SearchQueryRepository {
                 "   WHERE ranking <= lastIndex AND productId = product.id)) AS checkHot, " +
                 "   (SELECT EXISTS (SELECT p.id FROM product p " +
                 "                  LEFT JOIN zzim ON p.id = zzim.product_id " +
-                "                  WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId)) AS checkZzim " +
+                "                  WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
                 "FROM product " +
                 "where product.id < :lastId and product.is_deleted = false " +
                 "and (lower(product.title) like lower(:title) or :title is null) " +
