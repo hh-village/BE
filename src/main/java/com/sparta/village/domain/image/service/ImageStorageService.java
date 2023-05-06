@@ -27,6 +27,8 @@ import java.util.UUID;
 public class ImageStorageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
+    @Value("${cloud.aws.cloudfront.domain}")
+    private String cloudFrontDomain;
     private final AmazonS3 amazonS3;
     private final ImageRepository imageRepository;
 
@@ -52,7 +54,7 @@ public class ImageStorageService {
                 throw new RuntimeException("이미지 업로드 실패: " + fileName, e);
             }
             //S3 버킷 내에 저장된 파일의 URL 생성
-            String fileUrl = amazonS3.getUrl(bucketName, fileName).toString();
+            String fileUrl = "https://" + cloudFrontDomain + "/" + fileName;
             imageUrlList.add(fileUrl);
         }
         return imageUrlList;
