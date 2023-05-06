@@ -112,7 +112,7 @@ public class ProductService {
                 (String) productDetailList.get(0)[2],
                 Integer.parseInt(productDetailList.get(0)[3].toString()),
                 (String) productDetailList.get(0)[4],
-                Integer.parseInt(productDetailList.get(0)[5].toString()) != 0,
+                Integer.parseInt(productDetailList.get(0)[13].toString()) != 0,
                 (String) productDetailList.get(0)[6],
                 (String) productDetailList.get(0)[7],
                 Integer.parseInt(productDetailList.get(0)[8].toString()),
