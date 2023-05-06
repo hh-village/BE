@@ -174,6 +174,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "JOIN image i ON p.id = i.product_id " +
             "JOIN reservation r ON p.id = r.product_id " +
             "JOIN users ru ON r.user_id = ru.id " +
-            "WHERE p.id = :productId and i.is_deleted = false and r.is_deleted = false ", nativeQuery = true)
+            "WHERE p.id = :productId and i.is_deleted = false ", nativeQuery = true)
     List<Object[]> findProductDetailList(@Param("productId") Long productId, @Param("userId") Long userId);
 }
