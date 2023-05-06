@@ -2,14 +2,9 @@ package com.sparta.village.domain.product.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.village.domain.product.dto.ProductResponseDto;
-import com.sparta.village.domain.product.entity.QProduct;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
