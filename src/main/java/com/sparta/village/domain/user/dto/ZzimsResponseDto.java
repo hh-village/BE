@@ -4,18 +4,16 @@ import com.sparta.village.domain.image.entity.Image;
 import com.sparta.village.domain.image.repository.ImageRepository;
 import com.sparta.village.domain.user.entity.User;
 import com.sparta.village.domain.zzim.entity.Zzim;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ZzimsResponseDto {
 
-    private final Long id;
-    private final String productTitle;
-    private final String image;
-
-    public ZzimsResponseDto(User user, Zzim zzim, String imageUrl) {
-        this.id = zzim.getProduct().getId();
-        this.productTitle = zzim.getProduct().getTitle();
-        this.image = imageUrl;
-    }
+    private Long id;
+    private String productTitle;
+    private String image;
 }
