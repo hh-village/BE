@@ -22,10 +22,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByLocationContainingOrderByIdDesc(String location);
 
     @Query(value = "SELECT product.id, title, " +
-            "(SELECT image_url FROM product p " +
-            "  LEFT JOIN image ON p.id = image.product_id" +
-            "  WHERE p.is_deleted = false AND p.id = product.id " +
-            "  GROUP BY p.id) AS image_url, " +
+            "(SELECT image_url FROM image where image.product_id = product.id and image.is_deleted = false limit 1) AS image_url, " +
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
@@ -55,10 +52,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Object[]> findLatestSixProduct(@Param("userId") Long userId);
 
     @Query(value = "SELECT product.id, title, " +
-            "(SELECT image_url FROM product p " +
-            "  LEFT JOIN image ON p.id = image.product_id" +
-            "  WHERE p.is_deleted = false AND p.id = product.id " +
-            "  GROUP BY p.id) AS image_url, " +
+            "(SELECT image_url FROM image where image.product_id = product.id and image.is_deleted = false limit 1) AS image_url, " +
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
@@ -89,10 +83,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query(value = "SELECT product.id, title, " +
-            " (SELECT image_url FROM product p " +
-            "   LEFT JOIN image ON p.id = image.product_id " +
-            "   WHERE p.is_deleted = false AND p.id = :productId " +
-            "   GROUP BY p.id) AS image_url, " +
+            " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
             "   location, " +
             "   price, " +
             "   (SELECT EXISTS (SELECT p.id FROM product p " +
@@ -125,10 +116,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "where ranking <= lastIndex " +
             "order by rand() limit 1) " +
             "SELECT product.id, title, " +
-            " (SELECT image_url FROM product p " +
-            "   LEFT JOIN image ON p.id = image.product_id " +
-            "   WHERE p.is_deleted = false AND p.id = (select productId from one_popular) " +
-            "   GROUP BY p.id) AS image_url, " +
+            " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
             "   location, " +
             "   price, " +
             "   (SELECT EXISTS (SELECT p.id FROM product p " +
@@ -145,7 +133,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "left join Product p on r.product.id = p.id " +
             "inner join users u1 on p.user.id = u1.id " +
             "left join users u2 on r.user.id = u2.id " +
-            "where r.status = 'accepted'")
+            "where r.status = 'accepted' and r.isDeleted = false ")
     List<AcceptReservationResponseDto> getDealList();
 
     @Modifying
@@ -166,14 +154,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'returned') as owner_returned, " +
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'accepted') as owner_accepted, " +
             "(SELECT COUNT(*) FROM reservation r WHERE r.user_id = u.id AND r.status = 'waiting') as owner_waiting, " +
-            "EXISTS(SELECT 1 FROM zzim z WHERE z.user_id = :userId AND z.product_id = p.id) as zzim_status, " +
+            "EXISTS(SELECT 1 FROM zzim z WHERE (:userId IS NULL OR z.user_id = :userId) AND z.product_id = p.id) as zzim_status, " +
+            "EXISTS(SELECT 1 FROM product pr WHERE pr.user_id = :userId AND pr.id = p.id) as checkOwner, " +
             "i.image_url, " +
             "r.id as reservation_id, r.start_date, r.end_date, r.status as reservation_status, r.user_id as reservation_user_id, ru.nickname as reservation_user_nickname, ru.profile as reservation_user_profile " +
             "FROM product p " +
-            "JOIN users u ON p.user_id = u.id " +
-            "JOIN image i ON p.id = i.product_id " +
-            "JOIN reservation r ON p.id = r.product_id " +
-            "JOIN users ru ON r.user_id = ru.id " +
-            "WHERE p.id = :productId", nativeQuery = true)
+            "left JOIN users u ON p.user_id = u.id " +
+            "left JOIN image i ON p.id = i.product_id " +
+            "left JOIN reservation r ON p.id = r.product_id " +
+            "left JOIN users ru ON r.user_id = ru.id " +
+            "WHERE p.id = :productId and i.is_deleted = false ", nativeQuery = true)
     List<Object[]> findProductDetailList(@Param("productId") Long productId, @Param("userId") Long userId);
 }

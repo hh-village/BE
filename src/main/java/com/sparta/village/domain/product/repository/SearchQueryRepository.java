@@ -2,14 +2,9 @@ package com.sparta.village.domain.product.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.village.domain.product.dto.ProductResponseDto;
-import com.sparta.village.domain.product.entity.QProduct;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -26,7 +21,7 @@ public class SearchQueryRepository {
 
     public List<ProductResponseDto> searchProduct(Long userId, String title, String location, Long lastId, int size) {
         String sql = "SELECT product.id, title, " +
-                " (SELECT image_url FROM image where image.product_id = product.id limit 1) AS image_url, " +
+                " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
                 "   location, " +
                 "   price, " +
                 "  (WITH reservationCounts AS ( " +
@@ -52,7 +47,7 @@ public class SearchQueryRepository {
                 "                  LEFT JOIN zzim ON p.id = zzim.product_id " +
                 "                  WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId)) AS checkZzim " +
                 "FROM product " +
-                "where product.id < :lastId " +
+                "where product.id < :lastId and product.is_deleted = false " +
                 "and (lower(product.title) like lower(:title) or :title is null) " +
                 "and (lower(product.location) like lower(:location) or :location is null) " +
                 "order by product.id desc limit :size";
