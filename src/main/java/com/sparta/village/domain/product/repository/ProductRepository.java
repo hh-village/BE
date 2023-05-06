@@ -24,7 +24,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT product.id, title, " +
             "(SELECT image_url FROM product p " +
             "  LEFT JOIN image ON p.id = image.product_id" +
-            "  WHERE p.is_deleted = false AND p.id = product.id " +
+            "  WHERE p.is_deleted = false and image_url = false AND p.id = product.id " +
             "  GROUP BY p.id) AS image_url, " +
             " location, " +
             " price, " +
@@ -57,7 +57,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT product.id, title, " +
             "(SELECT image_url FROM product p " +
             "  LEFT JOIN image ON p.id = image.product_id" +
-            "  WHERE p.is_deleted = false AND p.id = product.id " +
+            "  WHERE p.is_deleted = false and image_url = false AND p.id = product.id " +
             "  GROUP BY p.id) AS image_url, " +
             " location, " +
             " price, " +
@@ -91,7 +91,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT product.id, title, " +
             " (SELECT image_url FROM product p " +
             "   LEFT JOIN image ON p.id = image.product_id " +
-            "   WHERE p.is_deleted = false AND p.id = :productId " +
+            "   WHERE p.is_deleted = false and image_url = false AND p.id = :productId " +
             "   GROUP BY p.id) AS image_url, " +
             "   location, " +
             "   price, " +
@@ -127,7 +127,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "SELECT product.id, title, " +
             " (SELECT image_url FROM product p " +
             "   LEFT JOIN image ON p.id = image.product_id " +
-            "   WHERE p.is_deleted = false AND p.id = (select productId from one_popular) " +
+            "   WHERE p.is_deleted = false and image_url = false AND p.id = (select productId from one_popular) " +
             "   GROUP BY p.id) AS image_url, " +
             "   location, " +
             "   price, " +
@@ -145,7 +145,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "left join Product p on r.product.id = p.id " +
             "inner join users u1 on p.user.id = u1.id " +
             "left join users u2 on r.user.id = u2.id " +
-            "where r.status = 'accepted'")
+            "where r.status = 'accepted' and r.isDeleted = false ")
     List<AcceptReservationResponseDto> getDealList();
 
     @Modifying
@@ -174,6 +174,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "JOIN image i ON p.id = i.product_id " +
             "JOIN reservation r ON p.id = r.product_id " +
             "JOIN users ru ON r.user_id = ru.id " +
-            "WHERE p.id = :productId", nativeQuery = true)
+            "WHERE p.id = :productId and i.is_deleted = false and r.is_deleted = false ", nativeQuery = true)
     List<Object[]> findProductDetailList(@Param("productId") Long productId, @Param("userId") Long userId);
 }
