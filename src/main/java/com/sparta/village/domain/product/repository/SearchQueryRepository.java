@@ -26,7 +26,7 @@ public class SearchQueryRepository {
 
     public List<ProductResponseDto> searchProduct(Long userId, String title, String location, Long lastId, int size) {
         String sql = "SELECT product.id, title, " +
-                " (SELECT image_url FROM image where image.product_id = product.id limit 1) AS image_url, " +
+                " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
                 "   location, " +
                 "   price, " +
                 "  (WITH reservationCounts AS ( " +
