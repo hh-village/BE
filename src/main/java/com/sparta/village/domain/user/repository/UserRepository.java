@@ -56,7 +56,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     "JOIN zzim z ON u.id = z.user_id " +
                     "JOIN product p ON z.product_id = p.id " +
                     "LEFT JOIN product_images i ON i.product_id = p.id AND i.row_num = 1 " +
-                    "WHERE z.user_id = :userId AND p.is_deleted = false AND :key = 'zzims' " +
+                    "WHERE z.user_id = :userId AND p.is_deleted = false AND z.is_deleted = false AND :key = 'zzims' " +
                     "GROUP BY z.id, p.id, i.image_url ", nativeQuery = true)
     List<Object[]> findZzimsByUserIdAndKey(@Param("userId") Long userId, @Param("key") String key);
 }
