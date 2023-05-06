@@ -62,8 +62,8 @@ public class UserService {
                                                                                      r[7].toString())).toList():
                               key.equals("zzims")    ? userRepository.findZzimsByUserIdAndKey(user.getId(), key).stream().map(z ->
                                                        new ZzimsResponseDto(Long.parseLong(z[2].toString()),
-                                                                            z[2].toString(),
-                                                                            z[3].toString())).toList():
+                                                                            z[3].toString(),
+                                                                            z[4].toString())).toList():
                               null;
 
         if(productList == null) {
