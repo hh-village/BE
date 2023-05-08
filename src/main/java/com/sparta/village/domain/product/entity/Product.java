@@ -70,8 +70,5 @@ public class Product extends Timestamped{
         this.description = productRequestDto.getDescription();
         this.price = productRequestDto.getPrice();
         this.location = productRequestDto.getLocation();
-        this.user = user;
-        this.zzimCount = 0;
-
     }
 }
