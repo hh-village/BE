@@ -21,7 +21,7 @@ public interface ZzimRepository extends JpaRepository<Zzim, Long> {
 
     List<Zzim> findByUser(User user);
 
-    @Query(value = "select count(*) from zzim z where z.user_id = :userId", nativeQuery = true)
+    @Query(value = "select count(*) from zzim z where z.user_id = :userId and z.is_deleted = false", nativeQuery = true)
     int countByUserId(@Param("userId") Long userId);
 
     @Modifying
