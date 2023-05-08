@@ -54,7 +54,7 @@ public class ChatService {
     @Transactional
     public void saveMessage(ChatMessageDto message) {
         User user = userService.getUserByNickname(message.getSender());
-        ChatRoom room = chatRoomRepository.findByRoomId(message.getRoomId()).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
+        ChatRoom room = chatRoomRepository.findById(message.getRoomId()).orElseThrow(() -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND));
         ChatMessage chatMessage = new ChatMessage(user, message.getContent(), room);
         chatMessageRepository.saveAndFlush(chatMessage);
         ChatMessageResponseDto responseDto = new ChatMessageResponseDto(chatMessage.getRoom().getId(), chatMessage.getSender().getNickname(), chatMessage.getContent(), changeDateFormat(chatMessage.getCreatedAt()));
