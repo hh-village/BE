@@ -19,7 +19,7 @@ public class UserSecurityContextFactory implements WithSecurityContextFactory<Wi
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
         UserDetailsImpl principal =
-                new UserDetailsImpl(new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER), "1");
+                new UserDetailsImpl(new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false), "1");
 
         Authentication auth =
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());

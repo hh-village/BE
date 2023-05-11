@@ -54,12 +54,12 @@ class ReservationServiceTest {
     public void ReserveSuccessTest() {
         //given
         Long productId = 1L;
-        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user);
+        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user, false);
         ReservationRequestDto reservationRequestDto = reservationRequest();
 
         doReturn(Optional.of(product)).when(productRepository).findById(productId);
         doReturn(false).when(reservationRepository).checkOverlapDateByProduct(product, reservationRequestDto.getStartDate(), reservationRequestDto.getEndDate());
-        doReturn(new Reservation(1L, "waiting", reservationRequestDto.getStartDate(), reservationRequestDto.getEndDate(), user, product)).when(reservationRepository).saveAndFlush(any(Reservation.class));
+        doReturn(new Reservation(1L, "waiting", reservationRequestDto.getStartDate(), reservationRequestDto.getEndDate(), user, product, false)).when(reservationRepository).saveAndFlush(any(Reservation.class));
 
         //when
         ResponseEntity<ResponseMessage> response = reservationService.reserve(productId, reservationRequestDto, user);
@@ -82,7 +82,7 @@ class ReservationServiceTest {
     public void ReserveDuplicateDateTest() {
         //given
         Long productId = 1L;
-        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user);
+        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user, false);
         ReservationRequestDto reservationRequestDto = reservationRequest();
 
         doReturn(Optional.of(product)).when(productRepository).findById(productId);
@@ -105,7 +105,7 @@ class ReservationServiceTest {
     public void ReserveProductNotFoundTest() {
         //given
         Long productId = 1L;
-        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user);
+        Product product = new Product(productId, "title", "description", 1000, "대전광역시", 0, user, false);
         ReservationRequestDto reservationRequestDto = reservationRequest();
 
         doReturn(Optional.empty()).when(productRepository).findById(productId);
@@ -127,8 +127,8 @@ class ReservationServiceTest {
     public void testDeleteReservation() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
         doNothing().when(reservationRepository).deleteById(reservationId);
@@ -150,7 +150,7 @@ class ReservationServiceTest {
     public void testDeleteReservationByNotProperId() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
 
         doReturn(Optional.empty()).when(reservationRepository).findById(reservationId);
 
@@ -170,9 +170,9 @@ class ReservationServiceTest {
     public void testDeleteReservationByInvalidUserId() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        User other = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        User other = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
 
         //when
@@ -191,8 +191,8 @@ class ReservationServiceTest {
     public void testDeleteReservationWithStatusNotWaiting() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "accepted", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "accepted", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
 
         //when
@@ -211,8 +211,8 @@ class ReservationServiceTest {
     public void testDeleteReservationWithNotLoginUser() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "accepted", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "accepted", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
 
         //when
@@ -231,8 +231,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel5() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -261,8 +261,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel4_1() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -291,8 +291,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel4_2() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -321,8 +321,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel4() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -352,8 +352,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel3() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -383,8 +383,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel2() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -414,8 +414,8 @@ class ReservationServiceTest {
     public void testChangeStatusLevel1() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);
@@ -453,9 +453,9 @@ class ReservationServiceTest {
     public void testChangeStatusWithNotProductOwner() {
         //given
         Long reservationId = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
-        User other = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER);
-        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
+        User other = new User(2L,2L, "nickname1", "profile1", UserRoleEnum.USER, false);
+        Reservation reservation = new Reservation(reservationId, "waiting", LocalDate.of(2023,5,10), LocalDate.of(2023,5,13), user, product, false);
         StatusRequestDto statusRequestDto = new StatusRequestDto("accepted");
 
         doReturn(Optional.of(reservation)).when(reservationRepository).findById(reservationId);

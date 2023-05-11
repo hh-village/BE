@@ -57,7 +57,7 @@ public class ReservationControllerTest {
     public void reserveSuccessTest() throws Exception {
         Long id = 1L;
         ReservationRequestDto requestDto = reservationRequest(true);
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
         ResponseEntity<ResponseMessage> response = ResponseMessage.SuccessResponse("예약 되었습니다.", "");
         doReturn(response).when(reservationService).reserve(id, requestDto, user);
         doReturn(Optional.of(user)).when(userRepository).findByKakaoId(1L);
@@ -80,7 +80,7 @@ public class ReservationControllerTest {
     @DisplayName("예약 삭제하기")
     public void deleteReserveSuccessTest() throws Exception {
         Long id = 1L;
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
         ResponseEntity<ResponseMessage> response = ResponseMessage.SuccessResponse("예약 취소되었습니다.", "");
         doReturn(response).when(reservationService).deleteReservation(id, user);
         doReturn(Optional.of(user)).when(userRepository).findByKakaoId(1L);
@@ -96,7 +96,7 @@ public class ReservationControllerTest {
     public void changeStatusSuccessTest() throws Exception {
         Long id = 1L;
         StatusRequestDto requestDto = new StatusRequestDto("accepted");
-        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER);
+        User user = new User(1L,1L, "nickname", "profile1", UserRoleEnum.USER, false);
         ResponseEntity<ResponseMessage> response = ResponseMessage.SuccessResponse("상태 변경되었습니다.", "");
         doReturn(response).when(reservationService).changeStatus(id, requestDto, user);
         doReturn(Optional.of(user)).when(userRepository).findByKakaoId(1L);
