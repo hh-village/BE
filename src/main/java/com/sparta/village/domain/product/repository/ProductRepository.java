@@ -26,7 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
-            "   SELECT p.id AS productId, p.title, r.id AS reservationId, COUNT(*) AS count " +
+            "   SELECT p.id AS productId, p.title, COUNT(*) AS count " +
             "   FROM product p " +
             "   LEFT JOIN reservation r ON p.id = r.product_id " +
             "   WHERE p.is_deleted = false AND r.is_deleted = false AND r.status = 'returned' " +
@@ -36,16 +36,16 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    SELECT CEIL(COUNT(*) * 0.1) AS lastIndex " +
             "    FROM reservationCounts " +
             "  )" +
-            " SELECT EXISTS(SELECT * FROM ( " +
+            " SELECT case when EXISTS(SELECT * FROM ( " +
             "                             SELECT RANK() OVER(ORDER BY rc.count DESC) AS ranking, " +
-            "                               rc.productId, rc.title, rc.reservationId, rc.count, lastIndex.lastIndex " +
+            "                               rc.productId, rc.title, rc.count, lastIndex.lastIndex " +
             "                             FROM reservationCounts rc " +
             "                             CROSS JOIN lastIndex " +
             "                               ) AS rankingList " +
-            " WHERE ranking <= lastIndex AND productId = product.id)) AS checkHot, " +
-            "(SELECT EXISTS (SELECT p.id FROM product p " +
+            " WHERE ranking <= lastIndex AND productId = product.id) then 1 else 0 end) AS checkHot, " +
+            "(SELECT case when EXISTS (SELECT p.id FROM product p " +
             "                LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
+            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false) then 1 else 0 end) AS checkZzim " +
             "FROM product " +
             "JOIN (SELECT id FROM product WHERE is_deleted = false ORDER BY id desc LIMIT 6) AS lastestIds " +
             "ON product.id = lastestIds.id ", nativeQuery = true)
@@ -56,7 +56,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " location, " +
             " price, " +
             " (WITH reservationCounts AS (" +
-            "   SELECT p.id AS productId, p.title, r.id AS reservationId, COUNT(*) AS count " +
+            "   SELECT p.id AS productId, p.title, COUNT(*) AS count " +
             "   FROM product p " +
             "   LEFT JOIN reservation r ON p.id = r.product_id " +
             "   WHERE p.is_deleted = false AND r.is_deleted = false AND r.status = 'returned' " +
@@ -66,20 +66,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "    SELECT CEIL(COUNT(*) * 0.1) AS lastIndex " +
             "    FROM reservationCounts " +
             "  )" +
-            " SELECT EXISTS(SELECT * FROM ( " +
+            " SELECT case when EXISTS(SELECT * FROM ( " +
             "                             SELECT RANK() OVER(ORDER BY rc.count DESC) AS ranking, " +
-            "                               rc.productId, rc.title, rc.reservationId, rc.count, lastIndex.lastIndex " +
+            "                               rc.productId, rc.title, rc.count, lastIndex.lastIndex " +
             "                             FROM reservationCounts rc " +
             "                             CROSS JOIN lastIndex " +
             "                               ) AS rankingList " +
-            " WHERE ranking <= lastIndex AND productId = product.id)) AS checkHot, " +
-            "(SELECT EXISTS (SELECT p.id FROM product p " +
+            " WHERE ranking <= lastIndex AND productId = product.id) then 1 else 0 end) AS checkHot, " +
+            "(SELECT case when EXISTS (SELECT p.id FROM product p " +
             "                LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
+            "                WHERE p.is_deleted = false AND p.id = product.id AND zzim.user_id = :userId AND zzim.is_deleted = false) then 1 else 0 end) AS checkZzim " +
             "FROM product " +
-            "JOIN (SELECT id FROM product WHERE is_deleted = false and product.id != :productId ORDER BY RAND() LIMIT 8) AS randomIds " +
+            "JOIN (SELECT id FROM product WHERE is_deleted = false ORDER BY RAND() LIMIT 8) AS randomIds " +
             "ON product.id = randomIds.id ", nativeQuery = true)
-    List<Object[]> findRandomEightProduct(@Param("userId") Long userId, @Param("productId") Long productId);
+    List<Object[]> findRandomEightProduct(@Param("userId") Long userId);
 
 
     @Query(value = "SELECT product.id, title, " +
@@ -96,7 +96,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "with one_popular as ( " +
             "WITH reservationCounts AS ( " +
-            "  SELECT p.id as productId, p.title, r.id as reservationId, COUNT(*) AS count " +
+            "  SELECT p.id as productId, p.title, COUNT(*) AS count " +
             "  FROM product p " +
             "  LEFT JOIN reservation r ON p.id = r.product_id " +
             "  WHERE p.is_deleted = false AND r.is_deleted = false AND r.status = 'returned' " +
@@ -108,7 +108,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             ") " +
             "select * from( " +
             "  SELECT rank() over(order by rc.count desc) AS ranking, " +
-            "   rc.productId, rc.title, rc.reservationId, " +
+            "   rc.productId, rc.title, " +
             "   rc.count, lastIndex.lastIndex " +
             " FROM reservationCounts rc " +
             " cross join lastIndex " +
@@ -119,9 +119,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             " (SELECT image_url FROM image where image.product_id = product.id and is_deleted = false limit 1) AS image_url, " +
             "   location, " +
             "   price, " +
-            "   (SELECT EXISTS (SELECT p.id FROM product p " +
+            "   (SELECT case when EXISTS (SELECT p.id FROM product p " +
             "                  LEFT JOIN zzim ON p.id = zzim.product_id " +
-            "                  WHERE p.is_deleted = false AND p.id = (select productId from one_popular) AND zzim.user_id = :userId AND zzim.is_deleted = false)) AS checkZzim " +
+            "                  WHERE p.is_deleted = false AND p.id = (select productId from one_popular) AND zzim.user_id = :userId AND zzim.is_deleted = false) then 1 else 0 end) AS checkZzim " +
             "FROM product " +
             "where product.id = (select productId from one_popular)", nativeQuery = true)
     List<Object[]> getOnePopularProduct(@Param("userId") Long userId);
