@@ -40,18 +40,20 @@ public class ProductService {
         redisTemplate.opsForValue().increment("visitor_count",1);
         Long userId = userDetails == null ? null : userDetails.getUser().getId();
 
-        Object[] randomPopularProduct = productRepository.getOnePopularProduct(userId).get(0);
-        Long randomPopularProductId = randomPopularProduct == null ? null : Long.parseLong(randomPopularProduct[0].toString());
-
         List<AcceptReservationResponseDto> dealList = productRepository.getDealList();
-        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct(userId, randomPopularProductId).stream().map(p ->
+        List<ProductResponseDto> randomProduct = new ArrayList<>(productRepository.findRandomEightProduct(userId).stream().map(p ->
                 new ProductResponseDto(Long.parseLong(p[0].toString()), (String) p[1], (String) p[2], (String) p[3], Integer.parseInt(String.valueOf(p[4])), Integer.parseInt(String.valueOf(p[5])) == 1, Integer.parseInt(String.valueOf(p[6])) == 1)).toList());
         List<ProductResponseDto> latestProduct = productRepository.findLatestSixProduct(userId).stream().map(p ->
                 new ProductResponseDto(Long.parseLong(p[0].toString()), (String)p[1], (String)p[2], (String)p[3], Integer.parseInt(String.valueOf(p[4])), Integer.parseInt(String.valueOf(p[5])) == 1, Integer.parseInt(String.valueOf(p[6])) == 1)).toList();
 
-        if (randomPopularProduct != null) {
-            int randomIndex = (int) (Math.random() * (8));
-            randomProduct.set(randomIndex, new ProductResponseDto(randomPopularProductId, (String)randomPopularProduct[1], (String)randomPopularProduct[2], (String)randomPopularProduct[3], Integer.parseInt(String.valueOf(randomPopularProduct[4])), true, Integer.parseInt(String.valueOf(randomPopularProduct[5]))==1));
+        List<Object[]> randomPopularProduct = productRepository.getOnePopularProduct(userId);
+        if (randomPopularProduct.size() > 0) {
+            ProductResponseDto popularProduct = new ProductResponseDto(Long.parseLong(randomPopularProduct.get(0)[0].toString()), (String)randomPopularProduct.get(0)[1], (String)randomPopularProduct.get(0)[2], (String)randomPopularProduct.get(0)[3], Integer.parseInt(String.valueOf(randomPopularProduct.get(0)[4])), true, Integer.parseInt(String.valueOf(randomPopularProduct.get(0)[5]))==1);
+            if (!randomProduct.contains(popularProduct)) {
+                int num = Math.min(randomProduct.size(), 8);
+                int randomIndex = (int) (Math.random() * (num));
+                randomProduct.set(randomIndex, popularProduct);
+            }
         }
 //        double afterTime = System.currentTimeMillis(); // 코드 실행 후에 시간 받아오기
 //        double secDiffTime = (afterTime - beforeTime)/1000; //두 시간에 차 계산
